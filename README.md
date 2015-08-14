@@ -15,7 +15,7 @@ The pheromones are released according to the robots' positions provided by the o
 
 ![System configuration and Colias-Phi micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)<br/>System configuration and Colias-Phi micro robot.
 
-[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc)"Pheromone-based Leader-Follower Scenario"<br/>
+[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=eXmyAxW8IZ8)"Pheromone-based Leader-Follower Scenario (TODO)"<br/>
 <b>Click the picture to see a video of the CosPhi system operation.</b>
 
 The Frequency Map Enhancement (FreMEn) is an enabling technology for long-term mobile robot autonomy in changing environments.
