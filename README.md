@@ -1,5 +1,4 @@
-#CosPhi
-##Artificial Pheromone System for Robotic Swarms
+#CosPhi: An Artificial Pheromone System for Robotic Swarms
 
 ##Why to study pheromones?
 Pheromones serve as a common means of communication in nature.
