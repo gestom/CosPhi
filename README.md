@@ -1,5 +1,5 @@
 #CosPhi: An Artificial Pheromone System for Robotic Swarms
-
+=================================
 ##Why to study pheromones?
 Pheromones serve as a common means of communication in nature.
 Social insects such as bees, ants and termites use pheromones both for inter-agent and agent-swarm communications. Using pheromone-based communication, these simple individuals form communities and swarms that exhibit complex and intelligent behaviour. The phenomena of <i>swarm intelligence</i>, which naturally emerges from interation of large amounts of simple individuals, is in the focus of the swarm robotics research. Understanding pheromone-based communication is one of the keys that will allow to understand the emergence of swarm intelligence. So far, pheromone-based communication has been either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, none of these systems were able to replicate all the aspects of pheromones as seen in nature. 
