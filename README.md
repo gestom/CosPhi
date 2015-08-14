@@ -10,7 +10,7 @@ CosPhi is a novel artificial pheromone system that is reliable, accurate and use
 
 ![System configuration and Colias-Phi micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/pics/col-field.png
 
-[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/CosPhi/pics/field.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc"Pheromone-based Leader-Follower Scenario")
+[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc"Pheromone-based Leader-Follower Scenario")
 <b>Click the picture to see a detailed explanation.</b>
 
 The Frequency Map Enhancement (FreMEn) is an enabling technology for long-term mobile robot autonomy in changing environments.
