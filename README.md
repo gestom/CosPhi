@@ -6,7 +6,7 @@ Social insects such as bees, ants and termites use pheromones both for inter-age
 Using pheromone-based communication, these simple individuals form communities and swarms that exhibit complex and intelligent behaviour.
 The phenomena of <i>swarm intelligence</i>, which naturally emerges from interation of large amounts of simple individuals, is in the focus of the swarm robotics research.
 Understanding pheromone-based communication is one of the keys that will allow to understand the emergence of swarm intelligence.
-So far, pheromone-based communication was either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, which were not able to replicate all the aspects of pheromones as seen in nature. 
+So far, pheromone-based communication was either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, which were not able to replicate all aspects of pheromones as seen in nature. 
 
 ###What is CosPhi?
 CosPhi is a novel artificial pheromone system that is reliable, accurate and uses off-the-shelf components only: an LCD screen and a low-cost USB camera.
@@ -27,7 +27,7 @@ So far, the system was used to study cue-based aggregation~[[1](#references)] an
 ###Can I use it ?
 
 Yes, CosPhi is fully open-source.
-The CosPhi system is composed of two software modules: the [[SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization)] module, which is a derivative of the  
+The CosPhi system is composed of two software modules: the [SwarmCon(https://github.com/gestom/CosPhi/tree/master/Localization)] module, which is a derivative of the [WhyCon(http://purl.org/robotics/whycon)] system and the [Pheromone simulator(https://github.com/gestom/CosPhi/tree/master/Pheromone)], which simulates the individual pheromones and displays them on the horizontal LCD.
 
 ###References
 1. F. Arvin, T. Krajník, A. E. Turgut, and S. Yue: <b>[COSΦ: Artificial Pheromone System for Robotic Swarms Research.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.pdf)</b>In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015.
