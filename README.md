@@ -1,16 +1,16 @@
-#CosPhi: An Artificial Pheromone System for Robotic Swarms
-=================================
-##Why to study pheromones?
+#CosPhi: 
+##An Artificial Pheromone System for Robotic Swarms
+
+###Why to study pheromones?
 Pheromones serve as a common means of communication in nature.
 Social insects such as bees, ants and termites use pheromones both for inter-agent and agent-swarm communications. Using pheromone-based communication, these simple individuals form communities and swarms that exhibit complex and intelligent behaviour. The phenomena of <i>swarm intelligence</i>, which naturally emerges from interation of large amounts of simple individuals, is in the focus of the swarm robotics research. Understanding pheromone-based communication is one of the keys that will allow to understand the emergence of swarm intelligence. So far, pheromone-based communication has been either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, none of these systems were able to replicate all the aspects of pheromones as seen in nature. 
 
-##What is CosPhi?
+###What is CosPhi?
 CosPhi is a novel artificial pheromone system that is reliable, accurate and uses off-the-shelf components only: an LCD screen and a low-cost USB camera. The horizontally-positioned LCD displays the spatial distribution of the pheromones, which are sensed by the robots that move on the screen. The pheromones are released according to the robots' positions provided by the overhead camera:
 
-![Configuration of Spatio-temporal occupancy grid of the Lincoln Centre for Autonomous Systems (L-CAS) office. The static cells are in green and cells that exhibit daily periodicity are in red.](https://raw.githubusercontent.com/wiki/gestom/fremen/pics/grid.png
+![System configuration and Colias-Phi micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/pics/col-field.png
 
-
-[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/fremen/pics/features.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc"Pheromone-based Leader-Follower Scenario")
+[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/CosPhi/pics/field.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc"Pheromone-based Leader-Follower Scenario")
 <b>Click the picture to see a detailed explanation.</b>
 
 The Frequency Map Enhancement (FreMEn) is an enabling technology for long-term mobile robot autonomy in changing environments.
