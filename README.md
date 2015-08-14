@@ -8,9 +8,9 @@ Social insects such as bees, ants and termites use pheromones both for inter-age
 ###What is CosPhi?
 CosPhi is a novel artificial pheromone system that is reliable, accurate and uses off-the-shelf components only: an LCD screen and a low-cost USB camera. The horizontally-positioned LCD displays the spatial distribution of the pheromones, which are sensed by the robots that move on the screen. The pheromones are released according to the robots' positions provided by the overhead camera:
 
-![System configuration and Colias-Phi micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena2.png
+![System configuration and Colias-Phi micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena2.png)
 
-[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc"Pheromone-based Leader-Follower Scenario")
+[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc"Pheromone-based Leader-Follower Scenario")<br/>
 <b>Click the picture to see a detailed explanation.</b>
 
 The Frequency Map Enhancement (FreMEn) is an enabling technology for long-term mobile robot autonomy in changing environments.
