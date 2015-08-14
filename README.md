@@ -2,14 +2,20 @@
 
 ###Why to study pheromones?
 Pheromones serve as a common means of communication in nature.
-Social insects such as bees, ants and termites use pheromones both for inter-agent and agent-swarm communications. Using pheromone-based communication, these simple individuals form communities and swarms that exhibit complex and intelligent behaviour. The phenomena of <i>swarm intelligence</i>, which naturally emerges from interation of large amounts of simple individuals, is in the focus of the swarm robotics research. Understanding pheromone-based communication is one of the keys that will allow to understand the emergence of swarm intelligence. So far, pheromone-based communication has been either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, none of these systems were able to replicate all the aspects of pheromones as seen in nature. 
+Social insects such as bees, ants and termites use pheromones both for inter-agent and agent-swarm communications.
+Using pheromone-based communication, these simple individuals form communities and swarms that exhibit complex and intelligent behaviour.
+The phenomena of <i>swarm intelligence</i>, which naturally emerges from interation of large amounts of simple individuals, is in the focus of the swarm robotics research.
+Understanding pheromone-based communication is one of the keys that will allow to understand the emergence of swarm intelligence.
+So far, pheromone-based communication was either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, which were not able to replicate all the aspects of pheromones as seen in nature. 
 
 ###What is CosPhi?
-CosPhi is a novel artificial pheromone system that is reliable, accurate and uses off-the-shelf components only: an LCD screen and a low-cost USB camera. The horizontally-positioned LCD displays the spatial distribution of the pheromones, which are sensed by the robots that move on the screen. The pheromones are released according to the robots' positions provided by the overhead camera:
+CosPhi is a novel artificial pheromone system that is reliable, accurate and uses off-the-shelf components only: an LCD screen and a low-cost USB camera.
+The horizontally-positioned LCD displays the spatial distribution of the pheromones, which are sensed by the robots that move on the screen. 
+The pheromones are released according to the robots' positions provided by the overhead camera:
 
 ![System configuration and Colias-Phi micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)<br/>System configuration and Colias-Phi micro robot.
 
-[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc"Pheromone-based Leader-Follower Scenario")<br/>
+[![Artificial Pheromone Experiments](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc)"Pheromone-based Leader-Follower Scenario"<br/>
 <b>Click the picture to see a video of the CosPhi system operation.</b>
 
 The Frequency Map Enhancement (FreMEn) is an enabling technology for long-term mobile robot autonomy in changing environments.
@@ -36,19 +42,11 @@ The picture below illustrates the use of FreMEn for visual localization in chang
 [![FreMEn for Visual Localization](https://raw.githubusercontent.com/wiki/gestom/fremen/pics/features.png)](https://www.youtube.com/watch?v=aTr9KD4XMGc"FreMEn for Visual Localization")
 <b>Click the picture to see a detailed explanation - make sure you have sound on.</b>
 
-###Does it apply only to image features ?
-No, the concept is quite universal - it works with any environment models that represent the environment by a set of discrete components with binary states, e.g. occupancy grids with cells that are occupied or free or topological map with edges that are traversable or not. The classic models represent the uncertainty of these states by probability, which is constant unless updated through direct observation. FreMEn represents the uncertainty by combination of periodic functions obtained through frequency analysis. An overview of experiments with various FreMEn models is provided as a [poster](http://raw.githubusercontent.com/wiki/gestom/fremen/posters/Fremen_2015.pdf).
-
 ###Where can I download it ?
 
 The FreMEn is part of a software release of the EU-funded project [STRANDS](http://strands-project.eu). You can get its source code on [STRANDS github](https://github.com/strands-project/) or as a [Ubuntu package](http://strands.acin.tuwien.ac.at/software.html). FreMEn is implemented as a ROS action server.
 
 ###References
-1. T.Krajnik, J.P.Fentanes, G.Cielniak, C.Dondrup, T.Duckett: <b>[Spectral Analysis for Long-Term Robotic Mapping.](http://raw.githubusercontent.com/wiki/gestom/fremen/papers/fremen_2014_ICRA.pdf)</b>In proceedings of the IEEE International Conference on Robotics and Automation (ICRA), 2014.
-2. T.Krajnik, J.M.Santos, B.Seemann, T.Duckett: <b>[FROctomap: An Efficient Spatio-Temporal Environment Representation.](http://raw.githubusercontent.com/wiki/gestom/fremen/papers//fremen_2014_TAROS.pdf)</b> In proceedings of Towards Autonomous Robotic Systems (TAROS), 2014.
-3. T.Krajnik, J.P.Fentanes, O.M.Mozos, T.Duckett, J.Ekekrantz, M.Hanheide: <b>[Long-term topological localisation for service robots in dynamic environments using spectral maps.](http://raw.githubusercontent.com/wiki/gestom/fremen/papers/fremen_2014_IROS.pdf)</b> In proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2014.
-4. T.Krajnik, J.P.Fentanes, J.Santos, K.Kusumam, T.Duckett: <b>[FreMEn: Frequency Map Enhancement for Long-Term Mobile Robot Autonomy in Changing Environments.](http://raw.githubusercontent.com/wiki/gestom/fremen/papers/fremen_2015_ICRA_VPRCE.pdf)</b> In proceedings of the ICRA Workshop on Visual Place Recognition in Changinc Environments (VPRiCE), 2014.
-5. J.P.Fentanes, B.Lacerda, T.Krajnik, N.Hawes, M.Hanheide: <b>[Now or later? predicting and maximising success of navigation actions from long-term experience.](http://raw.githubusercontent.com/wiki/gestom/fremen/papers/fremen_2015_ICRA_navigation.pdf)</b> In proceedings of the IEEE International Conference on Robotics and Automation (ICRA), 2015.
-6. T.Krajnik, M.Kulich, L.Mudrova, R.Ambrus, T.Duckett: <b>[Where is waldo at time t? using spatio-temporal models for mobile robot search.](http://raw.githubusercontent.com/wiki/gestom/fremen/papers/fremen_2015_ICRA_search.pdf)</b> In proceedings of the IEEE International Conference on Robotics and Automation (ICRA), 2015.
-7. T.Krajnik, J.M.Santos, T.Duckett: <b>[Life-Long Spatio-Temporal Exploration of Dynamic Environments.](http://raw.githubusercontent.com/wiki/gestom/fremen/papers/fremen_2015_ECMR_exploration.pdf)</b> In proceedings of the European Conference on Mobile Robotics (ECMR), 2015. (In review).
-8. J.M.Santos, T.Krajnik, J.P.Fentanes, T.Duckett: <b>[4D Lifelong Exploration of Dynamic Environments.](http://raw.githubusercontent.com/wiki/gestom/fremen/papers/fremen_2015_IROS_exploration.pdf)</b> In proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015 (In review).
+1. F. Arvin, T. Krajník, A. E. Turgut, and S. Yue: <b>[COSΦ: Artificial Pheromone System for Robotic Swarms Research.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.pdf)</b>In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015.
+2. T. Krajnik, F. Arvin, A. E. Turgut, S. Yue, and T. Duckett: <b>[COSΦ: Vision-based Artificial Pheromone System for Robotic Swarms.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.pdf)</b> In: International Conference on Robotics and Automation. Late breaking poster session. 2015. 
+3. F. Arvin, A. Attar, A. E. Turgut, and S. Yue: <b>Power-law distribution of long-term experimental data in swarm robotics.</b>In Advances in Swarm and Computational Intelligence. Springer, 2015.
