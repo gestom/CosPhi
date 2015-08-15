@@ -1,12 +1,11 @@
 ##CosΦ: An Artificial Pheromone System for Robotic Swarms
 
 ###Why to study pheromones?
-Pheromones serve as a common means of communication in nature.
-Social insects such as bees, ants and termites use pheromones both for inter-agent and agent-swarm communications.
-Using pheromone-based communication, these simple individuals form communities and swarms that exhibit complex and intelligent behaviour.
+Pheromones serve as a common means of communication for most animals.
+Using pheromone-based communication, simple life-forms like bees, ants and termites form communities that exhibit complex and intelligent behaviour.
 The phenomena of <i>swarm intelligence</i>, which naturally emerges from interation of large amounts of simple individuals, is in the focus of the swarm robotics research.
-Understanding pheromone-based communication is one of the keys that will allow to understand the emergence of swarm intelligence.
-So far, pheromone-based communication was either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, which were not able to replicate all aspects of pheromones as seen in nature. 
+Understanding pheromone-based communication is one of the keys that will allow to grasp the priciples that are behind emergence of swarm intelligence.
+So far, pheromone-based communication was either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, which were not able to replicate more complex aspects of pheromones as seen in nature. 
 
 ###What is CosΦ?
 CosΦ is a novel artificial pheromone system that is reliable, accurate and uses off-the-shelf components only: an LCD screen and a low-cost USB camera.
@@ -17,16 +16,13 @@ The pheromones are released according to the robots' positions provided by the o
 [![System configuration and Colias-Φ micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=eXmyAxW8IZ8)<br/>
 System configuration and Colias-Φ micro robot. Click the picture to see a video of the CosΦ system operation.
 
-###How is that useful ?
-
-The system can be used to study pheromone-based communication in robotic swarms.
 In contract to other systems, CosΦ can simulate several pheromones while precisely controlling their evaporation, diffusion and release rate.
-Along with the precise localization system, CosΦ allows for an affordable way to perform repeatable swarm robotics experiment.
+Along with the precise localization system, CosΦ allows for an affordable way to perform <i>repeatable experiments</i> in swarm robotics.
 So far, the system was used to study cue-based aggregation~[[1](#references)] and leader-follower interactions [[2,3](#references)].
   
 ###Can I use it ?
 
-Yes, CosΦ is fully open-source.
+CosΦ is fully open-source and free.
 The CosΦ system is composed of two software modules: the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) module, which is a derivative of the [WhyCon](http://purl.org/robotics/whycon) system and the [Pheromone simulator](https://github.com/gestom/CosPhi/tree/master/Pheromone), which simulates the individual pheromones and displays them on the horizontal LCD. Note, that the full version of the softare will be reseased after its presentation at the IROS 2015 conference.
 
 ###References
