@@ -3,7 +3,7 @@
 ###Why to study pheromones?
 Pheromones serve as a common means of communication for most animals.
 Using pheromone-based communication, simple life-forms like bees, ants and termites form communities that exhibit complex and intelligent behaviour.
-The phenomena of <i>swarm intelligence</i>, which naturally emerges from interation of large amounts of simple individuals, is in the focus of the swarm robotics research.
+The phenomena of <b>swarm intelligence</b>, which naturally emerges from interation of large amounts of simple individuals, is in the focus of the swarm robotics research.
 Understanding pheromone-based communication is one of the keys that will allow to grasp the priciples that are behind emergence of swarm intelligence.
 So far, pheromone-based communication was either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, which were not able to replicate more complex aspects of pheromones as seen in nature. 
 
@@ -17,8 +17,8 @@ The pheromones are released according to the robots' positions provided by the o
 System configuration and Colias-Φ micro robot. Click the picture to see a video of the CosΦ system operation.
 
 In contract to other systems, CosΦ can simulate several pheromones while precisely controlling their evaporation, diffusion and release rate.
-Along with the precise localization system, CosΦ allows for an affordable way to perform <i>repeatable experiments</i> in swarm robotics.
-So far, the system was used to study cue-based aggregation~[[1](#references)] and leader-follower interactions [[2,3](#references)].
+Along with the precise localization system, CosΦ allows for an affordable way to perform <b>repeatable experiments</b> in swarm robotics.
+So far, the system was used to study cue-based aggregation [[1](#references)] and leader-follower interactions [[2,3](#references)].
   
 ###Can I use it ?
 
