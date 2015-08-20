@@ -13,7 +13,7 @@ The horizontally-positioned LCD displays the spatial distribution of the pheromo
 The pheromones are released according to the robots' positions provided by the overhead camera.
 
 
-[![System configuration and Colias-Φ micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=eXmyAxW8IZ8)<br/>
+[![System configuration and Colias-Φ micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=TkYbpEhDa58)<br/>
 System configuration and Colias-Φ micro robot. Click the picture to see a video of the CosΦ system operation.
 
 In contract to other systems, CosΦ can simulate several pheromones while precisely controlling their evaporation, diffusion and release rate.
