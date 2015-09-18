@@ -3,8 +3,8 @@
 ###Why to study pheromones?
 Pheromones serve as a common means of communication for most animals.
 Using pheromone-based communication, simple life-forms like bees, ants and termites form communities that exhibit complex and intelligent behaviour.
-The phenomena of <b>swarm intelligence</b>, which naturally emerges from interation of large amounts of simple individuals, is in the focus of the swarm robotics research.
-Understanding pheromone-based communication is one of the keys that will allow to grasp the priciples that are behind emergence of swarm intelligence.
+The phenomena of <b>swarm intelligence</b>, which naturally emerges from interaction of large amounts of simple individuals, is in the focus of the swarm robotics research.
+Understanding pheromone-based communication is one of the keys that will allow to grasp the principles that are behind emergence of swarm intelligence.
 So far, pheromone-based communication was either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, which were not able to replicate more complex aspects of pheromones as seen in nature. 
 
 ###What is CosΦ?
@@ -16,14 +16,14 @@ The pheromones are released according to the robots' positions provided by the o
 [![System configuration and Colias-Φ micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)](https://www.youtube.com/watch?v=TkYbpEhDa58)<br/>
 System configuration and Colias-Φ micro robot. Click the picture to see a video of the CosΦ system operation.
 
-In contract to other systems, CosΦ can simulate several pheromones while precisely controlling their evaporation, diffusion and release rate.
+In contrast to other systems, CosΦ can simulate several pheromones while precisely controlling their evaporation, diffusion and release rate.
 Along with the precise localization system, CosΦ allows for an affordable way to perform <b>repeatable experiments</b> in swarm robotics.
 So far, the system was used to study cue-based aggregation [[1](#references)] and leader-follower interactions [[2,3](#references)].
   
 ###Can I use it ?
 
 CosΦ is fully open-source and free.
-The CosΦ system is composed of two software modules: the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) module, which is a derivative of the [WhyCon](http://purl.org/robotics/whycon) system and the [Pheromone simulator](https://github.com/gestom/CosPhi/tree/master/Pheromone), which simulates the individual pheromones and displays them on the horizontal LCD. Note, that the full version of the softare will be reseased after its presentation at the IROS 2015 conference.
+The CosΦ system is composed of two software modules: the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) module, which is a derivative of the [WhyCon](http://purl.org/robotics/whycon) system, and the [Pheromone simulator](https://github.com/gestom/CosPhi/tree/master/Pheromone), which simulates the individual pheromones and displays them on the horizontal LCD. Note, that the full version of the software will be released after its presentation at the IROS 2015 conference.
 
 ###References
 1. F. Arvin, T. Krajník, A. E. Turgut, and S. Yue: <b>[COSΦ: Artificial Pheromone System for Robotic Swarms Research.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.pdf)</b>In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015.

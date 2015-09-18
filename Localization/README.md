@@ -20,7 +20,7 @@ To start with the software:
 <li>Download the software from GitHub and go to the <b>src</b> directory.</li>
 <li>Adjust the camera resolution in the <b>main/swarmcon.cpp</b>.</li>
 <li>Compile the software - just type <b>make</b>.</li>
-<li>Download, resize and print one circular <a href="pattern.pdf">pattern</a>.</li>
+<li>Download, resize and print one circular <a href="etc/test.pdf">pattern</a>.</li>
 <li>Try a test run - you need to run the binary from the <b>bin</b> directory. Type <b>./swarmcon /dev/videoX 1</b>, where X is the number of the camera and 1 tells the system to track one pattern.</li> 
 <li>You should see the image with some numbers below the circle. Pressing <b>D</b> shows the segmentation result.</li>
 <li>Open your browser to view localhost:6666. You should see the circle position.</li>
