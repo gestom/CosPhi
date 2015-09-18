@@ -29,14 +29,12 @@ int  imageHeight = 1080;
 float circleDiameter = 0.03;
 
 //Adjust the X and Y dimensions of the coordinate system 
-float circlePositionX = 1.00;
-float circlePositionY = 1.00;
+float fieldLength = 1.00;
+float fieldWidth = 1.00;
 
 //save raw video for postprocessing
 bool saveVideo = true;
 //----------------------------------------------------------------------------
-
-
 
 
 int numFound = 0;
@@ -93,6 +91,8 @@ void autocalibrate()
 		 value[j] = -100000000; 
 		 index[j] = 0; 
 	}
+
+	//find circles at the field corners
 	for (int i = 0;i<numBots;i++) {
 		for (int j = 0;j<4;j++) {
 			if ((signX[j]*currentSegmentArray[i].x+signY[j]*currentSegmentArray[i].y)>value[j])
@@ -102,6 +102,8 @@ void autocalibrate()
 			}
 		}
 	}
+
+	//and use them for calibration
 	for (int j = 0;j<4;j++){
 		SSegment tmp;
 		tmp = currentSegmentArray[j];
@@ -109,14 +111,14 @@ void autocalibrate()
 		currentSegmentArray[index[j]] = tmp;
 		trans->transformType = TRANSFORM_NONE;
 		calib[j] = trans->transform(currentSegmentArray[j],false);
-		//calib[j] = objectArray[index[j]]; 
-		//printf("Calibrator %i %.5f %.5f \n",index[j],objectArray[index[j]].x,objectArray[index[j]].y);
 	}
-	trans->calibrate2D(calib,circlePositionX,circlePositionY);
+	trans->calibrate2D(calib,fieldLength,fieldWidth);
 }
 
+/*process events coming from GUI*/
 void processKeys()
 {
+	//process mouse - mainly for manual calibration - by clicking four circles at the corners of the operational area 
 	while (SDL_PollEvent(&event)){
 		if (event.type == SDL_MOUSEBUTTONDOWN){
 			if (calibNum < 4 && calibStep > CALIB_STEPS){
@@ -131,27 +133,43 @@ void processKeys()
 			detectorArray[numBots-1]->localSearch = true;
 		}
 	}
+
+	//process keys 
 	keys = SDL_GetKeyState(&keyNumber);
+
+	//program control - (s)top, (p)ause+move one frame and resume
 	if (keys[SDLK_ESCAPE]) stop = true;
 	if (keys[SDLK_SPACE] && lastKeys[SDLK_SPACE] == false){ moveOne = 10000000; moveVal = 1000000;};
 	if (keys[SDLK_p] && lastKeys[SDLK_p] == false) {moveOne = 1; moveVal = 0;}
+
 	if (keys[SDLK_m] && lastKeys[SDLK_m] == false) printf("SAVE %03f %03f %03f %03f %03f %03f %03f\n",objectArray[0].x,objectArray[0].y,objectArray[0].z,objectArray[0].error,objectArray[0].d,currentSegmentArray[0].m0,currentSegmentArray[0].m1);
 	if (keys[SDLK_n] && lastKeys[SDLK_n] == false) printf("SEGM %03f %03f %03f\n",currentSegmentArray[0].x,currentSegmentArray[0].y,currentSegmentArray[0].m0);
 	if (keys[SDLK_s] && lastKeys[SDLK_s] == false) image->saveBmp();
 	if (keys[SDLK_o] && lastKeys[SDLK_o] == false) drawOriginal = drawOriginal == false; 
-	if (keys[SDLK_d] && lastKeys[SDLK_d] == false) for (int i = 0;i<MAX_PATTERNS;i++){
+
+	//initiate autocalibration (searches for 4 outermost circular patterns and uses them to establisht the coordinate system)
+	if (keys[SDLK_a] && lastKeys[SDLK_a] == false) autocalibrate();
+
+	//manual calibration (click the 4 calibration circles with mouse)
+	if (keys[SDLK_r] && lastKeys[SDLK_r] == false) { calibNum = 0; wasBots=numBots; numBots = 1;}
+
+	//debugging - toggle drawing coordinates and debugging results results
+	if (keys[SDLK_l] && lastKeys[SDLK_l] == false) drawCoords = drawCoords == false;
+	if (keys[SDLK_v] && lastKeys[SDLK_v] == false) for (int i = 0;i<numBots;i++) detectorArray[i]->drawAll = detectorArray[i]->drawAll==false;
+	if (keys[SDLK_d] && lastKeys[SDLK_d] == false)
+	{ 
+		for (int i = 0;i<numBots;i++){
 			detectorArray[i]->draw = detectorArray[i]->draw==false;
 			detectorArray[i]->debug = 10-detectorArray[i]->debug;
-			
+		}
 	}
-	if (keys[SDLK_a] && lastKeys[SDLK_a] == false) autocalibrate();
-	if (keys[SDLK_l] && lastKeys[SDLK_l] == false) drawCoords = drawCoords == false;
-	if (keys[SDLK_r] && lastKeys[SDLK_r] == false) { calibNum = 0; wasBots=numBots; numBots = 1;}; 
-	if (keys[SDLK_v] && lastKeys[SDLK_v] == false) for (int i = 0;i<numBots;i++) detectorArray[i]->drawAll = detectorArray[i]->drawAll==false;;
+
+	//transformations to use - in our case, the relevant transform is '2D'
 	if (keys[SDLK_1] && lastKeys[SDLK_1] == false) trans->transformType = TRANSFORM_NONE;
 	if (keys[SDLK_2] && lastKeys[SDLK_2] == false) trans->transformType = TRANSFORM_2D;
 	if (keys[SDLK_3] && lastKeys[SDLK_3] == false) trans->transformType = TRANSFORM_3D;
 
+	//camera low-level settings 
 	if (keys[SDLK_c] && keys[SDLK_RSHIFT] == false) camera->changeContrast(-1);
 	if (keys[SDLK_c] && keys[SDLK_RSHIFT] == true) camera->changeContrast(1);
 	if (keys[SDLK_g] && keys[SDLK_RSHIFT] == false) camera->changeGain(-1);
@@ -161,44 +179,53 @@ void processKeys()
 	if (keys[SDLK_b] && keys[SDLK_RSHIFT] == false) camera->changeBrightness(-1);
 	if (keys[SDLK_b] && keys[SDLK_RSHIFT] == true) camera->changeBrightness(1);
 
-	if (keys[SDLK_h] && lastKeys[SDLK_h] == false){
-	//	 useGui = useGui == false;
-		 displayHelp = displayHelp == false; 
-	}
+	//display help
+	if (keys[SDLK_h] && lastKeys[SDLK_h] == false) displayHelp = displayHelp == false; 
 
+	//adjust the number of robots to be searched for
 	if (keys[SDLK_PLUS]) numBots++;
 	if (keys[SDLK_EQUALS]) numBots++;
 	if (keys[SDLK_MINUS]) numBots--;
 	if (keys[SDLK_KP_PLUS]) numBots++;
 	if (keys[SDLK_KP_MINUS]) numBots--;
 
+	//store the key states
 	memcpy(lastKeys,keys,keyNumber);
 }
 
 int main(int argc,char* argv[])
 {
+	//initialize logging system, camera and network connection 
 	dump = new CDump(NULL,256,1000000);
 	if (argc < 2) {
-		fprintf(stderr,"usage: %s cameraDevice\ne.g. %s /dev/video0 num_tracked\n",argv[0],argv[0]);
+		fprintf(stderr,"usage: %s imageSource num_robots\ne.g. %s /dev/video0 1\n",argv[0],argv[0]);
 		return 0;
 	}
 	const char* cameraDevice = argv[1];
 	camera = new CCamera();
 	server = new CPositionServer();
 	server->init("6666"); 
+
 	moveOne = moveVal;
 	moveOne  = 0;
 	if (argc > 2) numBots = atoi(argv[2]);
 	if (argc > 2) useGui=true;
 	if (argc > 3 && strcmp(argv[3],"nogui")==0) useGui=false;
 	camera->init(cameraDevice,&imageWidth,&imageHeight,saveVideo);
+
+	//determine gui size so that it fits the screen
 	while (imageHeight/guiScale > screenHeight || imageHeight/guiScale > screenWidth) guiScale = guiScale*2;
+
+	//initialize GUI, image structures, coordinate transformation modules
 	if (useGui) gui = new CGui(imageWidth,imageHeight,guiScale);
 	image = new CRawImage(imageWidth,imageHeight);
 	trans = new CTransformation(imageWidth,imageHeight,circleDiameter,true);
+
+	//initialize the circle detectors - each circle has its own detector instance 
 	for (int i = 0;i<MAX_PATTERNS;i++) detectorArray[i] = new CCircleDetect(imageWidth,imageHeight,i);
 	image->getSaveNumber();
 
+	//setup timers to assess system performance
 	CTimer timer;
 	timer.reset();
 	timer.start();
@@ -208,14 +235,15 @@ int main(int argc,char* argv[])
 	globalTimer.start();
 
 	int frameID =0;
-	while (stop == false){
+	while (stop == false)
+	{
 		//if (camera->renewImage(image,moveOne-->0)==-1)stop = true;
 		camera->renewImage(image,moveOne-->0);
 		if (drawOriginal) gui->drawImage(image);
 		numFound = numStatic = 0;
 		timer.reset();
 
-		//track the robots 
+		//track the robots found in the last attempt 
 		for (int i = 0;i<numBots;i++){
 			detectorArray[i]->calibMode = false;
 			if (calibNum >= 4){
@@ -225,7 +253,7 @@ int main(int argc,char* argv[])
 			if (lastSegmentArray[i].valid) currentSegmentArray[i] = detectorArray[i]->findSegment(image,lastSegmentArray[i]); else currentSegmentArray[i].valid = false; 
 		}
 
-		//search for lost (i.e. untracked) robots 
+		//search for untracked (not detected in the last frame) robots 
 		for (int i = 0;i<numBots;i++){
 			if (currentSegmentArray[i].valid == false){
 				lastSegmentArray[i].valid = false;
@@ -234,7 +262,8 @@ int main(int argc,char* argv[])
 			if (currentSegmentArray[i].valid == false) break;
 		}
 		autocalibrate();
-		//perform transformations
+
+		//perform transformations from camera to world coordinates
 		for (int i = 0;i<numBots;i++){
 			if (currentSegmentArray[i].valid){
 				objectArray[i] = trans->transform(currentSegmentArray[i],false);
@@ -246,13 +275,15 @@ int main(int argc,char* argv[])
 		}
 		printf("Pattern detection time: %i us. Found: %i Static: %i.\n",globalTimer.getTime(),numFound,numStatic);
 		evalTime = timer.getTime();
+
+		//pack up the data for sending to other systems (e.g. artificial pheromone one)
 		server->setNumOfPatterns(numBots);
 		for (int i = 0;i<numBots;i++) server->updatePosition(objectArray[i],i);
 		if (useGui){
 			if (drawOriginal == false) gui->drawImage(image);
 			gui->drawTimeStats(evalTime,numBots);
 			gui->displayHelp(displayHelp);
-			gui->guideCalibration(calibNum,circlePositionX,circlePositionY);
+			gui->guideCalibration(calibNum,fieldLength,fieldWidth);
 		}
 		for (int i = 0;i<numBots && useGui && drawCoords;i++){
 			if (currentSegmentArray[i].valid) gui->drawStats(currentSegmentArray[i].minx-30,currentSegmentArray[i].maxy,objectArray[i],trans->transformType == TRANSFORM_2D);
@@ -267,7 +298,7 @@ int main(int argc,char* argv[])
 				//object found - add to a buffer
 				if (calibStep < CALIB_STEPS) calibTmp[calibStep++] = o;
 
-				//is the buffer full enough to calculate the object position ?
+				//does the buffer contain enough data to calculate the object position
 				if (calibStep == CALIB_STEPS){
 					o.x = o.y = o.z = 0;
 					for (int k = 0;k<CALIB_STEPS;k++){
@@ -285,8 +316,8 @@ int main(int argc,char* argv[])
 					//was it the last object needed to establish the transform ?
 					if (calibNum == 4){
 						//calculate and save transforms
-						trans->calibrate2D(calib,circlePositionX,circlePositionY);
-						trans->calibrate3D(calib,circlePositionX,circlePositionY);
+						trans->calibrate2D(calib,fieldLength,fieldWidth);
+						trans->calibrate3D(calib,fieldLength,fieldWidth);
 						calibNum++;
 						numBots = wasBots;
 						trans->saveCalibration("default.cal");

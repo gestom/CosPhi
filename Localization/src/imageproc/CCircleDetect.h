@@ -37,6 +37,7 @@ typedef struct{
 
 class CCircleDetect
 {
+
 	public:
 		CCircleDetect(int wi,int he,int ID = -1);
 		~CCircleDetect();
