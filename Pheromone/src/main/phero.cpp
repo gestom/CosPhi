@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <signal.h>
 #include "CGui.h"
 #include "CDump.h"
 #include "CTimer.h"
@@ -7,189 +8,257 @@
 #include "CPositionClient.h"
 #include <SDL/SDL.h>
 
-#define MAX_PATTERNS 400 
-#define CALIB_STEPS 5 
+#define MAX_ROBOTS 100
 
-//Adjust camera resolution here
-int  imageWidth= 1920;
-int  imageHeight = 1080;
-int pos = 0;
-int numSaved = 0;
-bool stop = false;
+/*these values need to be adjusted by the user during the system set-up*/
+float arenaLength   = 0.92;	//screen width (or arena length) in meters
+float arenaWidth    = 0.52;	//screen height (or arena width) in meters
+float cameraHeight  = 1.0;	//camera height above the screen
+float robotHeight   = 0.04;	//height of the pattern from robot's base
+
+/*logging and experiment control*/
+CTimer globalTimer;		//used to terminate the experiment after a given time
+int experimentTime = 180;	//experiment duration is 3 minutes by default
+FILE *robotPositionLog = NULL;	//file to log robot positions
+bool calibration = true;	//re-calibrate the localization system each time 
+bool placement = true;		//randomly generate initial positions of robots at the experiment start
+float initX[MAX_ROBOTS];	//initial positions
+float initY[MAX_ROBOTS];	//initial positions
+float initA[MAX_ROBOTS];	//initial orientations 
+int initBorder = 100;		//defines minimal distance of the randomly-generated initial positions from the arena boundary
+int initBrightness = 255;	//brightness of the patterns at randomly-generated positions
+int initRadius = 50;		//radius of the randomly-generated positions
+int pheroStrength = 50;		//default pheromone strength released by the leader robot
+
+/*variables read from the command line*/
+int numBots = 1;		//number of robots in the arena
+float evaporation = 1;		//main pheromone half-life	[s]
+float diffusion = 0.0;		//main pheromone diffusion	- not implemented
+
+/*supporting classes and variables*/
 CGui* gui;
 CRawImage *image;
+CPheroField* pherofield[MAX_ROBOTS];
+CPositionClient* client;
+char logFileName[1000];
+
+/*GUI-related variables*/
+bool stop = false;
 SDL_Event event;
-int moveOne = 0;
-CTimer globalTimer;
 int keyNumber = 1000;
 Uint8 lastKeys[1000];
 Uint8 *keys = NULL;
 bool leftMousePressed = false;
 bool rightMousePressed = false;
-CPheroField* pherofield[100];
-CPositionClient* client;
-int numBots = 1;
-int pheroStrength = 50;
-bool placement = true;
-bool eraseHormone = true;
-int circleStrength = 255;
-int robX,robY;
-int trajectoryX[100000];
-int trajectoryY[100000];
-int trajectoryLength = 0;
-int trajectoryPosition = 0;
-bool calibration = true;
-bool travelled = true;
+int  imageWidth= 1920;			//autodetected later on
+int  imageHeight = 1080;		//autodetected later on
+float robotDiameter   = 0.04;		//obtained from the localization system
 
-void loadTrajectory()
+/*CTRL-C handler*/
+void ctrl_c_handler(int a)
 {
-	FILE* file = fopen("trajectory.txt","r");
-	trajectoryLength = 0;
-	while (feof(file) == 0)
+	stop = true;
+}
+
+/*randomly generate initial positions of the robots*/
+bool randomPlacement()
+{	srand(time(NULL));
+	int i = 0;
+	globalTimer.reset();
+	globalTimer.start();
+	while (i < numBots)
 	{
-		fscanf(file,"%i %i\n",&trajectoryX[trajectoryLength],&trajectoryY[trajectoryLength]);
-		trajectoryLength++;
+		//generate position
+		initX[i] = rand()%(imageWidth-initBorder*2)+initBorder;
+		initY[i] = rand()%(imageHeight-initBorder*2)+initBorder;
+		initA[i] = (rand()%628)/100.0;
+		//check for overlap
+		bool distanceOK = true;
+		for (int j = 0;j<i && distanceOK;j++){
+			if (pow(initX[i]-initX[j],2)+pow(initY[i]-initY[j],2) < pow(initRadius*2,2)) distanceOK = false; 
+		}
+		if (distanceOK) i++;
+		if (globalTimer.getTime() > 2000000)	//try for 2 seconds
+		{
+			fprintf(stderr,"Could not find random, non-overlaping placements for %i robots. Reduce the number of robots or try again.\n",numBots);
+			exit(-1); 
+		}
 	}
-	fclose(file);
+	globalTimer.reset();
+	globalTimer.pause();
+	return true;
 }
 
-bool getTrajectoryPoint()
+/*process mouse and keyboard events coming from the GUI*/
+void processEvents()
 {
-	float dist = 0;
-	do{
-		dist = sqrt((trajectoryX[trajectoryPosition]-robX)*(trajectoryX[trajectoryPosition]-robX)+(trajectoryY[trajectoryPosition]-robY)*(trajectoryY[trajectoryPosition]-robY));
-		if (dist < 45) trajectoryPosition++;
-		if (trajectoryPosition > trajectoryLength/2) travelled = true;
-	}while (dist < 45 && trajectoryPosition<trajectoryLength); 
-	if (trajectoryPosition<trajectoryLength) return true; else {
-		trajectoryPosition = 0;
-		if (travelled) eraseHormone = true;
-	}
-	return false; 
-}
+	keys = SDL_GetKeyState(&keyNumber);
+	SDL_ShowCursor(leftMousePressed||rightMousePressed);
 
-bool getlastTrajectoryPoint()
-{
-	float dist = 0;
-	do{
-		dist = sqrt((trajectoryX[trajectoryPosition]-robX)*(trajectoryX[trajectoryPosition]-robX)+(trajectoryY[trajectoryPosition]-robY)*(trajectoryY[trajectoryPosition]-robY));
-		if (dist > 45) trajectoryPosition++;
-		if (trajectoryPosition > trajectoryLength/2) travelled = true;
-	}while (dist > 45 && trajectoryPosition<trajectoryLength); 
-	if (trajectoryPosition<trajectoryLength) return true; else trajectoryPosition = 0;
-	return false; 
-}
-
-void processKeys()
-{
+	//mouse events - allows to use the mouse to draw pheromone track 
 	while (SDL_PollEvent(&event)){
 		if (event.type == SDL_MOUSEBUTTONDOWN){
-			if (event.button.button == SDL_BUTTON_LEFT){
-				  leftMousePressed = true;
-				  //pherofield[0]->add(event.motion.x,event.motion.y,0,pheroStrength);
-				  robX = event.motion.x;
-				  robY = event.motion.y;
-			}
-			if (event.button.button == SDL_BUTTON_RIGHT){
-				rightMousePressed = true;
-				//pherofield[1]->add(event.motion.x,event.motion.y,1,pheroStrength);
-			}
+			if (event.button.button == SDL_BUTTON_LEFT)leftMousePressed = true;
+			if (event.button.button == SDL_BUTTON_RIGHT) rightMousePressed = true;
 		}
 		if (event.type == SDL_MOUSEBUTTONUP){
 			if (event.button.button == SDL_BUTTON_RIGHT)rightMousePressed = false;
 			if (event.button.button == SDL_BUTTON_LEFT)leftMousePressed = false;
 		}
-		if (leftMousePressed){
-			  //pherofield[0]->addTo(event.motion.x,event.motion.y,0,pheroStrength);
-			  robX = event.motion.x;
-			  robY = event.motion.y;
-		}
-		if (rightMousePressed) pherofield[1]->addTo(event.motion.x,event.motion.y,1,pheroStrength);
+		if (leftMousePressed) pherofield[0]->add(event.motion.x,event.motion.y,0,pheroStrength,35);
+		if (rightMousePressed) pherofield[1]->addTo(event.motion.x,event.motion.y,1,pheroStrength,35);
 	}
-	keys = SDL_GetKeyState(&keyNumber);
+
+	//terminate 
 	if (keys[SDLK_ESCAPE]) stop = true;
-	if (keys[SDLK_KP_PLUS]) circleStrength++;
-	if (keys[SDLK_KP_MINUS]) circleStrength--;
-	if (keys[SDLK_SPACE] && lastKeys[SDLK_SPACE] == false) placement = placement && false;
-	if (keys[SDLK_c]) calibration = false;
-	if (keys[SDLK_p] && lastKeys[SDLK_p] == false) moveOne = 1;
+	if ((keys[SDLK_LCTRL] || keys[SDLK_RCTRL]) && keys[SDLK_c]) stop = true;
+
+	//press space to start the experiment
+	if (keys[SDLK_SPACE] && lastKeys[SDLK_SPACE] == false && calibration == false){
+		placement = false;
+		globalTimer.reset();
+		globalTimer.start();
+		client->resetTime();
+	}
+
+	//clear pheromone fields
+	if (keys[SDLK_c]){
+	       	pherofield[0]->clear();
+	       	pherofield[1]->clear();
+	       	pherofield[2]->clear();
+	}
+
+	//generate new random positions to start
+	if (keys[SDLK_p] && lastKeys[SDLK_p] == false) randomPlacement();
+
+	//save an image
 	if (keys[SDLK_s] && lastKeys[SDLK_s] == false) image->saveBmp();
 	memcpy(lastKeys,keys,keyNumber);
 }
 
+/*initialize logging*/
+bool initializeLogging()
+{
+	//initialize logging system
+	dump = new CDump(NULL,256,1000000);
+
+	char timeStr[100];
+	time_t timeNow;
+	time(&timeNow);
+	strftime(timeStr, sizeof(timeStr), "%Y-%m-%d_%H-%M-%S",localtime(&timeNow));
+	sprintf(logFileName,"output/Phero_%.3f_%s.txt",evaporation,timeStr);
+	robotPositionLog = fopen(logFileName,"w");
+	if (robotPositionLog == NULL)
+	{
+		fprintf(stderr,"Cannot open log file %s. Does the \"output\" directory exist?\n",logFileName);
+		return false;
+	}
+	return true;
+}
+
+/*log robot positions for further analysis*/
+void logRobotPositions()
+{
+	/*get robot positions from the localization system*/
+	float x[numBots],y[numBots];
+	for (int i = 0;i<numBots;i++){
+		x[i] = client->getX(i);
+		y[i] = client->getY(i);
+	}
+
+	/*and save robots' positions and relative distances to each other in a file for later analysis*/
+	for (int i = 0;i<numBots;i++){;
+		int indexX = (int)(client->getX(i)*imageWidth/arenaLength);
+		int indexY = (int)(client->getY(i)*imageHeight/arenaWidth);
+		if (client->exists(i) && x[i] > 0 && y[i] > 0 && x[i] < 1 && y[i] < 1 ){
+			fprintf(robotPositionLog,"Robot %01i %08.3f %06.3f %06.3f %06.3f %06.0f ",i,client->getTime(i),client->getX(i),client->getY(i),client->getPhi(i),pherofield[0]->get(indexX,indexY));
+			for (int j = 0;j<numBots;j++)fprintf(robotPositionLog,"%.3f ",sqrt((x[i]-x[j])*(x[i]-x[j])+(y[i]-y[j])*(y[i]-y[j])));
+			fprintf(robotPositionLog,"\n");
+		}
+	}
+}
+
+
 int main(int argc,char* argv[])
 {
-	loadTrajectory();
-	dump = new CDump(NULL,256,1000000);
-	for (int i = 0;i<3;i++) pherofield[i] = new CPheroField(imageWidth,imageHeight);
-	image = new CRawImage(imageWidth,imageHeight);
-	client = new CPositionClient();
-	gui = new CGui(imageWidth,imageHeight,1);
-	client->init(argv[1],"6666");
-	image->getSaveNumber();
-	float initX[100];
-	float initY[100];
-	float initA[100];
-	for (int i = 0;i<numBots;i++)
-	{
-		initX[i] = rand()%1880;
-		initY[i] = rand()%1040;
-	}
-	float angle = 0;
-	placement = false;
-	eraseHormone = false;
-	int xa,ya;
-	FILE* file = fopen("record.txt","w+");
-	while (stop == false){
-		//robX = client->getX(0)*1920/0.92;
-		//robY = client->getY(0)*1080/0.52;
-		//angle = atan2((robY-1080/2)/2,(robX-1920/2)/3)+0.10;
-		if (eraseHormone){
-			if (getlastTrajectoryPoint())
-			{	
-				xa = trajectoryX[trajectoryPosition]; 
-				ya = trajectoryY[trajectoryPosition];	
-				float phi = atan2(ya-trajectoryY[(trajectoryPosition+10)%trajectoryLength],xa-trajectoryX[(trajectoryPosition+10)%trajectoryLength]);
-				if (calibration == false) pherofield[0]->remove(xa,ya,phi,pheroStrength);
-			}
+	//register ctrl+c handler
+	signal (SIGINT,ctrl_c_handler);
+	//initialize the logging system
+	if (initializeLogging()==false) return -1;
 
-		}else{
-			if (getTrajectoryPoint())
-			{
-				xa = trajectoryX[trajectoryPosition]; 
-				ya = trajectoryY[trajectoryPosition];		
-				if (calibration == false) pherofield[0]->addTo(xa,ya,0,pheroStrength);
-			}
-		}
-		printf("Trajectory %i %i %i %i\n",trajectoryPosition,trajectoryLength,robX,robY);
-		//pherofield[0]->addTo(robX,robY,0,pheroStrength);
-		//for (int i = 0;i<numBots;i++) pherofield[0]->addTo(client->getX(i)*1920/0.92,client->getY(i)*1080/0.52,i,pheroStrength);
-		//pherofield[0]->addTo(client->getX(6)/0.92*1920,client->getY(6)*1080/0.52,6,pheroStrength);
-		for (int i = 0;i<numBots;i++) printf("Robot %i %i %i \n",i,(int)(client->getX(i)*1920/0.92),(int)(client->getY(i)*1080/0.52));
-		//DECAY set here
-		//for (int i = 0;i<3;i++) 
-		pherofield[0]->recompute(atof(argv[2]),0.00);
-		
-		image->generate(pherofield[0],0);
-		if (calibration) image->displayCalibration();
-		for (int i = 0;i<numBots && calibration ==false && placement;i++)
+	//read parameters
+	evaporation = atof(argv[2]);
+	numBots = atoi(argv[1]);
+
+	//auto-detect screen resolution and initialize the GUI
+	gui = new CGui(&imageWidth,&imageHeight);
+	image = new CRawImage(imageWidth,imageHeight);
+
+	/*initialize the pheromone fields
+	* pheromone field 0 simulates a longer-decay pheromone that the other robots follow
+	* pheromone field 1 is released by the leader if it gets too close to arena boundaries causing the leader to avoid them - this pheromone decays quickly
+	* pheromone field 2 is released by the leader to supress pheromone field 0 (this avoids the leader to detect pheromone 0 by its sensors)*/
+	for (int i = 0;i<3;i++) pherofield[i] = new CPheroField(imageWidth,imageHeight);
+
+	/*connect to the localization system*/
+	client = new CPositionClient(numBots,robotDiameter);
+	client->init("localhost","6666");
+	image->getSaveNumber();
+
+	float nearest = 0.10;
+	randomPlacement();
+
+	globalTimer.pause();
+	while (stop == false){
+		stop = (globalTimer.getTime()/1000000>experimentTime);
+		if (calibration==false && placement==false)
 		{
-			image->displayRobotFull(initX[i],initY[i],initA[i],circleStrength);
+			/*cause the leading robot to release the pheromone 0 that other robots follow*/
+			for (int i = 0;i<1;i++)pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStrength);
+	
+			/*cause the leading robot to release pheromone 1 that is used for obstacle avoidance and 2 that temporarily suppresses pheromone 0*/
+			float dist = 0.030;	//distance of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
+			float addPhi = 0;	//angle of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
+			float phi = client->getPhi(0);
+		
+			/*is the leader close to the arena edge ?*/
+			if ((client->getX(0)<nearest && cos(phi)<0) || (client->getX(0)>arenaLength-nearest && cos(phi) > 0 )|| (client->getY(0)<nearest && sin(phi)<0) || (client->getY(0)>arenaWidth-nearest && sin(phi)>0))
+			{
+				/*leader is close to the arena edge -> release pheromone 1 that causes the robot to turn away */
+				pherofield[1]->addTo((client->getX(0)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(0)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,35);
+			}else{
+				/*leader is not close to the arena edge -> release pheromone 2 suporessed pheromone 0, so that the leader does not pick it's own pheromone */
+				pherofield[2]->addTo((client->getX(0)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(0)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,45);
+			}
+			/*save positions for later analysis*/
+			logRobotPositions();
 		}
+
+		//calculate the pheromone decay 
+		pherofield[0]->recompute(evaporation,0.0);	//main pheromone half-life (user-settable, usually long)
+		pherofield[1]->recompute(0.1,0.0);		//collision avoidance pheromone with quick decay
+		pherofield[2]->recompute(0.1,0.0);		//suppression pheromone with quick decay
+
+		//convert the pheromone field to grayscale image
+		image->generate(pherofield[0],pherofield[1],pherofield[2],0);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc. 
 		gui->drawImage(image);
+		//if (calibration) image->displayCalibration();
+		for (int i = 0;i<numBots && placement;i++) gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius);
+
+		if (calibration) gui->displayCalibrationInfo(cameraHeight,numBots,3);
 		if (client->checkForData() > 0){
-			//fprintf(file,"%i %i\n",robX,robY);
 			calibration = false;
 		}
-		//gui->saveScreen(runs);
-		//printf("Success rate: %f (%i of %i) %i %i \n",(float) correct/(correct+fails),correct,correct+fails,moveOne,numBots);
-		//printf("Drawing results time: %i ms.\n",globalTimer.getTime());
 		gui->update();
-		//printf("GUI update time: %i ms.\n",globalTimer.getTime());
-		processKeys();
-		printf("%i\n",circleStrength);
+		processEvents();
 	}
-	fclose(file);
+	fclose(robotPositionLog);
+	if (globalTimer.getTime()/1000000<experimentTime) {
+		remove(logFileName); 
+		printf("EXPERIMENT TERMINATED MANUALLY\n");
+	}else{
+		printf("EXPERIMENT FINISHED SUCESSFULLY, results saved to %s.\n",logFileName);
+	}
 	for (int i = 0;i<3;i++) delete pherofield[i];
 	delete image;
 	delete gui;

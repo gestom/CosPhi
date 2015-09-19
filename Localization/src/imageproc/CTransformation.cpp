@@ -343,23 +343,23 @@ void CTransformation::loadCalibration(const char *str)
 		char errStr[1000];
 		char dumStr[1000];
 		sprintf(errStr,"Transformation: error reading coordinate system transformation file %s\n",str);
-		if (fscanf(file,"Dimensions %f %f\n",&gDimX,&gDimY)!=2) fprintf(stderr,errStr);
+		if (fscanf(file,"Dimensions %f %f\n",&gDimX,&gDimY)!=2) fprintf(stderr,"%s",errStr);
 		int dum = 0;
 		for (int k = 0;k<4;k++){
-			if (fscanf(file,"3D_calibration %i\n",&dum)!=1) fprintf(stderr,errStr);
+			if (fscanf(file,"3D_calibration %i\n",&dum)!=1) fprintf(stderr,"%s",errStr);
 			for (int i = 0;i<3;i++){
 				for (int j = 0;j<3;j++){
-					if (fscanf(file,"%f ",&D3transform[k].simlar[i][j])!=1) fprintf(stderr,errStr);
+					if (fscanf(file,"%f ",&D3transform[k].simlar[i][j])!=1) fprintf(stderr,"%s",errStr);
 				}
-				if (fscanf(file,"\n")!=0) fprintf(stderr,errStr);
+				if (fscanf(file,"\n")!=0) fprintf(stderr,"%s",errStr);
 			}
-			if (fscanf(file,"Offset %f %f %f\n",&D3transform[k].orig.x,&D3transform[k].orig.y,&D3transform[k].orig.z)!=3)fprintf(stderr,errStr);
+			if (fscanf(file,"Offset %f %f %f\n",&D3transform[k].orig.x,&D3transform[k].orig.y,&D3transform[k].orig.z)!=3)fprintf(stderr,"%s",errStr);
 		}
-		if (fscanf(file,"%s\n",dumStr)!=1) fprintf(stderr,errStr);
+		if (fscanf(file,"%s\n",dumStr)!=1) fprintf(stderr,"%s",errStr);
 		for (int i = 0;i<9;i++){
-			if (fscanf(file,"%f ",&hom[i])!=1)fprintf(stderr,errStr);
+			if (fscanf(file,"%f ",&hom[i])!=1)fprintf(stderr,"%s",errStr);
 			if (i%3 == 2){
-				if (fscanf(file,"\n")!=0) fprintf(stderr,errStr);
+				if (fscanf(file,"\n")!=0) fprintf(stderr,"%s",errStr);
 			}
 		}
 		fclose(file);

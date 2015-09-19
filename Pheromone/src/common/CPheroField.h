@@ -20,9 +20,11 @@ public:
 
   void addCalibration();
   void recompute(float decay,float diffuse = 0);
-  void add(int x, int y,int id,int num);
-  void remove(int x, int y,float a,int num);
-  void addTo(int x, int y,int id,int num);
+  void add(int x, int y,int id,int num,int radius);
+  void remove(int x, int y,int lx,int ly,int num);
+  void addTo(int x, int y,int id,int num,int radius = 25);
+  float get(int x, int y);
+  void clear();
 
   int width;
   int height;

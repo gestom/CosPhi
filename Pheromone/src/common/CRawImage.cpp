@@ -54,26 +54,29 @@ CRawImage::CRawImage(unsigned char *datai,int wi,int he)
 	numSaved = 0;
 }
 
-void CRawImage::generate(CPheroField *phero,int chan)
+void CRawImage::generate(CPheroField *pA,CPheroField *pB,CPheroField *pC,int color)
 {
-	float *phe = phero->data;
-	chan = chan%7;
-//	int chana = chan%3;
-	for (int i = 0;i<size;i+=3){
-		 data[i]=data[i+1]=data[i+2]=fmin(phe[i/3],255);
-	}
-	/*if (chan > 2){
-		chana = (chan+1)%3;
-		for (int i = 0;i<size;i+=3){
-				if (phe[i/3] > 0)  data[i+chana]=fmin(phe[i/3],255);
+	float *pheA = pA->data;
+	float *pheB = pB->data;
+	float *pheC = pC->data;
+	float p;
+	if (color > 0){
+		for (int i = 0;i<size;i+=3)
+		{
+			p=fmax(pheB[i/3],pheA[i/3]);
+			p=p-2*pheC[i/3];
+			data[i+color%3]=fmax(fmin(p,255),1);
+			data[i+(color+1)%3]=0;
+			data[i+(color+2)%3]=0;
+		}
+	}else{
+		for (int i = 0;i<size;i+=3)
+		{
+			p=fmax(pheB[i/3],pheA[i/3]);
+			p=p-2*pheC[i/3];
+			data[i+1]=data[i+2]=data[i]=fmax(fmin(p,255),1);
 		}
 	}
-	if (chan > 6){
-		chana = (chan+2)%3;
-		for (int i = 0;i<size;i+=3){
-			if (phe[i/3] > 0) data[i+chana]=fmin(phe[i/3],255);
-		}
-	}*/
 }
 
 int CRawImage::getSaveNumber()
@@ -192,74 +195,7 @@ void CRawImage::plotLine(int x,int y) {
 	}
 }
 
-void CRawImage::displayCalibration()
-{
-	int radius = 40;
-	int pos = 0;
-	int iix,iiy;
-	int oX = 0;
-	int oY = 0;
-	int xx[] = {radius+oX,radius+oX,width-radius-oX,width-radius-oX};
-	int yy[] = {radius+oY,height-radius-oY,radius+oY,height-radius-oY};
-	for (int corner = 0;corner<4;corner++)
-	{
-		int x = xx[corner]; 
-		int y = yy[corner]; 
-		for (int ix = -radius;ix<radius+1;ix++)
-		{
-			iix = ix +x;
-			for (int iy = -radius;iy<radius+1;iy++)
-			{
-				iiy = iy +y;
-				if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
-				{
-					pos = 3*(iix+iiy*width);
-					float dist = sqrt(ix*ix+iy*iy);
-					if (dist < radius && dist > radius*0.75 || dist < radius * 0.25) data[pos]=data[pos+1]=data[pos+2]=255;
-				}
-			}
-		}
-	}
-}
 
-void CRawImage::displayRobotFull(int x, int y,int phi,int id)
-{
-	int radius = 80;
-	int iix,iiy;
-	int pos = 0;
-	for (int ix = -radius;ix<radius+1;ix++)
-	{
-		iix = ix +x;
-		for (int iy = -radius;iy<radius+1;iy++)
-		{
-			iiy = iy +y;
-			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
-			{
-				pos = 3*(iix+iiy*width);
-				float dist = sqrt(ix*ix+iy*iy);
-				if (dist < radius) data[pos]=data[pos+1]=data[pos+2]=id;
-			}
-		}
-	}
-}
-
-void CRawImage::displayRobot(int x, int y,int phi,int id)
-{
-	int radius = 40;
-	int pos = 0;
-	int iix,iiy;
-	for (float i  = 0;i<6.28;i+=0.01)
-	{
-		iix = x+radius*sin(i);
-		iiy = y+radius*cos(i);
-
-		if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
-		{
-			pos = 3*(iix+iiy*width);
-			data[pos]=data[pos+1]=data[pos+2]=128;
-		}
-	}
-}
 
 /** pocita jas obrazku:
   *  upperHalf == true, pocita se jen z horni poloviny obrazku

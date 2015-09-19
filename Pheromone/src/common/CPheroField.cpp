@@ -18,7 +18,12 @@ CPheroField::~CPheroField()
 	free(data);
 }
 
-void CPheroField::addTo(int x, int y,int id,int num)
+void CPheroField::clear()
+{
+	memset(data,0,size*sizeof(float));
+}
+
+void CPheroField::addTo(int x, int y,int id,int num,int radius)
 {
 	id = id%MAX_ID;
 	int dx = x-lastX[id];
@@ -43,7 +48,7 @@ void CPheroField::addTo(int x, int y,int id,int num)
 		float f = (float)dy/(float)dx;
 		for (int ix = sx;ix<=ex;ix++)
 		{
-			add(ix,iy,id,num);
+			add(ix,iy,id,num,radius);
 			iy+=f;
 		}
 	}else{
@@ -59,7 +64,7 @@ void CPheroField::addTo(int x, int y,int id,int num)
 		float f = (float)dx/(float)dy;
 		for (int iy = sy;iy<=ey;iy++)
 		{
-			add(ix,iy,id,num);
+			add(ix,iy,id,num,radius);
 			ix+=f;
 		}
 
@@ -70,10 +75,15 @@ void CPheroField::addTo(int x, int y,int id,int num)
 }
 
 
-void CPheroField::add(int x, int y,int id,int num)
+float CPheroField::get(int x, int y)
+{
+	if (x > 0 && y >0 && x<width && y<height) return data[x+y*width];
+	return -1;
+}
+
+void CPheroField::add(int x, int y,int id,int num,int radius)
 {
 	id = id%MAX_ID;
-	int radius = 25;
 	int pos = 0;
 	int iix,iiy;
 	for (int ix = -radius;ix<radius+1;ix++){
@@ -90,12 +100,13 @@ void CPheroField::add(int x, int y,int id,int num)
 	lastY[id] = y;
 }
 
-void CPheroField::remove(int x, int y,float an,int num)
+void CPheroField::remove(int x, int y,int lx,int ly,int num)
 {
-	int radius = 30;
 	int pos = 0;
 	int iix,iiy;
-	for (float r=25;r<31;r+=0.01)
+	float an = atan2(y-ly,x-lx);
+	float distance = sqrt((x-lx)*(x-lx)+(y-ly)*(y-ly)); 
+	for (float r=25;r<35+distance;r+=0.1)
 	{
 		for (float a=an-M_PI/2;a<an+M_PI/2;a+=0.01)
 		{

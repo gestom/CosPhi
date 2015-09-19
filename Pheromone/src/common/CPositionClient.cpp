@@ -2,9 +2,16 @@
 
 #define NETWORK_BLOCK MSG_WAITALL
 
-CPositionClient::CPositionClient()
+CPositionClient::CPositionClient(int numBots,float diam)
 {
 	module = LOG_MODULE_CLIENT;
+	for (int i =0 ; i < MAX_POSITIONS;i++) vArray[i] = false;
+	timer.reset();
+	timer.start();
+	calibrated = true;
+	numDetected = -1;
+	numSearched = numBots;
+	robotDiameter = diam;
 }
 
 CPositionClient::~CPositionClient()
@@ -30,6 +37,21 @@ int CPositionClient::init(const char *ip,const char* port)
 	return result;
 }
 
+void CPositionClient::resetTime()
+{
+	timer.reset();
+	timer.start();
+	for (int i =0 ; i < MAX_POSITIONS;i++) vArray[i] = false;
+}
+
+void CPositionClient::calibrate(float fieldLength,float fieldWidth,float camHeight,float robotHeight)
+{
+	if (calibrated == true){
+		//poslat naky mrdky wajkonu 
+		calibrated = false;
+	}
+}
+
 int CPositionClient::checkForData()
 {
 	float x,y,phi;
@@ -46,13 +68,20 @@ int CPositionClient::checkForData()
 			token = strtok(data, "\n");
 			while( token != NULL ) 
 			{
-				sscanf(token,"%i %f %f %f \n",&id,&x,&y,&phi);
-				printf("%i %f %f %f \n",id,x,y,phi);
-				token = strtok(NULL, "\n");
-				if (id >=0 && id < MAX_POSITIONS){
-					xArray[id] = x;
-					yArray[id] = y;
+				if (strncmp(token,"Robot",5)==0){
+					sscanf(token,"Robot %i %f %f %f \n",&id,&x,&y,&phi);
+					if (id >=0 && id < MAX_POSITIONS){
+						xArray[id] = x;
+						yArray[id] = y;
+						pArray[id] = phi/180*M_PI;
+						vArray[id] = true;
+						tArray[id] = timer.getTime()/1000000.0;
+					}
 				}
+				if (strncmp(token,"Params",6)==0) sscanf(token,"Params %i %f \n",&numSearched,&robotDiameter);
+				if (strncmp(token,"Detected",6)==0) sscanf(token,"Detected %i \n",&numDetected);
+				if (strncmp(token,"Calibrated",11)==0) calibrated = true;
+				token = strtok(NULL, "\n");
 			}
 		}
 	}
@@ -71,4 +100,20 @@ float CPositionClient::getY(int i)
 {
 	if (i >= 0 && i < MAX_POSITIONS) return yArray[i];
 	return 0;
+}
+
+float CPositionClient::getPhi(int i)
+{
+	if (i >= 0 && i < MAX_POSITIONS) return pArray[i];
+	return 0;
+}
+
+bool CPositionClient::exists(int i)
+{
+	return vArray[i];
+}
+
+float CPositionClient::getTime(int i)
+{
+	return tArray[i];
 }

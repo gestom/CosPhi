@@ -79,8 +79,7 @@ void* serverLoop(void* serv)
 		STrackedObject o;
 		for (int i=0;i<server->numObjects;i++){
 			o=server->object[i];
-			//sprintf(buffer,"%s020-000-021-%03i,%.3f,%.3f,%.3f,%.3f\n",buffer,i,o.x,o.y,o.z,o.error);//Ubisense server emulation
-			sprintf(buffer,"%s%03i %.3f %.3f %.3f\n",buffer,i,o.x,o.y,o.yaw*180/M_PI);//Ubisense server emulation
+			sprintf(buffer,"%s%03i %.3f %.3f %.3f\n",buffer,i,o.x,o.y,o.yaw*180/M_PI);
 		}
 		if (send(socket,buffer,strlen(buffer),MSG_NOSIGNAL) != (int)strlen(buffer)) {
 			connected = false;
@@ -113,8 +112,6 @@ int CPositionServer::updatePosition(STrackedObject o,int num)
 	}
 	return 0;
 }
-
-	
 
 int CPositionServer::closeConnection(int socket)
 {

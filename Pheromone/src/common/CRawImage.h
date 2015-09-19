@@ -23,7 +23,7 @@ public:
   void saveBmp();
   bool loadBmp(const char* name);
   void swap();
-  void generate(CPheroField *phero,int chan);
+  void generate(CPheroField *pA,CPheroField *pB,CPheroField *pC,int c);
 
   void plotLine(int x,int y);
   void plotCenter();
@@ -31,9 +31,6 @@ public:
   int  getSaveNumber();
 
   double getOverallBrightness(bool upperHalf);
-  void displayCalibration();
-  void displayRobot(int x, int y,int phi,int i);
-  void displayRobotFull(int x, int y,int phi,int i);
 	  
   int width;
   int height;

@@ -123,8 +123,8 @@ int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
 	if (cameraType == CT_VIDEOLOADER){
 		initLut();
 		aviFile = AVI_open_input_file(deviceName,1);
-		width = AVI_video_width(aviFile);
-		height = AVI_video_height(aviFile);
+		*wi = width = AVI_video_width(aviFile);
+		*he = height = AVI_video_height(aviFile);
 		printf("AVI file opened, video dimensions are %i %i\n",width,height);
 		aviBuffer1 = (char*) malloc(4*width*height);
 		aviBuffer2 = (unsigned char*) malloc(4*width*height);
