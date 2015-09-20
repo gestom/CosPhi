@@ -2,11 +2,11 @@
 
 ###What is Phero ?
 
-<i>CosΦ</i> is a novel artificial pheromone system that is reliable, accurate and uses off-the-shelf components only: an LCD screen and a low-cost USB camera.
-The system uses a horizontally-positioned LCD displays the spatial distribution of the pheromones, which are sensed by the robots that move on the screen. 
-The pheromones are released according to the robots' positions provided by the overhead camera.
-In contrast to other systems, <i>CosΦ</i> can simulate several pheromones while precisely controlling their evaporation, diffusion and release rate.
-<i>Phero </i> is a component of <i>CosΦ</i>, which simulates the pheromones and displays them on a LCD screen. 
+<i>Phero</i> is a pheromone simulator and visualizer of the <i>CosΦ</i> system. 
+Together with <i>SwarmCon</i>, <i>Phero</i> constitute the <i>CosΦ</i> artificial pheromone system that is reliable, accurate and uses off-the-shelf components only: an LCD screen and a low-cost USB camera.
+The <i>Phero</i> system uses a horizontally-positioned LCD displays the spatial distribution of the pheromones, which are sensed by the robots that move on the screen. 
+The pheromones are released according to the robots' positions provided by the <i>SwarmCon</i> system, which uses an overhead camera and circular markers placed on the robots.
+In contrast to other systems, <i>CosΦ/Phero</i> can simulate several pheromones while precisely controlling their evaporation, diffusion and release rate.
 The pheromone system is described in a short, late-breaking paper [[1](#references)] and a full research paper [[2](#references)].
  
 ###Setting it up
@@ -36,6 +36,4 @@ The pheromone system is described in a short, late-breaking paper [[1](#referenc
 
 ###References
 1. F. Arvin, T. Krajník, A. E. Turgut, and S. Yue: <b>[COSΦ: Artificial Pheromone System for Robotic Swarms Research.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.pdf)</b>In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.bib)].
-2. T. Krajník, M. Nitsche et al.: <b>[A Practical Multirobot Localization System.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.pdf)</b>Journal of Intelligent and Robotic Systems (JINT), 2014 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.bib)].
-3. T. Krajnik, F. Arvin, A. E. Turgut, S. Yue, and T. Duckett: <b>[COSΦ: Vision-based Artificial Pheromone System for Robotic Swarms.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.pdf)</b> In: International Conference on Robotics and Automation. Late breaking poster session. 2015 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.bib)].
-4. F. Arvin, A. Attar, A. E. Turgut, and S. Yue: <b>Power-law distribution of long-term experimental data in swarm robotics.</b>In Advances in Swarm and Computational Intelligence. Springer, 2015.
+3. T. Krajník, F. Arvin, A. E. Turgut, S. Yue, and T. Duckett: <b>[COSΦ: Vision-based Artificial Pheromone System for Robotic Swarms.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.pdf)</b> In: International Conference on Robotics and Automation. Late breaking poster session. 2015 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.bib)].
