@@ -212,7 +212,7 @@ void processKeys()
 	if (keys[SDLK_s] && lastKeys[SDLK_s] == false) image->saveBmp();
 
 	//initiate autocalibration (searches for 4 outermost circular patterns and uses them to establisht the coordinate system)
-	if (keys[SDLK_a] && lastKeys[SDLK_a] == false) { calibStep = 0; transformType=trans->transformType; wasBots=numBots; numBots = numBots+4;autocalibrate = true;trans->transformType=TRANSFORM_NONE;}; 
+	if (keys[SDLK_a] && lastKeys[SDLK_a] == false) { calibStep = 0; transformType=trans->transformType; wasBots = numBots; autocalibrate = true;trans->transformType=TRANSFORM_NONE;}; 
 
 	//manual calibration (click the 4 calibration circles with mouse)
 	if (keys[SDLK_r] && lastKeys[SDLK_r] == false) { calibNum = 0; wasBots=numBots; numBots = 1;}
@@ -284,6 +284,7 @@ int main(int argc,char* argv[])
 	if (useGui) gui = new CGui(imageWidth,imageHeight,guiScale);
 	image = new CRawImage(imageWidth,imageHeight);
 	trans = new CTransformation(imageWidth,imageHeight,circleDiameter,true);
+	trans->transformType = TRANSFORM_2D;		//in our case, 2D is the default
 
 	//initialize the circle detectors - each circle has its own detector instance 
 	for (int i = 0;i<MAX_PATTERNS;i++) detectorArray[i] = new CCircleDetect(imageWidth,imageHeight,i);
