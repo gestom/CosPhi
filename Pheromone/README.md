@@ -36,7 +36,10 @@ Full URL to this file is: https://raw.github.com/lrse/whycon/master/cite.bib.
 
 <h3>Some additional remarks</h3>
 <ol>
-<li>Then, run the Pheromone simulator itself: <b>../bin/phero E N</b></li>, where <b>E</b> is the half-life of the first pheromone (in seconds) and <i>N</i> is the number of robots on the field.</li>
+<li>At this point, you can start experimenting with the system by changing evaporation rates, adding diffusion etc.</li>
+<li>We have tried to comment the code so an experienced programmer should be able to alter the system accordingly. However, if you have any questions regarding the code, feel free to contact [me](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) or [Farshad](http://scholar.google.co.uk/citations?user=cUdtAowAAAAJ&hl=en)</li>
+<li>If you use this system for your research, please don't forget to cite the two [papers](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/cite.bib), that describe the components of this system.</li>
+<li>Have fun!</li>
 </ol>
 
 </body>
