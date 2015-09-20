@@ -26,7 +26,7 @@ Full URL to this file is: https://raw.github.com/lrse/whycon/master/cite.bib.
 
 <h3>Running up</h3>
 <ol>
-<li>First, run the <a href="https://github.com/gestom/CosPhi/tree/master/Localization">SwarmCon</a> localization system (e.g. <b>../../Localization/bin/swarmcon /dev/video0 1</i>. You should see a window with the entire LCD screen.</li>
+<li>First, run the <a href="https://github.com/gestom/CosPhi/tree/master/Localization">SwarmCon</a> localization system (e.g. <b>../../Localization/bin/swarmcon /dev/video0 1</b>. You should see a window with the entire LCD screen.</li>
 <li>Then, run the Pheromone simulator itself: <b>../bin/phero E N</b></li>, where <b>E</b> is the half-life of the first pheromone (in seconds) and <i>N</i> is the number of robots on the field.</li>
 <li>If you run in dual-monitor mode, the pheromones will appear in a borderless window. You can move this window to the horizontal LCD monitor using <i>ALT+mouse drag</i>.</li>
 <li>If you run a single-monitor setup, the pheromones will appear in fullscreen.</li>
