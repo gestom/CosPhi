@@ -117,3 +117,4 @@ float CPositionClient::getTime(int i)
 {
 	return tArray[i];
 }
+
