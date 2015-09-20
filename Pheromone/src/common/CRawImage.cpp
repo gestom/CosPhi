@@ -156,38 +156,3 @@ bool CRawImage::loadBmp(const char* inName)
 	}
 	return false;
 }
-
-void CRawImage::plotCenter()
-{
-	int centerWidth = 20;
-	unsigned char color[] = {255,150,150};
-	for (int i = -centerWidth;i<centerWidth;i++){
-		for (int j =0;j<3;j++){
-			data[(width*(height/2+i)+width/2-centerWidth)*3+j] = color[j];
-			data[(width*(height/2+i)+width/2+centerWidth)*3+j] = color[j];
-			data[(width*(height/2-centerWidth)+width/2+i)*3+j] = color[j];
-			data[(width*(height/2+centerWidth)+width/2+i)*3+j] = color[j];
-		}
-	}
-}
-
-void CRawImage::plotLine(int x,int y) {
-	int base;
-	if (y < 0 || y > height-1) y = height/2;
-	if (x < 0 || x > width-1) x = width/2;
-	for(int i=0; i < width;i++) {
-		if (i == width/2) i++;
-		base = (width*y+i)*3;
-		data[base+0] = 255;
-		data[base+1] = 0;
-		data[base+2] = 255;
-	}
-
-	for(int j=0;j<height;j++) {
-		const int bidx = ((width*j)+x)*3;
-	if (j == height/2) j++;
-		data[bidx+0] = 255;
-		data[bidx+1] = 255;
-		data[bidx+2] = 0;
-	}
-}

@@ -2,7 +2,7 @@
 
 #define NETWORK_BLOCK MSG_WAITALL
 
-CPositionClient::CPositionClient(int numBots,float diam)
+CPositionClient::CPositionClient()
 {
 	module = LOG_MODULE_CLIENT;
 	for (int i =0 ; i < MAX_POSITIONS;i++) vArray[i] = false;
@@ -10,8 +10,7 @@ CPositionClient::CPositionClient(int numBots,float diam)
 	timer.start();
 	calibrated = true;
 	numDetected = -1;
-	numSearched = numBots;
-	robotDiameter = diam;
+	numSearched = -1;
 }
 
 CPositionClient::~CPositionClient()

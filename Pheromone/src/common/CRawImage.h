@@ -15,24 +15,26 @@
 class CRawImage
 {
 public:
-
+  /*allocates main data array*/
   CRawImage(int wi,int he);
+
+  /*uses the data array pointed to by 'datai'*/
   CRawImage(unsigned char *datai,int wi,int he);
   ~CRawImage();
 
   /*combine pheromones into a grayscale image according to their influence*/
   void combinePheromones(CPheroField *p[],int numPheromones,int color);
 
+  /*saving and loading - provide a name*/
   void saveBmp(const char* name);
-  void saveBmp();
   bool loadBmp(const char* name);
-  void swap();
 
-
-  void plotLine(int x,int y);
-  void plotCenter();
-
+  /*saving to 'images' directory with a incremental number*/
+  void saveBmp();
   int  getSaveNumber();
+
+  /*channel swap*/
+  void swap();
 
   int width;
   int height;

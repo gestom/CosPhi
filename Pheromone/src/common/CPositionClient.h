@@ -18,22 +18,32 @@
 
 /**
 @author Tom Krajnik
+@this class provides a TCP-based communication interface with the WhyCon system
 */
 class CPositionClient
 {
 public:
-  CPositionClient(int numBots,float diam);
+  CPositionClient();
   ~CPositionClient();
 
+  /*connect to the WhyCon localization system at a given IP and PORT*/
   int init(const char *ip,const char* port);
+
+  /*ask WhyCon to calibrate its coordinate system given the provided parameters*/
   void calibrate(int numRobots,float fieldLength,float fieldWidth,float camHeight,float robotDiameter,float robotHeight);
 
+  /*read incoming messages*/
   int checkForData();
+
+  /*get positions, orientations and latest detection information 
+   of the individual robots provided by the WhyCon system*/
   float getX(int i);
   float getY(int i);
-  float getTime(int i);
   float getPhi(int i);
+  float getTime(int i);
   bool exists(int i);
+
+  /*resets detection timers*/ 
   void resetTime();
 
   int numSearched;

@@ -2,30 +2,44 @@
 #define __CGUI_H__
 
 #include "CRawImage.h"
-#include "CPositionClient.h"
 #include <math.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 
+/*
+author Tom Krajnik tkrajnik@lincoln.ac.uk
+CGui uses the SDL library to display the pheromones field and to guide the user through the experiment setup
+*/
 class CGui
 {
 public:
-  CGui(int *wi,int *he);
+  /*GUI initialization
+   if dualMonitor = false, then GUI goes fullscreen and width and height are autodetected from the current settings
+   if dualMonitor = true, then GUI appears in a window with a given resolution*/
+  CGui(int *width,int *height,bool dualMonitor);
+
+  /*GUI destructor*/
   ~CGui();
 
-  void drawTimeStats(int evalTime,int numBots);
-  void displayCalibrationInfo(int numBots);
+  /*draws the image that combined the pheromones*/
   void drawImage(CRawImage* image);
+
+  /*displays the calibration circles the the display corners + WhyCon information*/
+  void displayCalibrationInfo(float camHeight,int numBots,int numVisible,int radius);
+
+  /*displays the positions of the robots to place when starting an experiment*/
   void displayInitialPositions(int x, int y,float phi,int id,int radius);
-  void displayCalibrationInfo(float camHeight,int numBots,int numVisible);
+  /*provides additional information about robot placement*/
   void displayPlacementInfo(int numBots,int numVisible);
-  void saveScreen(int a);
+  /*displays the outline of the detected robot - used to verify if the WhyCon system works correctly*/
+  void displayRobot(int x, int y,float phi,int id,int radius);
+
+
+  /*GUI update - causes the GUI to be drawn on the screen*/
   void update();
 
-  void displayRobot(int x, int y,float phi,int id);
-  void drawCircle(float cx,float cy,float r);
-  void drawLine(float sx1,float sx2,float sy1,float sy2);
-  void displayHelp(bool wtf);
+  /*saves the screen to the 'output' directory*/
+  void saveScreen(int a);
 
 private:
   SDL_Surface *screen;

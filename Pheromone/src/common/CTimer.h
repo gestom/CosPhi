@@ -3,6 +3,7 @@
 
 /**
 @author Tom Krajnik
+@basic timer class 
 */
 #include <sys/time.h>
 #include <stdlib.h>
@@ -15,14 +16,19 @@ class CTimer
 		CTimer(int timeOut = TIMEOUT_INTERVAL);
 		~CTimer();
 
-		void reset(int timeOut = TIMEOUT_INTERVAL);
-		bool paused();
+		/*time in microseconds*/
+		int getTime();
 
+		/*timer reset,start,pause*/
+		void reset(int timeOut = TIMEOUT_INTERVAL);
 		int pause();
 		int start();
-		int getTime();
+
+		/*was there a timeout ?*/
 		bool timeOut();
 
+		/*is the timer running ?*/
+		bool paused();
 	private:
 		int getRealTime();
 		int startTime;

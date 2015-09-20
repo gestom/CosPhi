@@ -10,27 +10,37 @@
 
 #define MAX_ROBOTS 100
 
-/*these values need to be adjusted by the user during the system set-up*/
+/*
+author: Tom Krajnik tkrajnik@lincoln.ac.uk,
+This program is a pheromone simulator intended for swarm robotics.
+Its thorough description and use-cases are provided in a conference article:
+Arvin, Krajnik, Turgut, Yue: "CosPhi: Artificial Pheromone System for Robotic Swarms Research", In International Conference on Intelligent Robotic Systems (IROS), 2015.
+if you will use this software for your research, please cite the aforementioned paper
+*/
+
+/*---------The following values need to be adjusted by the user during the system set-up -------------*/
 float arenaLength     = 0.92;	//screen width (or arena length) in meters
 float arenaWidth      = 0.52;	//screen height (or arena width) in meters
 float cameraHeight    = 1.0;	//camera height above the screen
 float robotHeight     = 0.02;	//height of the pattern from robot's base
 float robotDiameter   = 0.04;	//robot diameter
 char whyconIP[] = "localhost";	//IP of a machine that runs the localization
+bool dualMonitor      = true;	//do you want the pheromone system to be displayed on a secondary screen?
+int  imageWidth= 1600;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+int  imageHeight = 900;	//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+/*---------The previous values need to be adjusted by the user during the system set-up -------------*/
 
-/*logging and experiment control*/
-CTimer globalTimer;		//used to terminate the experiment after a given time
-int experimentTime = 180;	//experiment duration is 3 minutes by default
-FILE *robotPositionLog = NULL;	//file to log robot positions
-bool calibration = true;	//re-calibrate the localization system each time 
-bool placement = true;		//randomly generate initial positions of robots at the experiment start
-float initX[MAX_ROBOTS];	//initial positions
-float initY[MAX_ROBOTS];	//initial positions
-float initA[MAX_ROBOTS];	//initial orientations 
-int initBorder = 100;		//defines minimal distance of the randomly-generated initial positions from the arena boundary
-int initBrightness = 255;	//brightness of the patterns at randomly-generated positions
-int initRadius = 50;		//radius of the randomly-generated positions and robots
+
+/*---------Adjust the following variables to define your experiment duration, initial conditions etc.------------*/
 int pheroStrength = 50;		//default pheromone strength released by the leader robot
+int experimentTime = 180;	//experiment duration is 3 minutes by default
+bool calibration = true;	//re-calibrate the localization system at each start 
+bool placement = true;		//randomly generate initial positions of robots at the experiment start
+int initBrightness = 255;	//brightness of the patterns at randomly-generated positions
+int initBorder = 100;		//defines minimal distance of the randomly-generated initial positions from the arena boundary
+int initRadius = 50;		//radius of the randomly-generated positions on the display 
+float avoidDistance = 0.10;	//minimal distance to trigger pheromone 2 release - this pheromone causes the leading robot to turn away from an obstacle  
+/*---------Adjust the previous variables to define your experiment duration, initial conditions etc.-------------*/
 
 /*variables read from the command line*/
 int numBots = 1;		//number of robots in the arena
@@ -38,9 +48,14 @@ float evaporation = 1;		//main pheromone half-life	[s]
 float diffusion = 0.0;		//main pheromone diffusion	- not implemented
 
 /*supporting classes and variables*/
+CTimer globalTimer;		//used to terminate the experiment after a given time
+FILE *robotPositionLog = NULL;	//file to log robot positions
+float initX[MAX_ROBOTS];	//initial positions
+float initY[MAX_ROBOTS];	//initial positions
+float initA[MAX_ROBOTS];	//initial orientations 
+CPheroField* pherofield[MAX_ROBOTS];//pheromone matrices
 CGui* gui;
 CRawImage *image;
-CPheroField* pherofield[MAX_ROBOTS];
 CPositionClient* client;
 char logFileName[1000];
 
@@ -52,8 +67,6 @@ Uint8 lastKeys[1000];
 Uint8 *keys = NULL;
 bool leftMousePressed = false;
 bool rightMousePressed = false;
-int  imageWidth= 1920;			//autodetected later on
-int  imageHeight = 1080;		//autodetected later on
 
 /*CTRL-C handler*/
 void ctrl_c_handler(int a)
@@ -186,8 +199,8 @@ int main(int argc,char* argv[])
 	//initialize the logging system
 	if (initializeLogging()==false) return -1;
 
-	//auto-detect screen resolution and initialize the GUI
-	gui = new CGui(&imageWidth,&imageHeight);
+	//auto-detect screen resolution (in case of a single display) and initialize the GUI
+	gui = new CGui(&imageWidth,&imageHeight,dualMonitor);
 	image = new CRawImage(imageWidth,imageHeight);
 
 	//read number of robots and pheromone half-life from the command line
@@ -196,6 +209,7 @@ int main(int argc,char* argv[])
 
 	float diffusion = 0;
 	float influence = 1.0;
+
 	/*initialize the pheromone fields
 	* pheromone field 0 simulates a longer-decay pheromone that the other robots follow
 	* pheromone field 1 is released by the leader if it gets too close to arena boundaries causing the leader to avoid them - this pheromone decays quickly
@@ -207,11 +221,10 @@ int main(int argc,char* argv[])
 	pherofield[2] = new CPheroField(imageWidth,imageHeight,0.1,0,-2);
 
 	/*connect to the localization system*/
-	client = new CPositionClient(numBots,robotDiameter);
+	client = new CPositionClient();
 	client->init(whyconIP,"6666");
 	image->getSaveNumber();
 
-	float nearest = 0.10;
 	randomPlacement();
 
 	globalTimer.pause();
@@ -228,7 +241,7 @@ int main(int argc,char* argv[])
 			float phi = client->getPhi(0);
 		
 			/*is the leader close to the arena edge ?*/
-			if ((client->getX(0)<nearest && cos(phi)<0) || (client->getX(0)>arenaLength-nearest && cos(phi) > 0 )|| (client->getY(0)<nearest && sin(phi)<0) || (client->getY(0)>arenaWidth-nearest && sin(phi)>0))
+			if ((client->getX(0)<avoidDistance && cos(phi)<0) || (client->getX(0)>arenaLength-avoidDistance && cos(phi) > 0 )|| (client->getY(0)<avoidDistance && sin(phi)<0) || (client->getY(0)>arenaWidth-avoidDistance && sin(phi)>0))
 			{
 				/*leader is close to the arena edge -> release pheromone 1 that causes the robot to turn away */
 				pherofield[1]->addTo((client->getX(0)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(0)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,35);
@@ -250,16 +263,18 @@ int main(int argc,char* argv[])
 		gui->drawImage(image);
 
 		//experiment preparation phase 2: draw initial and real robot positions
+		initRadius = robotDiameter/arenaLength*imageWidth/2;	//calculate robot radius in pixels, so that it matches the real robot dimensions
 		for (int i = 0;i<numBots && placement;i++)
 		{
 			 gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius);
-			 if (client->exists(i))  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0);
+			 if (client->exists(i))  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,40);
 		}
 	
 		//experiment preparation phase 1: draw calibration, contact WhyCon to calibrate and draw initial robot positions
 		if (calibration){
-			 gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected);
-			 client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight);
+			int calibRadius = initRadius/(cameraHeight-robotHeight)*cameraHeight;		//slightly enlarge to compensate for the higher distance from the camera
+			gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected,calibRadius);
+			client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight);
 		}else if (placement){
 			 gui->displayPlacementInfo(client->numSearched,client->numDetected);
 		}
