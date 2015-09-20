@@ -23,7 +23,7 @@ Full URL to this file is: https://raw.github.com/lrse/whycon/master/cite.bib.
 <li>.</li>
 </ol>
 
-![Fig.1: Pheromone System configuration and Colias-Φ micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)<br/>
+[!Fig.1: Pheromone System configuration and Colias-Φ micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)<br/>
 
 <h4>Advanced setup for more robots in a rectangular field</h4>
 <ol>
