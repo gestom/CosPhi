@@ -23,7 +23,7 @@ So far, the system was used to study cue-based aggregation [[1](#references)] an
 ###Can I use it ?
 
 CosΦ is fully open-source and free.
-The CosΦ system is composed of two software modules: the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) module, which is a derivative of the [WhyCon](http://purl.org/robotics/whycon) system[[2](#references)], and the [Pheromone simulator](https://github.com/gestom/CosPhi/tree/master/Pheromone), which simulates the individual pheromones and displays them on the horizontal LCD. Note, that the full version of the software will be released after its presentation at the IROS 2015 conference.
+The CosΦ system is composed of two software modules: the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) module, which is a derivative of the [WhyCon](http://purl.org/robotics/whycon) system [[2](#references)], and the [Pheromone simulator](https://github.com/gestom/CosPhi/tree/master/Pheromone), which simulates the individual pheromones and displays them on the horizontal LCD. Note, that the full version of the software will be released after its presentation at the IROS 2015 conference.
 If you use this software for your work, please cite the two papers that describe these software modules - here is their [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/cite.bib).
 
 ###References
