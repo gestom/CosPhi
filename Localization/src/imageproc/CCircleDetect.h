@@ -53,7 +53,7 @@ class CCircleDetect
 
 		int loadCircleID(const char* id);
 		bool changeThreshold();
-		bool draw,drawAll,lastTrackOK,calibMode;
+		bool draw,drawAll,lastTrackOK;
 		int debug;
 		bool localSearch;
 	private:

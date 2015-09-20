@@ -409,18 +409,26 @@ STrackedObject CTransformation::normalize(STrackedObject o)
 	return r;
 }
 
-int CTransformation::calibrate2D(STrackedObject *inp,float dimX,float dimY)
+int CTransformation::calibrate2D(STrackedObject *inp,float dimX,float dimY,float robotRadius,float robotHeight,float cameraHeight)
 {
 	STrackedObject r[4];
 	STrackedObject o[4];
-	r[0].x = 0;
-	r[0].y = 0;
-	r[1].x = dimX;
-	r[1].y = 0;
-	r[2].x = 0;
-	r[2].y = dimY;
-	r[3].x = dimX;
-	r[3].y = dimY;
+	/*specific to the pheromone system - compensates the fact, that the calibration patterns are displayed in a lower position than the robots
+	assumes that the camera above the field centre*/
+	float iX = dimX/cameraHeight*robotHeight*2;
+	float iY = dimY/cameraHeight*robotHeight*2;
+
+	//float iX = dimX/(inp[0].x+inp[1].x+inp[2].x+inp[3].x)*4*off;
+	//float iY = dimY/(inp[0].x+inp[1].x+inp[2].x+inp[3].x)*4*off;
+
+	r[0].x = robotRadius+iX;
+	r[0].y = robotRadius+iY;
+	r[1].x = dimX-robotRadius-iX;
+	r[1].y = robotRadius+iY;
+	r[2].x = robotRadius+iX;
+	r[2].y = dimY-robotRadius-iY;
+	r[3].x = dimX-robotRadius-iX;
+	r[3].y = dimY-robotRadius-iY;
 	for (int i = 0;i<4;i++){
 		o[i].x = -inp[i].y/inp[i].x;
 		o[i].y = -inp[i].z/inp[i].x;
@@ -455,6 +463,7 @@ int CTransformation::calibrate2D(STrackedObject *inp,float dimX,float dimY)
 	transformType = TRANSFORM_2D;
 	return 0;
 }
+
 STrackedObject CTransformation::crossPrd(STrackedObject o0,STrackedObject o1,STrackedObject o2,float gridDimX,float gridDimY)
 {
 	STrackedObject v[3];

@@ -17,9 +17,6 @@
 #define AUTO_CALIB_INITS 10 
 
 //-----These parameters need to be adjusted by the user -----------------------
-//Adjust max GUI dimensions here 
-int  screenWidth= 1920;
-int  screenHeight = 1080;
 
 //Adjust camera resolution here
 int  imageWidth= 1920;
@@ -28,19 +25,30 @@ int  imageHeight = 1080;
 //Adjust the black circle diameter [m] 
 float circleDiameter = 0.03;
 
-//Adjust the X and Y dimensions of the coordinate system 
-float fieldLength = 1.00;
+/*Adjust the X and Y dimensions of the coordinate system 
+in case you are using the artificial pheromone system, adjust the dimensions in phero.cpp*/
+float fieldLength = 1.00;		
 float fieldWidth = 1.00;
+//----------------------------------------------------------------------------
+
+/*-----These params are provided by the artificial pheromone system ----------------------
+-------change them only in the phero.cpp file, otherwise do not alter ------------------*/
+float robotDiameter = 0.00;		//diameter of the pattern's outer white circle 
+float robotHeight = 0.00;		//height of the robot (pattern height)	
+float cameraHeight = 1.00;		//height of the camera above the field 
+//----------------------------------------------------------------------------
+
+//Max GUI dimensions 
+int  screenWidth= 1920;
+int  screenHeight = 1080;
 
 //save raw video for postprocessing
 bool saveVideo = true;
-//----------------------------------------------------------------------------
-
-
 int numFound = 0;
 int numStatic = 0;
 ETransformType transformType = TRANSFORM_2D;
 
+bool autocalibrate = false;
 bool autotest = false;
 bool track = true;
 int runs = 0;
@@ -60,7 +68,6 @@ int numSaved = 0;
 bool stop = false;
 bool displayHelp = false;
 bool drawCoords = true;
-bool drawOriginal = false;
 
 CCamera* camera;
 CGui* gui;
@@ -81,38 +88,96 @@ int keyNumber = 10000;
 Uint8 lastKeys[1000];
 Uint8 *keys = NULL;
 
-void autocalibrate()
+void manualcalibration()
 {
-	int index[4];
-	int value[4];
-	int signX[] = {-1,+1,-1,+1};
-	int signY[] = {+1,+1,-1,-1};
-	for (int j = 0;j<4;j++){
-		 value[j] = -100000000; 
-		 index[j] = 0; 
-	}
+	if (currentSegmentArray[0].valid){
+		STrackedObject o = objectArray[0];
+		moveOne = moveVal;
 
-	//find circles at the field corners
-	for (int i = 0;i<numBots;i++) {
-		for (int j = 0;j<4;j++) {
-			if ((signX[j]*currentSegmentArray[i].x+signY[j]*currentSegmentArray[i].y)>value[j])
-			{
-				value[j]=signX[j]*currentSegmentArray[i].x+signY[j]*currentSegmentArray[i].y;
-				index[j] = i;
+		//object found - add to a buffer
+		if (calibStep < CALIB_STEPS) calibTmp[calibStep++] = o;
+
+		//does the buffer contain enough data to calculate the object position
+		if (calibStep == CALIB_STEPS){
+			o.x = o.y = o.z = 0;
+			for (int k = 0;k<CALIB_STEPS;k++){
+				o.x += calibTmp[k].x;
+				o.y += calibTmp[k].y;
+				o.z += calibTmp[k].z;
 			}
+			o.x = o.x/CALIB_STEPS;	
+			o.y = o.y/CALIB_STEPS;	
+			o.z = o.z/CALIB_STEPS;
+			if (calibNum < 4){
+				calib[calibNum++] = o;
+			}
+
+			//was it the last object needed to establish the transform ?
+			if (calibNum == 4){
+				//calculate and save transforms
+				trans->calibrate2D(calib,fieldLength,fieldWidth);
+				trans->calibrate3D(calib,fieldLength,fieldWidth);
+				calibNum++;
+				numBots = wasBots;
+				trans->saveCalibration("default.cal");
+				trans->transformType = transformType;
+				detectorArray[0]->localSearch = false;
+			}
+			calibStep++;
 		}
 	}
+}
 
-	//and use them for calibration
-	for (int j = 0;j<4;j++){
-		SSegment tmp;
-		tmp = currentSegmentArray[j];
-		currentSegmentArray[j]= currentSegmentArray[index[j]];
-		currentSegmentArray[index[j]] = tmp;
-		trans->transformType = TRANSFORM_NONE;
-		calib[j] = trans->transform(currentSegmentArray[j],false);
+void autocalibration()
+{
+	bool saveVals = true;
+	for (int i = 0;i<numBots;i++){
+		if (detectorArray[i]->lastTrackOK == false) saveVals=false;
 	}
-	trans->calibrate2D(calib,fieldLength,fieldWidth);
+	if (saveVals){
+		int index[] = {0,0,0,0};	
+		int maxEval = 0;
+		int eval = 0;
+		int sX[] = {-1,+1,-1,+1};
+		int sY[] = {-1,-1,+1,+1};
+		for (int b = 0;b<4;b++)
+		{
+			maxEval = -10000000;
+			for (int i = 0;i<numBots;i++)
+			{
+				eval = 	sX[b]*currentSegmentArray[i].x +sY[b]*currentSegmentArray[i].y;
+				if (eval > maxEval)
+				{
+					maxEval = eval;
+					index[b] = i;
+				}
+			}
+		}
+		printf("INDEX: %i %i %i %i\n",index[0],index[1],index[2],index[3]);
+		for (int i = 0;i<4;i++){
+			if (calibStep <= AUTO_CALIB_INITS) calib[i].x = calib[i].y = calib[i].z = 0;
+			calib[i].x+=objectArray[index[i]].x;
+			calib[i].y+=objectArray[index[i]].y;
+			calib[i].z+=objectArray[index[i]].z;
+		}
+		calibStep++;
+		if (calibStep == AUTO_CALIB_STEPS){
+			for (int i = 0;i<4;i++){
+				calib[i].x = calib[i].x/(AUTO_CALIB_STEPS-AUTO_CALIB_INITS);
+				calib[i].y = calib[i].y/(AUTO_CALIB_STEPS-AUTO_CALIB_INITS);
+				calib[i].z = calib[i].z/(AUTO_CALIB_STEPS-AUTO_CALIB_INITS);
+			}
+			trans->calibrate2D(calib,fieldLength,fieldWidth,robotDiameter/2,robotHeight,cameraHeight);
+			trans->calibrate3D(calib,fieldLength,fieldWidth);
+			trans->calibrate4D(calib,fieldLength,fieldWidth);
+			calibNum++;
+			numBots = wasBots;
+			trans->saveCalibration("default.cal");
+			trans->transformType = transformType;
+			autocalibrate = false;
+			server->finishCalibration();
+		}
+	}
 }
 
 /*process events coming from GUI*/
@@ -125,12 +190,12 @@ void processKeys()
 				 calibStep = 0;
 				 trans->transformType = TRANSFORM_NONE;
 			}
-			lastSegmentArray[numBots-1].x = event.motion.x*guiScale; 
-			lastSegmentArray[numBots-1].y = event.motion.y*guiScale;
-			//currentSegmentArray[numBots-1].x = event.motion.x*guiScale; 
-			//currentSegmentArray[numBots-1].y = event.motion.y*guiScale;
-			lastSegmentArray[numBots-1].valid = true;
-			detectorArray[numBots-1]->localSearch = true;
+			if (numBots > 0){
+				currentSegmentArray[numBots-1].x = event.motion.x*guiScale; 
+				currentSegmentArray[numBots-1].y = event.motion.y*guiScale;
+				currentSegmentArray[numBots-1].valid = true;
+				detectorArray[numBots-1]->localSearch = true;
+			}
 		}
 	}
 
@@ -145,10 +210,9 @@ void processKeys()
 	if (keys[SDLK_m] && lastKeys[SDLK_m] == false) printf("SAVE %03f %03f %03f %03f %03f %03f %03f\n",objectArray[0].x,objectArray[0].y,objectArray[0].z,objectArray[0].error,objectArray[0].d,currentSegmentArray[0].m0,currentSegmentArray[0].m1);
 	if (keys[SDLK_n] && lastKeys[SDLK_n] == false) printf("SEGM %03f %03f %03f\n",currentSegmentArray[0].x,currentSegmentArray[0].y,currentSegmentArray[0].m0);
 	if (keys[SDLK_s] && lastKeys[SDLK_s] == false) image->saveBmp();
-	if (keys[SDLK_o] && lastKeys[SDLK_o] == false) drawOriginal = drawOriginal == false; 
 
 	//initiate autocalibration (searches for 4 outermost circular patterns and uses them to establisht the coordinate system)
-	if (keys[SDLK_a] && lastKeys[SDLK_a] == false) autocalibrate();
+	if (keys[SDLK_a] && lastKeys[SDLK_a] == false) { calibStep = 0; transformType=trans->transformType; wasBots=numBots; numBots = numBots+4;autocalibrate = true;trans->transformType=TRANSFORM_NONE;}; 
 
 	//manual calibration (click the 4 calibration circles with mouse)
 	if (keys[SDLK_r] && lastKeys[SDLK_r] == false) { calibNum = 0; wasBots=numBots; numBots = 1;}
@@ -239,18 +303,15 @@ int main(int argc,char* argv[])
 	{
 		//if (camera->renewImage(image,moveOne-->0)==-1)stop = true;
 		camera->renewImage(image,moveOne-->0);
-		if (drawOriginal) gui->drawImage(image);
 		numFound = numStatic = 0;
 		timer.reset();
 
 		//track the robots found in the last attempt 
 		for (int i = 0;i<numBots;i++){
-			detectorArray[i]->calibMode = false;
-			if (calibNum >= 4){
+			if (currentSegmentArray[i].valid){
 				lastSegmentArray[i] = currentSegmentArray[i];
-				detectorArray[i]->calibMode = false;
+				currentSegmentArray[i] = detectorArray[i]->findSegment(image,lastSegmentArray[i]);
 			}
-			if (lastSegmentArray[i].valid) currentSegmentArray[i] = detectorArray[i]->findSegment(image,lastSegmentArray[i]); else currentSegmentArray[i].valid = false; 
 		}
 
 		//search for untracked (not detected in the last frame) robots 
@@ -259,9 +320,8 @@ int main(int argc,char* argv[])
 				lastSegmentArray[i].valid = false;
 				currentSegmentArray[i] = detectorArray[i]->findSegment(image,lastSegmentArray[i]);
 			}
-			if (currentSegmentArray[i].valid == false) break;
+			if (currentSegmentArray[i].valid == false) break;		//does not make sense to search for more patterns if the last one was not found
 		}
-		autocalibrate();
 
 		//perform transformations from camera to world coordinates
 		for (int i = 0;i<numBots;i++){
@@ -277,10 +337,30 @@ int main(int argc,char* argv[])
 		evalTime = timer.getTime();
 
 		//pack up the data for sending to other systems (e.g. artificial pheromone one)
-		server->setNumOfPatterns(numBots);
+		server->setNumOfPatterns(numFound,numBots);
 		for (int i = 0;i<numBots;i++) server->updatePosition(objectArray[i],i);
+
+		//check if there are some commands comming over the network interface - for communication with the pheromone system 
+		EServerCommand command = server->getCommand();
+		if (command == SC_CALIBRATE) 
+		{ 
+			calibStep = 0; 
+			transformType=TRANSFORM_2D; 
+			wasBots=server->numObjects; 
+			numBots = wasBots+4;
+			autocalibrate = true;
+			trans->transformType=TRANSFORM_NONE;
+
+			fieldLength = server->fieldLength;
+			fieldWidth = server->fieldWidth;
+			cameraHeight = server->cameraHeight;
+			robotDiameter = server->robotDiameter;
+			robotHeight = server->robotHeight;
+		}
+
+		//draw stuff on the GUI 
 		if (useGui){
-			if (drawOriginal == false) gui->drawImage(image);
+			gui->drawImage(image);
 			gui->drawTimeStats(evalTime,numBots);
 			gui->displayHelp(displayHelp);
 			gui->guideCalibration(calibNum,fieldLength,fieldWidth);
@@ -289,48 +369,11 @@ int main(int argc,char* argv[])
 			if (currentSegmentArray[i].valid) gui->drawStats(currentSegmentArray[i].minx-30,currentSegmentArray[i].maxy,objectArray[i],trans->transformType == TRANSFORM_2D);
 		}
 
-		//establishing the coordinate system
-		if (calibNum < 4){
-			if (currentSegmentArray[0].valid){
-				STrackedObject o = objectArray[0];
-				moveOne = moveVal;
+		//establishing the coordinate system by manual or autocalibration
+		if (autocalibrate && numFound == numBots) autocalibration();
+		if (calibNum < 4) manualcalibration();
 
-				//object found - add to a buffer
-				if (calibStep < CALIB_STEPS) calibTmp[calibStep++] = o;
-
-				//does the buffer contain enough data to calculate the object position
-				if (calibStep == CALIB_STEPS){
-					o.x = o.y = o.z = 0;
-					for (int k = 0;k<CALIB_STEPS;k++){
-						o.x += calibTmp[k].x;
-						o.y += calibTmp[k].y;
-						o.z += calibTmp[k].z;
-					}
-					o.x = o.x/CALIB_STEPS;	
-					o.y = o.y/CALIB_STEPS;	
-					o.z = o.z/CALIB_STEPS;
-					if (calibNum < 4){
-						calib[calibNum++] = o;
-					}
-
-					//was it the last object needed to establish the transform ?
-					if (calibNum == 4){
-						//calculate and save transforms
-						trans->calibrate2D(calib,fieldLength,fieldWidth);
-						trans->calibrate3D(calib,fieldLength,fieldWidth);
-						calibNum++;
-						numBots = wasBots;
-						trans->saveCalibration("default.cal");
-						trans->transformType = transformType;
-						detectorArray[0]->localSearch = false;
-					}
-					calibStep++;
-				}
-			}
-		}
-		//gui->saveScreen(runs);
-		if (useGui) gui->update();
-		if (useGui) processKeys();
+		
 		for (int i = 0;i<numBots;i++){
 			//if (currentSegmentArray[i].valid) printf("Object %i %03f %03f %03f %03f %03f\n",i,objectArray[i].x,objectArray[i].y,objectArray[i].z,objectArray[i].error,objectArray[i].esterror);
 		}
@@ -340,7 +383,6 @@ int main(int argc,char* argv[])
 			moveOne = moveVal;
 		}else{
 			//for postprocessing, try to find all robots before loading next frame
-			//if (numStatic ==  numBots)
 			if (numFound ==  numBots)
 			{
 				//gui->saveScreen(runs++);
@@ -351,8 +393,13 @@ int main(int argc,char* argv[])
 				if (moveOne-- < -100) moveOne = moveVal;
 			}
 		}
+
+		//gui->saveScreen(runs);
+		if (useGui) gui->update();
+		if (useGui) processKeys();
 		if (displayTime) printf("Printing results time: %i ms.\n",globalTimer.getTime());
 	}
+	delete server;
 	runs--;
 	delete image;
 	if (useGui) delete gui;

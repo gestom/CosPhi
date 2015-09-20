@@ -10,7 +10,8 @@ CGui::CGui(int *wi,int *he)
 	*wi = width = info->current_w;
 	if(TTF_Init() == -1)printf("Unable to initialize SDL_ttf: %s\n", TTF_GetError());
 	screen = NULL;
-	screen = SDL_SetVideoMode(width,height,24,SDL_FULLSCREEN); 
+	//screen = SDL_SetVideoMode(width,height,24,SDL_FULLSCREEN); 
+	screen = SDL_SetVideoMode(width,height,24,SDL_SWSURFACE); 
 	if (screen == NULL)fprintf(stderr,"Couldn't set SDL video mode: %s\n",SDL_GetError());
 	SDL_WM_SetCaption("Robot revue vision system","Robot revue vision system");
 	smallFont =  TTF_OpenFont("../etc/DejaVuSansCondensed.ttf",24);
@@ -34,7 +35,6 @@ void CGui::drawImage(CRawImage* image)
 void CGui::displayInitialPositions(int x, int y,float phi,int id,int radius)
 {
 	int iix,iiy;
-	int pos = 0;
 	Uint8 *bufp;
 	for (int ix = -radius;ix<radius;ix++)
 	{
@@ -55,23 +55,33 @@ void CGui::displayInitialPositions(int x, int y,float phi,int id,int radius)
 	}
 }
 
-void CGui::displayRobot(int x, int y,int phi,int id)
+void CGui::displayRobot(int x, int y,float phi,int id)
 {
 	int radius = 40;
-	int pos = 0;
 	int iix,iiy;
 	Uint8 *bufp;
-	for (float i  = 0;i<6.28;i+=0.01)
+	for (int ix = -radius;ix<radius;ix++)
 	{
-		iix = x+radius*sin(i);
-		iiy = y+radius*cos(i);
-
-		if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
+		iix = ix +x;
+		for (int iy = -radius;iy<radius;iy++)
 		{
-			bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*3;
-			bufp[0]=bufp[1]=bufp[2]=128;
+			iiy = iy +y;
+			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
+			{
+				bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*3;
+				float dist = sqrt(ix*ix+iy*iy);
+				float ang = atan2(iy,ix)-phi;
+				if (ang > +M_PI) ang-=2*M_PI;
+				if (ang < -M_PI) ang+=2*M_PI;
+				if (dist < radius && fabs(ang) > 0.1 && dist > radius-10)
+				{
+					bufp[1]=bufp[2]=0;
+					bufp[0]=255;
+				}
+			}
 		}
 	}
+
 }
 
 void CGui::displayCalibrationInfo(float camHeight,int numBots,int numVisible)
@@ -79,7 +89,6 @@ void CGui::displayCalibrationInfo(float camHeight,int numBots,int numVisible)
 	/*display calibration patterns in the screen corners*/
 	Uint8 *bufp;
 	int radius = 40;
-	int pos = 0;
 	int iix,iiy;
 	int oX = 0;
 	int oY = 0;
@@ -99,7 +108,7 @@ void CGui::displayCalibrationInfo(float camHeight,int numBots,int numVisible)
 				{
 					bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*3;
 					float dist = sqrt(ix*ix+iy*iy);
-					if ((dist < radius && dist > radius*0.75) || dist < radius * 0.25) bufp[pos]=bufp[pos+1]=bufp[pos+2]=255;
+					if ((dist < radius && dist > radius*0.75) || dist < radius * 0.25) bufp[0]=bufp[1]=bufp[2]=255;
 				}
 			}
 		}
@@ -126,7 +135,7 @@ void CGui::displayCalibrationInfo(float camHeight,int numBots,int numVisible)
 
 	SDL_Color blue = { 0, 255, 0, 0 };
 	rect.y += fontSize;
-	sprintf(info,"Searching for %i robots and 4 calibration patterns, %i of %i visible.",numBots,numVisible,numBots+4);
+	sprintf(info,"Searching for %i patterns, %i are visible.",numBots,numVisible);
 	text = TTF_RenderUTF8_Blended(smallFont, info, blue);
 	rect.x =  width/2 - text->w/2; 
 	SDL_BlitSurface(text, NULL, screen, &rect);
@@ -135,6 +144,51 @@ void CGui::displayCalibrationInfo(float camHeight,int numBots,int numVisible)
 	SDL_Color red = { 255, 0, 0, 0 };
 	rect.y += 2*fontSize;
 	sprintf(info,"Place your robots at the designated positions or press P to generate new ones.");
+	text = TTF_RenderUTF8_Blended(smallFont, info, red);
+	rect.x =  width/2 - text->w/2; 
+	SDL_BlitSurface(text, NULL, screen, &rect);
+	SDL_FreeSurface(text);
+}
+
+void CGui::displayPlacementInfo(int numBots,int numVisible)
+{
+	/*display calibration info*/
+	char info[1000];
+	SDL_Rect rect;				
+	SDL_Surface *text;		
+	int fontSize = 32;
+	rect.x = width/4;
+	rect.y = height/2;
+	rect.w = width/2;
+	rect.h = 24;
+	SDL_Color ok_col = { 0, 255, 0, 0 };
+
+	rect.x = width/4;
+	rect.y = height/2-fontSize;
+	sprintf(info,"Calibration finished - blue circles now designate detected robot positions.");
+	text = TTF_RenderUTF8_Blended(smallFont, info, ok_col);
+	rect.x =  width/2 - text->w/2; 
+	SDL_BlitSurface(text, NULL, screen, &rect);
+	SDL_FreeSurface(text);
+
+	SDL_Color blue = { 0, 255, 0, 0 };
+	rect.y += fontSize;
+	sprintf(info,"Detected %i out of %i robots.",numVisible,numBots);
+	text = TTF_RenderUTF8_Blended(smallFont, info, blue);
+	rect.x =  width/2 - text->w/2; 
+	SDL_BlitSurface(text, NULL, screen, &rect);
+	SDL_FreeSurface(text);
+
+	SDL_Color red = { 255, 0, 0, 0 };
+	rect.y += 2*fontSize;
+	sprintf(info,"Place your robots at the designated positions or press P to generate new ones.");
+	text = TTF_RenderUTF8_Blended(smallFont, info, red);
+	rect.x =  width/2 - text->w/2; 
+	SDL_BlitSurface(text, NULL, screen, &rect);
+	SDL_FreeSurface(text);
+
+	rect.y += fontSize;
+	sprintf(info,"Press SPACE BAR to start the experiment.");
 	text = TTF_RenderUTF8_Blended(smallFont, info, red);
 	rect.x =  width/2 - text->w/2; 
 	SDL_BlitSurface(text, NULL, screen, &rect);

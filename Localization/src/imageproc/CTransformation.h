@@ -54,7 +54,7 @@ class CTransformation
 		void unbarrel(unsigned char* src,unsigned char* dst);
 		STrackedObject transform(SSegment segment,bool unbarrel);
 		STrackedObject eigen(double data[]);
-		int calibrate2D(STrackedObject *o,float gridDimX,float gridDimY);
+		int calibrate2D(STrackedObject *inp,float dimX,float dimY,float robotRadius = 0,float robotHeight =0,float cameraHeight = 1.0);
 		int calibrate3D(STrackedObject *o,float gridDimX,float gridDimY);
 		int calibrate4D(STrackedObject *o,float gridDimX,float gridDimY);
 

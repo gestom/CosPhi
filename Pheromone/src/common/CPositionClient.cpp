@@ -15,7 +15,9 @@ CPositionClient::CPositionClient(int numBots,float diam)
 }
 
 CPositionClient::~CPositionClient()
-{}
+{
+	close(mySocket);
+}
 
 int CPositionClient::init(const char *ip,const char* port)
 {
@@ -44,10 +46,12 @@ void CPositionClient::resetTime()
 	for (int i =0 ; i < MAX_POSITIONS;i++) vArray[i] = false;
 }
 
-void CPositionClient::calibrate(float fieldLength,float fieldWidth,float camHeight,float robotHeight)
+void CPositionClient::calibrate(int numRobots,float fieldLength,float fieldWidth,float camHeight,float robotDiameter,float robotHeight)
 {
 	if (calibrated == true){
-		//poslat naky mrdky wajkonu 
+		char buffer[1000];
+		sprintf(buffer,"Calibrate %i %.3f %.3f %.3f %.3f %.3f \n",numRobots,fieldLength,fieldWidth,camHeight,robotDiameter,robotHeight);
+		if (send(mySocket,(void*)buffer,strlen(buffer),MSG_NOSIGNAL) != (int)strlen(buffer)) fprintf(stderr,"Network error - could not send calibrate command\n");
 		calibrated = false;
 	}
 }
@@ -58,7 +62,6 @@ int CPositionClient::checkForData()
 	int id = 0;
 	int numBytes = 0;
 	ioctl(mySocket,FIONREAD,&numBytes);
-	//printf("NumBytes %i\n",numBytes);
 	if (numBytes > 0){
 		char data[numBytes];
 		memset(data,0,numBytes);
@@ -78,17 +81,14 @@ int CPositionClient::checkForData()
 						tArray[id] = timer.getTime()/1000000.0;
 					}
 				}
-				if (strncmp(token,"Params",6)==0) sscanf(token,"Params %i %f \n",&numSearched,&robotDiameter);
-				if (strncmp(token,"Detected",6)==0) sscanf(token,"Detected %i \n",&numDetected);
+				if (strncmp(token,"Detected",6)==0) sscanf(token,"Detected %i %i\n",&numDetected,&numSearched);
 				if (strncmp(token,"Calibrated",11)==0) calibrated = true;
 				token = strtok(NULL, "\n");
 			}
 		}
 	}
-	//  if ((unsigned int)lengthReceived == len*sizeof(int)) result = 0;
 	return numBytes;
 }
-
 
 float CPositionClient::getX(int i)
 {

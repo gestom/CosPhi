@@ -7,10 +7,10 @@
 #include <CTimer.h>
 #include <math.h>
 #include <CPheroField.h>
-//#define THICK_CROSS
 
 /**
 @author Tom Krajnik
+@about a simple class to create bitmap images from the pheromones
 */
 class CRawImage
 {
@@ -19,19 +19,21 @@ public:
   CRawImage(int wi,int he);
   CRawImage(unsigned char *datai,int wi,int he);
   ~CRawImage();
+
+  /*combine pheromones into a grayscale image according to their influence*/
+  void combinePheromones(CPheroField *p[],int numPheromones,int color);
+
   void saveBmp(const char* name);
   void saveBmp();
   bool loadBmp(const char* name);
   void swap();
-  void generate(CPheroField *pA,CPheroField *pB,CPheroField *pC,int c);
+
 
   void plotLine(int x,int y);
   void plotCenter();
 
   int  getSaveNumber();
 
-  double getOverallBrightness(bool upperHalf);
-	  
   int width;
   int height;
   int palette;

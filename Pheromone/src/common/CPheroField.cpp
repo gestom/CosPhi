@@ -1,8 +1,10 @@
 #include "CPheroField.h"
 
-CPheroField::CPheroField(int wi,int he)
+CPheroField::CPheroField(int wi,int he,float evapor,float diffuse,float influ)
 {
-
+	evaporation = evapor;
+	diffusion = diffuse;
+	influence = influ;
 	lastX = (int*)calloc(MAX_ID,sizeof(float));
 	lastY = (int*)calloc(MAX_ID,sizeof(float));
 	width =  wi;
@@ -100,35 +102,14 @@ void CPheroField::add(int x, int y,int id,int num,int radius)
 	lastY[id] = y;
 }
 
-void CPheroField::remove(int x, int y,int lx,int ly,int num)
-{
-	int pos = 0;
-	int iix,iiy;
-	float an = atan2(y-ly,x-lx);
-	float distance = sqrt((x-lx)*(x-lx)+(y-ly)*(y-ly)); 
-	for (float r=25;r<35+distance;r+=0.1)
-	{
-		for (float a=an-M_PI/2;a<an+M_PI/2;a+=0.01)
-		{
-			iix = x + r*cos(a);
-			iiy = y + r*sin(a);
-			if (iix>= 0 && iix < width && iiy >=0 && iiy < height)
-			{
-				pos = (iix+iiy*width);
-				data[pos] = 0;//data[pos]*0.999;
-			}
-		}
-	}
-}
-
-void CPheroField::recompute(float decay,float diffuse)
+void CPheroField::recompute()
 {
 	float timex = timer.getTime();
-	decay = pow(2,-timex/1000000.0/decay);
+	float decay = pow(2,-timex/1000000.0/evaporation);
 	int diffV,diffH;
 	for (int i = 0;i<size;i++) data[i]=data[i]*decay;
-	if (diffuse > 0.0){
-		diffuse = pow(2,-timex/1000000.0/diffuse);
+	if (diffusion > 0.0){
+		float diffuse = pow(2,-timex/1000000.0/diffusion);
 		for (int i = width+1;i<size;i++){
 			if (i%width == 0) i++;
 			diffH = (data[i-1] - data[i])/2;

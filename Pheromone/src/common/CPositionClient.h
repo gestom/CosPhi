@@ -16,7 +16,6 @@
 #include "CDump.h" 
 #include "CTimer.h" 
 
-
 /**
 @author Tom Krajnik
 */
@@ -27,7 +26,7 @@ public:
   ~CPositionClient();
 
   int init(const char *ip,const char* port);
-  void calibrate(float fieldLength,float fieldWidth,float camHeight,float robotHeight);
+  void calibrate(int numRobots,float fieldLength,float fieldWidth,float camHeight,float robotDiameter,float robotHeight);
 
   int checkForData();
   float getX(int i);

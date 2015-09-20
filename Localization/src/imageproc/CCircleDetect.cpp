@@ -15,7 +15,6 @@ CCircleDetect::CCircleDetect(int wi,int he,int idi)
 	ID = idi;
 	numberIDs =0;
 	enableCorrections = false;
-	calibMode = false;
 	lastTrackOK = false;
 	debug = 0; 
 	draw = false; 
@@ -426,11 +425,6 @@ SSegment CCircleDetect::findSegment(CRawImage* image, SSegment init)
 									outer.valid = inner.valid = true;
 									threshold = (outer.mean+inner.mean)/2;
 									if (track) ii = start -1;
-									/*if ((outer.ID >= 0 && calibMode == false) || (calibMode && ID == outer.ID)){
-										outer.valid = inner.valid = true;
-										threshold = (outer.mean+inner.mean)/2;
-										if (track) ii = start -1;
-									}*/
 								}else{
 									if (track && init.valid){
 										ii = start -1;
@@ -481,12 +475,9 @@ SSegment CCircleDetect::findSegment(CRawImage* image, SSegment init)
 	if (outer.valid){
 		if (numSegments == 2 ){
 			lastTrackOK = true;
+			localSearch = false;
 		} else {
 			lastTrackOK = false;
-			if (calibMode){
-				if (ID == 0) clearCalibMask();
-				addCalibMask();
-			}
 			if (localSearch) outer.valid = false;
 		}
 	}

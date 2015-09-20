@@ -54,27 +54,24 @@ CRawImage::CRawImage(unsigned char *datai,int wi,int he)
 	numSaved = 0;
 }
 
-void CRawImage::generate(CPheroField *pA,CPheroField *pB,CPheroField *pC,int color)
+void CRawImage::combinePheromones(CPheroField *p[],int number,int color)
 {
-	float *pheA = pA->data;
-	float *pheB = pB->data;
-	float *pheC = pC->data;
-	float p;
+	float v;
 	if (color > 0){
 		for (int i = 0;i<size;i+=3)
-		{
-			p=fmax(pheB[i/3],pheA[i/3]);
-			p=p-2*pheC[i/3];
-			data[i+color%3]=fmax(fmin(p,255),1);
+		{	
+			v = 0;
+			for (int j = 0;j<number;j++) v+=p[j]->data[i/3]*p[j]->influence;
+			data[i+color%3]=fmax(fmin(v,255),1);
 			data[i+(color+1)%3]=0;
 			data[i+(color+2)%3]=0;
 		}
 	}else{
 		for (int i = 0;i<size;i+=3)
 		{
-			p=fmax(pheB[i/3],pheA[i/3]);
-			p=p-2*pheC[i/3];
-			data[i+1]=data[i+2]=data[i]=fmax(fmin(p,255),1);
+			v = 0;
+			for (int j = 0;j<number;j++) v+=p[j]->data[i/3]*p[j]->influence;
+			data[i+1]=data[i+2]=data[i]=fmax(fmin(v,255),1);
 		}
 	}
 }
@@ -194,31 +191,3 @@ void CRawImage::plotLine(int x,int y) {
 		data[bidx+2] = 0;
 	}
 }
-
-
-
-/** pocita jas obrazku:
-  *  upperHalf == true, pocita se jen z horni poloviny obrazku
-  *  upperHalf == false, pocita jen ze spodni poloviny obrazku
-  */
-double CRawImage::getOverallBrightness(bool upperHalf) {
-	int step = 5;
-	int sum,num,satMax,satMin,pos;
-	sum=num=satMax=satMin=0;
-	int limit = 0;
-	if (upperHalf) limit = 0; else limit=height/2;
-	for (int i = limit;i<height/2+limit;i+=step){
-		for (int j = 0;j<width;j+=step){
-			pos = (i*width+j)*bpp;
-			if (data[pos] >= 250 && data[pos+1] >=250 && data[pos+2] >= 250) satMax++;  
-			if (data[pos] <= 25 && data[pos+1] <=25 && data[pos+2] <= 25) satMin++;
-			sum+=data[pos] + data[pos+1] + data[pos+2];
-			num++;
-		}
-	}
-	return (sum/num/bpp) + (satMax-satMin)*100.0/num;
-}
-
-
-
-

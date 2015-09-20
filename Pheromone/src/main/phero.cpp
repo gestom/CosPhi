@@ -11,10 +11,12 @@
 #define MAX_ROBOTS 100
 
 /*these values need to be adjusted by the user during the system set-up*/
-float arenaLength   = 0.92;	//screen width (or arena length) in meters
-float arenaWidth    = 0.52;	//screen height (or arena width) in meters
-float cameraHeight  = 1.0;	//camera height above the screen
-float robotHeight   = 0.04;	//height of the pattern from robot's base
+float arenaLength     = 0.92;	//screen width (or arena length) in meters
+float arenaWidth      = 0.52;	//screen height (or arena width) in meters
+float cameraHeight    = 1.0;	//camera height above the screen
+float robotHeight     = 0.02;	//height of the pattern from robot's base
+float robotDiameter   = 0.04;	//robot diameter
+char whyconIP[] = "localhost";	//IP of a machine that runs the localization
 
 /*logging and experiment control*/
 CTimer globalTimer;		//used to terminate the experiment after a given time
@@ -27,7 +29,7 @@ float initY[MAX_ROBOTS];	//initial positions
 float initA[MAX_ROBOTS];	//initial orientations 
 int initBorder = 100;		//defines minimal distance of the randomly-generated initial positions from the arena boundary
 int initBrightness = 255;	//brightness of the patterns at randomly-generated positions
-int initRadius = 50;		//radius of the randomly-generated positions
+int initRadius = 50;		//radius of the randomly-generated positions and robots
 int pheroStrength = 50;		//default pheromone strength released by the leader robot
 
 /*variables read from the command line*/
@@ -52,7 +54,6 @@ bool leftMousePressed = false;
 bool rightMousePressed = false;
 int  imageWidth= 1920;			//autodetected later on
 int  imageHeight = 1080;		//autodetected later on
-float robotDiameter   = 0.04;		//obtained from the localization system
 
 /*CTRL-C handler*/
 void ctrl_c_handler(int a)
@@ -178,7 +179,6 @@ void logRobotPositions()
 	}
 }
 
-
 int main(int argc,char* argv[])
 {
 	//register ctrl+c handler
@@ -186,23 +186,29 @@ int main(int argc,char* argv[])
 	//initialize the logging system
 	if (initializeLogging()==false) return -1;
 
-	//read parameters
-	evaporation = atof(argv[2]);
-	numBots = atoi(argv[1]);
-
 	//auto-detect screen resolution and initialize the GUI
 	gui = new CGui(&imageWidth,&imageHeight);
 	image = new CRawImage(imageWidth,imageHeight);
 
+	//read number of robots and pheromone half-life from the command line
+	numBots = atoi(argv[1]);
+	float evaporation = atof(argv[2]);
+
+	float diffusion = 0;
+	float influence = 1.0;
 	/*initialize the pheromone fields
 	* pheromone field 0 simulates a longer-decay pheromone that the other robots follow
 	* pheromone field 1 is released by the leader if it gets too close to arena boundaries causing the leader to avoid them - this pheromone decays quickly
-	* pheromone field 2 is released by the leader to supress pheromone field 0 (this avoids the leader to detect pheromone 0 by its sensors)*/
-	for (int i = 0;i<3;i++) pherofield[i] = new CPheroField(imageWidth,imageHeight);
+	* pheromone field 2 is released by the leader to supress pheromone field 0 (this avoids the leader to detect pheromone 0 by its sensors)
+	*evaporation defines pheromone's half-life, diffusion its spreading over time and strength determines how the pheromone influences the LCD-displayed image
+	for details, see the chapter 2 of paper Arvin, Krajnik, Turgut, Yue: "CosPhi: Artificial Pheromone System for Robotic Swarms Research", IROS 2015*/
+	pherofield[0] = new CPheroField(imageWidth,imageHeight,evaporation,diffusion,influence);
+	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,1);
+	pherofield[2] = new CPheroField(imageWidth,imageHeight,0.1,0,-2);
 
 	/*connect to the localization system*/
 	client = new CPositionClient(numBots,robotDiameter);
-	client->init("localhost","6666");
+	client->init(whyconIP,"6666");
 	image->getSaveNumber();
 
 	float nearest = 0.10;
@@ -235,20 +241,34 @@ int main(int argc,char* argv[])
 		}
 
 		//calculate the pheromone decay 
-		pherofield[0]->recompute(evaporation,0.0);	//main pheromone half-life (user-settable, usually long)
-		pherofield[1]->recompute(0.1,0.0);		//collision avoidance pheromone with quick decay
-		pherofield[2]->recompute(0.1,0.0);		//suppression pheromone with quick decay
+		pherofield[0]->recompute();	//main pheromone half-life (user-settable, usually long)
+		pherofield[1]->recompute();		//collision avoidance pheromone with quick decay
+		pherofield[2]->recompute();		//suppression pheromone with quick decay
 
 		//convert the pheromone field to grayscale image
-		image->generate(pherofield[0],pherofield[1],pherofield[2],0);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc. 
+		image->combinePheromones(pherofield,3,0);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc. 
 		gui->drawImage(image);
-		//if (calibration) image->displayCalibration();
-		for (int i = 0;i<numBots && placement;i++) gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius);
 
-		if (calibration) gui->displayCalibrationInfo(cameraHeight,numBots,3);
-		if (client->checkForData() > 0){
-			calibration = false;
+		//experiment preparation phase 2: draw initial and real robot positions
+		for (int i = 0;i<numBots && placement;i++)
+		{
+			 gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius);
+			 if (client->exists(i))  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0);
 		}
+	
+		//experiment preparation phase 1: draw calibration, contact WhyCon to calibrate and draw initial robot positions
+		if (calibration){
+			 gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected);
+			 client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight);
+		}else if (placement){
+			 gui->displayPlacementInfo(client->numSearched,client->numDetected);
+		}
+
+		//get the latest data from localization system and check if the calibration finished
+		client->checkForData();
+		calibration = client->calibrated==false;
+
+		//update GUI etc
 		gui->update();
 		processEvents();
 	}
@@ -260,6 +280,7 @@ int main(int argc,char* argv[])
 		printf("EXPERIMENT FINISHED SUCESSFULLY, results saved to %s.\n",logFileName);
 	}
 	for (int i = 0;i<3;i++) delete pherofield[i];
+	delete client;
 	delete image;
 	delete gui;
 	return 0;
