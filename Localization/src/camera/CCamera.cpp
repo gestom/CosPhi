@@ -280,7 +280,9 @@ int CCamera::getDeviceBrightness() {
 
 int CCamera::getDeviceExposition() {
 	int rawValue = v4l2GetControl(videoIn,V4L2_CID_EXPOSURE_ABSOLUTE);
-	int value = (int)log2(rawValue);
+	int value = rawValue;
+	//sometimes, the cameras have the value in powers of 2, if this is the case, uncomment the following line
+	value = (int)log2(rawValue);
 	fprintf(stdout,"Exposition is set to %i-%i\n",value,rawValue);
 	return value;
 }
@@ -290,7 +292,8 @@ int CCamera::setDeviceExposition(int value) {
 		autoexposure = false;
 		setDeviceAutoExposure(1);
 	}
-	value = exp2(value);
+	//sometimes, the cameras have the value in powers of 2, if this is the case, uncomment the following line
+	//value = exp2(value);
 	return v4l2SetControl(videoIn,V4L2_CID_EXPOSURE_ABSOLUTE,value);
 }
 
