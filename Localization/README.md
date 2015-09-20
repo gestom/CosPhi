@@ -9,8 +9,7 @@ Moreover, the SwarmCon is especially intended for external localization of groun
 Thus, unlike WhyCon, SwarmCon can distinguish between individual robots and calculate their heading.
 
 WhyCon was first presented on ICRA2013 conference and later in the JINT journal.
-If you use this software for your publication it is mandatory to cite WhyCon using the references in the provided cite.bib file. 
-Full URL to this file is: https://raw.github.com/lrse/whycon/master/cite.bib.
+If you use this software for your publication, please cite WhyCon using the one of the references provided in this [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/WhyCon.bib)] file.
 
 <h3>Setting up</h3>
 
