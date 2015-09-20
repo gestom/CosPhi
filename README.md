@@ -17,15 +17,17 @@ The pheromones are released according to the robots' positions provided by the o
 System configuration and Colias-Φ micro robot. Click the picture to see a video of the CosΦ system operation.
 
 In contrast to other systems, CosΦ can simulate several pheromones while precisely controlling their evaporation, diffusion and release rate.
-Along with the precise localization system, CosΦ allows for an affordable way to perform <b>repeatable experiments</b> in swarm robotics.
-So far, the system was used to study cue-based aggregation [[1](#references)] and leader-follower interactions [[2,3](#references)].
+Along with the precise localization system [[2](#references)], CosΦ allows for an affordable way to perform <b>repeatable experiments</b> in swarm robotics.
+So far, the system was used to study cue-based aggregation [[1](#references)] and leader-follower interactions [[3,4](#references)].
   
 ###Can I use it ?
 
 CosΦ is fully open-source and free.
-The CosΦ system is composed of two software modules: the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) module, which is a derivative of the [WhyCon](http://purl.org/robotics/whycon) system, and the [Pheromone simulator](https://github.com/gestom/CosPhi/tree/master/Pheromone), which simulates the individual pheromones and displays them on the horizontal LCD. Note, that the full version of the software will be released after its presentation at the IROS 2015 conference.
+The CosΦ system is composed of two software modules: the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) module, which is a derivative of the [WhyCon](http://purl.org/robotics/whycon) system[[2](#references)], and the [Pheromone simulator](https://github.com/gestom/CosPhi/tree/master/Pheromone), which simulates the individual pheromones and displays them on the horizontal LCD. Note, that the full version of the software will be released after its presentation at the IROS 2015 conference.
+If you use this software for your work, please cite the two papers that describe these software modules http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/cite.bib.
 
 ###References
-1. F. Arvin, T. Krajník, A. E. Turgut, and S. Yue: <b>[COSΦ: Artificial Pheromone System for Robotic Swarms Research.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.pdf)</b>In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015.
-2. T. Krajnik, F. Arvin, A. E. Turgut, S. Yue, and T. Duckett: <b>[COSΦ: Vision-based Artificial Pheromone System for Robotic Swarms.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.pdf)</b> In: International Conference on Robotics and Automation. Late breaking poster session. 2015. 
-3. F. Arvin, A. Attar, A. E. Turgut, and S. Yue: <b>Power-law distribution of long-term experimental data in swarm robotics.</b>In Advances in Swarm and Computational Intelligence. Springer, 2015.
+1. F. Arvin, T. Krajník, A. E. Turgut, and S. Yue: <b>[COSΦ: Artificial Pheromone System for Robotic Swarms Research.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.pdf)</b>In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015. [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.bib)
+2. T. Krajník, M. Nitsche et al.: <b>[A Practical Multirobot Localization System.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.pdf)</b>Journal of Intelligent and Robotic Systems (JINT), 2014. [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.bib)
+3. T. Krajnik, F. Arvin, A. E. Turgut, S. Yue, and T. Duckett: <b>[COSΦ: Vision-based Artificial Pheromone System for Robotic Swarms.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.pdf)</b> In: International Conference on Robotics and Automation. Late breaking poster session. 2015. [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.bib)
+4. F. Arvin, A. Attar, A. E. Turgut, and S. Yue: <b>Power-law distribution of long-term experimental data in swarm robotics.</b>In Advances in Swarm and Computational Intelligence. Springer, 2015.
