@@ -27,7 +27,8 @@ The CosΦ system is composed of two software modules: the [SwarmCon](https://git
 If you use this software for your work, please cite the two papers that describe these software modules - here is their [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/cite.bib).
 
 ###How can I use it ?
-First, set up the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) localization system.
+First, get the software from this GitHub repository. 
+After that, set up the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) localization system.
 Then, set up the [Pheromone](https://github.com/gestom/CosPhi/tree/master/Pheromone) simulator.
 
 ###References

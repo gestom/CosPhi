@@ -8,7 +8,7 @@ While the core of the SwarmCon system is the same as the WhyCon one, it was desi
 Moreover, the SwarmCon is especially intended for external localization of ground-robot swarms.
 Thus, unlike WhyCon, SwarmCon can distinguish between individual robots and calculate their heading.
 
-WhyCon was first presented on ICRA2013 conference and later in the JINT journal.
+WhyCon was first presented on International Conference on Advanced Robotics 2013 [[1](#references)], later in the Journal of Intelligent and Robotics Systems [[2](#references)] and finally at the Workshop on Open Source Aerial Robotics during the International Conference on Intelligent Robotic Systems, 2015 [[3](#references)].
 If you use this software for your publication, please cite WhyCon using the one of the references provided in this [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/WhyCon.bib)] file.
 
 <h3>Setting up</h3>
@@ -16,18 +16,19 @@ If you use this software for your publication, please cite WhyCon using the one 
 <h4>Quick setup for initial testing</h4>
 <ol>
 <li>Install the <a href="#libraries">SDL libraries</a>.</li>
-<li>Download the software from GitHub and go to the <b>src</b> directory.</li>
+<li>Download the software from GitHub and go to the <b>Localization/src</b> directory.</li>
 <li>Adjust the camera resolution in the <b>main/swarmcon.cpp</b>.</li>
 <li>Compile the software - just type <b>make</b>.</li>
-<li>Download, resize and print one circular <a href="etc/test.pdf">pattern</a>.</li>
-<li>Try a test run - you need to run the binary from the <b>bin</b> directory. Type <b>./swarmcon /dev/videoX 1</b>, where X is the number of the camera and 1 tells the system to track one pattern.</li> 
+<li>Download, resize and print one circular <a href="etc/test.pdf">pattern</a> - you have the pattern also in the <b>Localization/etc/test.pdf</b> file.</li>
+<li>Try a test run - you need to run the binary from the <b>src</b> directory. Type <b>../bin/swarmcon /dev/videoX 1</b>, where X is the number of the camera and 1 tells the system to track one pattern.</li> 
 <li>You should see the image with some numbers below the circle. Pressing <b>D</b> shows the segmentation result.</li>
+<li>At this point, you can also change camera brightness, exposure, contrast by pressing <i>(SHIFT) b, e, c</i> respectively.</li>
 <li>Open your browser to view localhost:6666. You should see the circle position.</li>
 </ol>
 
 <h4>Advanced setup for more robots in a rectangular field</h4>
 <ol>
-<li>Calibrate your camera using the MATLAB (or Octave) calibration toolbox and put the <b>Calib_result.m</b> in the <b>etc</b> directory. (this step is not necessary, but it improves localization precision)</li>
+<li>Calibrate your camera using the MATLAB (or Octave) calibration toolbox and put the <b>Calib_Results.m</b> in the <b>etc</b> directory. (this step is not necessary, but it improves localization precision)</li>
 <li>Go to the <b>etc</b> directory and call <b>create.sh N M</b> to generate patterns for <b>NxM</b> robots.</li>
 <li>Print the generated file <b>pattern_n_m.pdf</b>, put the eliptical markers on your robots and place the remaining four circular markers at the corners of their operation space.</li>
 <li>Modify the dimensions of the operation space in the <b>main/swarmcon.cpp</b>.</li> 
@@ -61,10 +62,14 @@ If you use this software for your publication, please cite WhyCon using the one 
 All the following libraries are probably in your packages.
 
 <ul>
-<li><b>libSDL-1.2</b> for graphical user interface.</li>
-<li><b>libSDL_ttf-2.0</b> to print stuff in the GUI</li>
+<li><b>libsdl1.2-dev</b> for graphical user interface.</li>
+<li><b>libsdl-ttf2.0-dev</b> to print stuff in the GUI</li>
 <li><b>libncurses5-dev</b> to print stuff on the terminal</li>
 </ul>
 
+###References
+1. T. Krajník, M. Nitsche et al.: <b>[.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2013_icar_whycon.pdf)</b>International Conference on Advanced Robotics, 2013 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2013_icar_whycon.bib)].
+2. T. Krajník, M. Nitsche et al.: <b>[A Practical Multirobot Localization System.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.pdf)</b>Journal of Intelligent and Robotic Systems (JINT), 2014 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.bib)].
+3. M. Nitsche, T. Krajník et al.: <b>[A Practical Multirobot Localization System.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.pdf)</b>Journal of Intelligent and Robotic Systems (JINT), 2014 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.bib)].
 </body>
 </html>
