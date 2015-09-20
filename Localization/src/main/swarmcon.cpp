@@ -47,6 +47,7 @@ bool saveVideo = true;
 int numFound = 0;
 int numStatic = 0;
 ETransformType transformType = TRANSFORM_2D;
+FILE *robotPositionLog = NULL;	//file to log robot positions
 
 bool autocalibrate = false;
 bool autotest = false;
@@ -180,6 +181,26 @@ void autocalibration()
 	}
 }
 
+/*initialize logging*/
+bool initializeLogging()
+{
+	//initialize logging system
+	dump = new CDump(NULL,256,1000000);
+
+	char logFileName[1000];
+	char timeStr[100];
+	time_t timeNow;
+	time(&timeNow);
+	strftime(timeStr, sizeof(timeStr), "%Y-%m-%d_%H-%M-%S",localtime(&timeNow));
+	sprintf(logFileName,"output/SwarmCon_%s.txt",timeStr);
+	robotPositionLog = fopen(logFileName,"w");
+	if (robotPositionLog == NULL)
+	{
+		fprintf(stderr,"Cannot write to log file %s. Does the \"output\" directory exist?\n",logFileName);
+		return false;
+	}
+	return true;
+}
 /*process events coming from GUI*/
 void processKeys()
 {
@@ -260,7 +281,7 @@ void processKeys()
 int main(int argc,char* argv[])
 {
 	//initialize logging system, camera and network connection 
-	dump = new CDump(NULL,256,1000000);
+	initializeLogging();
 	if (argc < 2) {
 		fprintf(stderr,"usage: %s imageSource num_robots\ne.g. %s /dev/video0 1\n",argv[0],argv[0]);
 		return 0;
@@ -382,12 +403,20 @@ int main(int argc,char* argv[])
 		if (camera->cameraType == CT_WEBCAM){
 			//for real camera, continue with capturing of another frame even if not all robots have been found
 			moveOne = moveVal;
+			for (int i = 0;i<numBots;i++){
+			       	//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+			       	if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+			}
+			if (moveVal > 0) frameID++;
 		}else{
 			//for postprocessing, try to find all robots before loading next frame
 			if (numFound ==  numBots)
 			{
 				//gui->saveScreen(runs++);
-				for (int i = 0;i<numBots;i++) printf("Frame %i Object %i %i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+				for (int i = 0;i<numBots;i++){
+				       		//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+						if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+				}
 				moveOne = moveVal; 
 				if (moveVal > 0) frameID++;
 			}else{
@@ -400,6 +429,7 @@ int main(int argc,char* argv[])
 		if (useGui) processKeys();
 		if (displayTime) printf("Printing results time: %i ms.\n",globalTimer.getTime());
 	}
+	if (robotPositionLog != NULL) fclose(robotPositionLog);
 	delete server;
 	runs--;
 	delete image;
