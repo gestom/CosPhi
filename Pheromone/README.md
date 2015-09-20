@@ -22,7 +22,7 @@ Full URL to this file is: https://raw.github.com/lrse/whycon/master/cite.bib.
 <li>After updating the parameters, you can compile the software - just by typing <b>make</b>.</li>
 </ol>
 
-[!Fig.1: Pheromone System configuration and Colias-Φ micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)<br/>
+![Fig.1: Pheromone System configuration and Colias-Φ micro robot.](https://raw.githubusercontent.com/wiki/gestom/CosPhi/images/arena.png)<br/>
 
 <h3>Running up</h3>
 <ol>
