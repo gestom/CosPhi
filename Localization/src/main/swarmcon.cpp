@@ -19,16 +19,16 @@
 //-----These parameters need to be adjusted by the user -----------------------
 
 //Adjust camera resolution here
-int  imageWidth= 1920;
-int  imageHeight = 1080;
+int  imageWidth= 960;
+int  imageHeight = 720;
 
 //Adjust the black circle diameter [m] 
 float circleDiameter = 0.03;
 
 /*Adjust the X and Y dimensions of the coordinate system 
 in case you are using the artificial pheromone system, adjust the dimensions in phero.cpp*/
-float fieldLength = 1.00;		
-float fieldWidth = 1.00;
+float fieldLength = 1.13-0.04;		
+float fieldWidth = 0.95-0.04;
 //----------------------------------------------------------------------------
 
 /*-----These params are provided by the artificial pheromone system ----------------------
@@ -120,7 +120,7 @@ void manualcalibration()
 				trans->calibrate3D(calib,fieldLength,fieldWidth);
 				calibNum++;
 				numBots = wasBots;
-				trans->saveCalibration("default.cal");
+				trans->saveCalibration("../etc/default.cal");
 				trans->transformType = transformType;
 				detectorArray[0]->localSearch = false;
 			}
@@ -173,7 +173,7 @@ void autocalibration()
 			trans->calibrate4D(calib,fieldLength,fieldWidth);
 			calibNum++;
 			numBots = wasBots;
-			trans->saveCalibration("default.cal");
+			trans->saveCalibration("../etc/default.cal");
 			trans->transformType = transformType;
 			autocalibrate = false;
 			server->finishCalibration();
@@ -297,6 +297,7 @@ int main(int argc,char* argv[])
 	if (argc > 2) useGui=true;
 	if (argc > 3 && strcmp(argv[3],"nogui")==0) useGui=false;
 	camera->init(cameraDevice,&imageWidth,&imageHeight,saveVideo);
+	camera->loadConfig("../etc/camera.cfg");
 
 	//determine gui size so that it fits the screen
 	while (imageHeight/guiScale > screenHeight || imageHeight/guiScale > screenWidth) guiScale = guiScale*2;
@@ -323,8 +324,11 @@ int main(int argc,char* argv[])
 	int frameID =0;
 	while (stop == false)
 	{
-		//if (camera->renewImage(image,moveOne-->0)==-1)stop = true;
-		camera->renewImage(image,moveOne-->0);
+		if (useGui){
+			camera->renewImage(image,moveOne-->0);
+		}else{
+			if (camera->renewImage(image,moveOne-->0)==-1)stop = true;
+		}
 		numFound = numStatic = 0;
 		timer.reset();
 
@@ -435,6 +439,7 @@ int main(int argc,char* argv[])
 	delete image;
 	if (useGui) delete gui;
 	for (int i = 0;i<MAX_PATTERNS;i++) delete detectorArray[i];
+	camera->saveConfig("../etc/camera.cfg");
 	delete camera;
 	delete trans;
 	return 0;

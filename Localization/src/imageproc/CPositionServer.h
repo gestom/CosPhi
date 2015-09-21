@@ -15,6 +15,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 
@@ -53,7 +54,7 @@ class CPositionServer{
 		STrackedObject object[NUM_OBJECTS];
 		sem_t dataSem,connectSem;
 		bool debug;
-		int numObjects,numFound;
+		int numObjects,numFound,positionUpdate;
 		pthread_t* thread;
 
 		/*specific for communication with the pheromone server*/

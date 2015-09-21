@@ -84,7 +84,9 @@ int CPositionClient::checkForData()
 					}
 				}
 				else if (strncmp(token,"Detected",6)==0){
-				       	sscanf(token,"Detected %i %i \n",&numDetected,&numSearched);
+					int updates = 0;
+				       	sscanf(token,"Detected %i %i %i \n",&numDetected,&numSearched,&updates);
+				       	//printf("Detected %i %i %i \n",numDetected,numSearched,updates);
 					robotOrder=0;
 				}
 				else if (strncmp(token,"Calibrated",11)==0) calibrated = true;

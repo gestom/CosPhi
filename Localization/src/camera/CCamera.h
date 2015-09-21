@@ -68,6 +68,8 @@ class CCamera
 	int fileNum;		
 	ECameraType cameraType;
 
+	int saveConfig(const char* filename);
+	int loadConfig(const char* filename);
 	private:
 	int getDeviceGain();
 	int getDeviceContrast();

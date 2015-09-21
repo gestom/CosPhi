@@ -93,7 +93,7 @@ CTransformation::CTransformation(int widthi,int heighti,float diam,bool fullUnba
 			}
 		}
 	}
-	loadCalibration("default.cal");
+	loadCalibration("../etc/default.cal");
 }
 
 CTransformation::~CTransformation()

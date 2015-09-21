@@ -34,6 +34,8 @@ public:
   /*displays the outline of the detected robot - used to verify if the WhyCon system works correctly*/
   void displayRobot(int x, int y,float phi,int id,int radius);
 
+  /*displays a robot pattern at a given place - used to determine overall system lag*/
+  void displayPattern(int x, int y, int radius);
 
   /*GUI update - causes the GUI to be drawn on the screen*/
   void update();

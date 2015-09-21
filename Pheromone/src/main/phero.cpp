@@ -25,9 +25,9 @@ float cameraHeight    = 0.85;	//camera height above the screen
 float robotHeight     = 0.025;	//height of the pattern from robot's base
 float robotDiameter   = 0.04;	//robot diameter
 char whyconIP[] = "localhost";	//IP of a machine that runs the localization
-bool dualMonitor      = false;	//do you want the pheromone system to be displayed on a secondary screen?
-int  imageWidth= 1920;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
-int  imageHeight = 1080;	//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+bool dualMonitor      = true;	//do you want the pheromone system to be displayed on a secondary screen?
+int  imageWidth= 1280;//1920;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+int  imageHeight = 720;//1080;	//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
 /*---------The previous values need to be adjusted by the user during the system set-up -------------*/
 
 
@@ -233,12 +233,22 @@ int main(int argc,char* argv[])
 	performanceTimer.start();
 	while (stop == false){
 		//get the latest data from localization system and check if the calibration finished
-		client->checkForData();
 		stop = (globalTimer.getTime()/1000000>experimentTime);
+	
+
+		/*PHEROMONE DECAY*/ 
+		pherofield[0]->recompute();	//main pheromone half-life (user-settable, usually long)
+		pherofield[1]->recompute();		//collision avoidance pheromone with quick decay
+		pherofield[2]->recompute();		//suppression pheromone with quick decay
+
+		client->checkForData();
+
+		/*PHEROMONE INJECTION*/
 		if (calibration==false && placement==false)
 		{
 			int leader = 0;
-			/*cause the leading robot to release the pheromone 0 that other robots follow*/
+
+			/*PHEROMONE 1 - released by the leading robot*/
 			for (int i = 0;i<numBots;i++)
 			{
 				if (client->getID(i) == 0){
@@ -264,28 +274,36 @@ int main(int argc,char* argv[])
 			logRobotPositions();
 		}
 
-		//calculate the pheromone decay 
-		pherofield[0]->recompute();	//main pheromone half-life (user-settable, usually long)
-		pherofield[1]->recompute();		//collision avoidance pheromone with quick decay
-		pherofield[2]->recompute();		//suppression pheromone with quick decay
-
 		//convert the pheromone field to grayscale image
 		image->combinePheromones(pherofield,3,0);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc. 
 		gui->drawImage(image);
-
+		
+	
 		//experiment preparation phase 2: draw initial and real robot positions
 		initRadius = robotDiameter/arenaLength*imageWidth/2;	//calculate robot radius in pixels, so that it matches the real robot dimensions
 		for (int i = 0;i<numBots && placement;i++)
 		{
 			 gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius+10);
-			 if (client->exists(i))  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
+			 if (client->exists(i) && calibration == false)  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
 		}
 	
+		/*this chunk of code is used to determine lag*/
+		/*float t = globalTimer.getTime()/1000000.0;	
+		for (int i = 0;i<numBots;i++){
+			if (client->exists(i)){
+				gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
+				float dx = fabs(100+50*t-client->getX(i)*imageWidth/arenaLength);
+				float dy = fabs(imageHeight/2-client->getY(i)*imageHeight/arenaWidth);
+				printf("Distance: %.3f Lag: %f \n",sqrt(dx*dx+dy*dy),sqrt(dx*dx+dy*dy)/50);
+			}
+		}
+		gui->displayPattern(100+t*50,imageHeight/2,initRadius);*/
+
+
 		//experiment preparation phase 1: draw calibration, contact WhyCon to calibrate and draw initial robot positions
 		if (calibration){
 			int calibRadius = initRadius/(cameraHeight-robotHeight)*cameraHeight;		//slightly enlarge to compensate for the higher distance from the camera
 			gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected,calibRadius,performanceTimer.getTime()/1000);
-			performanceTimer.reset();
 			client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight);
 			client->checkForData();
 		}else if (placement){
@@ -293,9 +311,12 @@ int main(int argc,char* argv[])
 		}
 		calibration = client->calibrated==false;
 
+
 		//update GUI etc
 		gui->update();
 		processEvents();
+		printf("GUI refresh: %i ms\n",performanceTimer.getTime()/1000);
+		performanceTimer.reset();
 	}
 	fclose(robotPositionLog);
 	if (globalTimer.getTime()/1000000<experimentTime) {

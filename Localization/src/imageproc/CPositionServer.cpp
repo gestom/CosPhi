@@ -12,7 +12,7 @@ CPositionServer::CPositionServer()
 	calibration = false;
 	calibrationFinished = false;
 	cameraHeight=fieldWidth=fieldLength=1.0;
-	robotHeight=robotDiameter=0;
+	positionUpdate=robotHeight=robotDiameter=0;
 	stop = false;
 }
 
@@ -67,6 +67,10 @@ int CPositionServer::init(const char* port)
 		perror("setsockopt");
 		exit(1);
 	}
+	if (setsockopt(serverSocket, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes)) == -1) {
+		perror("setsockopt");
+		exit(1);
+	}
 	if (bind(serverSocket,( struct sockaddr *)&mySocketAddr,sizeof(mySocketAddr)) < 0)
 	{
 		if (debug) fprintf(stderr,"Cannot bind socket.");
@@ -93,11 +97,12 @@ void* serverLoop(void* serv)
 	while (connected && server->stop == false){
 		/*send robot positions*/
 		sem_wait(sem);
-		sprintf(buffer,"Detected %i %i\n",server->numFound,server->numObjects);
+		sprintf(buffer,"Detected %i %i %i \n",server->numFound,server->numObjects,server->positionUpdate);
+		server->positionUpdate = 0;
 		STrackedObject o;
 		for (int i=0;i<server->numObjects;i++){
 			o=server->object[i];
-			sprintf(buffer,"%sRobot %03i %.3f %.3f %.3f\n",buffer,o.ID,o.x,o.y,o.yaw*180/M_PI);
+			sprintf(buffer,"%sRobot %03i %.3f %.3f %.3f \n",buffer,o.ID,o.x,o.y,o.yaw*180/M_PI);
 		}
 		if (server->calibrationFinished)
 		{
@@ -134,7 +139,6 @@ void* serverLoop(void* serv)
 				}
 			}
 		}
-
 		usleep(30000);
 	}
 	shutdown(socket,SHUT_WR);
@@ -172,6 +176,7 @@ int CPositionServer::updatePosition(STrackedObject o,int num)
 	if (num < numObjects && num >= 0){
 		sem_wait(&dataSem);
 		object[num] = o;
+		positionUpdate++;
 		sem_post(&dataSem);
 	}
 	return 0;

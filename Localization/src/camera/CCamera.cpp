@@ -115,7 +115,6 @@ int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
 
 		setDeviceAutoExposure(0);
 		setDeviceWhiteBalanceAuto(1); 
-
 		fprintf(stderr,"Camera gain = %d\n",gain);
 		fprintf(stderr,"Camera exposition = %d\n",exposition);
 		fprintf(stderr,"Camera brightness = %d\n",brightness);
@@ -140,6 +139,33 @@ int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
 	return -1;
 }
 
+int CCamera::loadConfig(const char* filename)
+{
+	FILE* file = fopen(filename,"r");
+	if (file == NULL) return -1;
+	int exp,cntr,gain,brt;
+	fscanf(file,"%i %i %i %i\n",&exp,&cntr,&gain,&brt);	
+	setDeviceExposition(exp); 
+	setDeviceContrast(cntr); 
+	setDeviceGain(gain);
+	setDeviceBrightness(brt);
+        fclose(file);
+	return 0;	
+}
+
+int CCamera::saveConfig(const char* filename)
+{
+	FILE* file = fopen(filename,"w");
+	if (file == NULL) return -1;
+	int exp,cntr,gain,brt;
+	exp = getDeviceExposition(); 
+	cntr = getDeviceContrast(); 
+	gain = getDeviceGain();
+	brt = getDeviceBrightness();
+	fprintf(file,"%i %i %i %i\n",exp,cntr,gain,brt);	
+        fclose(file);	
+	return 0;	
+}
 int CCamera::renewImage(CRawImage* image,bool move)
 {
 	if (cameraType == CT_WEBCAM){
@@ -177,18 +203,21 @@ int CCamera::renewImage(CRawImage* image,bool move)
 	if (cameraType == CT_VIDEOLOADER)
 	{
 		if (readNextFrame){
-			int frame;
-			AVI_read_frame(aviFile,aviBuffer1,&frame);
-			printf("FRAME: %i\n",frame);	
+			int key;
+			int data = AVI_read_frame(aviFile,aviBuffer1,&key);
+			if (data < 0) return -1;
 			if (jpeg_decode(&aviBuffer2, (unsigned char*) aviBuffer1, &width, &height) < 0) {
 				printf("jpeg decode errors\n");
+				return -1;
 			}
 			else	
 			{
 				Pyuv422torgb24(aviBuffer2,image->data,width,height);
+				return 0;
 			}
 		}else{
 			Pyuv422torgb24(aviBuffer2,image->data,width,height);
+			return 0;
 		}
 		if (move) readNextFrame = true; else readNextFrame=false; 
 	}
@@ -282,7 +311,7 @@ int CCamera::getDeviceExposition() {
 	int rawValue = v4l2GetControl(videoIn,V4L2_CID_EXPOSURE_ABSOLUTE);
 	int value = rawValue;
 	//sometimes, the cameras have the value in powers of 2, if this is the case, uncomment the following line
-	value = (int)log2(rawValue);
+	//value = (int)log2(rawValue);
 	fprintf(stdout,"Exposition is set to %i-%i\n",value,rawValue);
 	return value;
 }

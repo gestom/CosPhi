@@ -20,7 +20,7 @@ CGui::CGui(int *wi,int *he,bool dualMonitor)
 	}
 	if (screen == NULL)fprintf(stderr,"Couldn't set SDL video mode: %s\n",SDL_GetError());
 	SDL_WM_SetCaption("CosPhi-Phero","Artificial Pheromone System");
-	smallFont =  TTF_OpenFont("../etc/DejaVuSansCondensed.ttf",24);
+	smallFont =  TTF_OpenFont("../etc/DejaVuSansCondensed.ttf",14);
 	if(!smallFont)printf("Unable to open font: %s\n", TTF_GetError());
 	TTF_SetFontStyle(smallFont, TTF_STYLE_NORMAL);
 }
@@ -89,34 +89,34 @@ void CGui::displayRobot(int x, int y,float phi,int id,int radius)
 
 }
 
+void CGui::displayPattern(int x, int y, int radius)
+{
+	Uint8 *bufp;
+	int iix,iiy;
+	for (int ix = -radius;ix<radius+1;ix++)
+	{
+		iix = ix +x;
+		for (int iy = -radius;iy<radius+1;iy++)
+		{
+			iiy = iy +y;
+			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
+			{
+				bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*3;
+				float dist = sqrt(ix*ix+iy*iy);
+				if ((dist < radius && dist > radius*0.75) || dist < radius * 0.25) bufp[0]=bufp[1]=bufp[2]=255; else bufp[0]=bufp[1]=bufp[2]=0;
+			}
+		}
+	}
+}
+
 void CGui::displayCalibrationInfo(float camHeight,int numBots,int numVisible,int radius,int refreshTime)
 {
 	/*display calibration patterns in the screen corners*/
-	Uint8 *bufp;
-	int iix,iiy;
 	int oX = 0;
 	int oY = 0;
 	int xx[] = {radius+oX,radius+oX,width-radius-oX,width-radius-oX};
 	int yy[] = {radius+oY,height-radius-oY,radius+oY,height-radius-oY};
-	for (int corner = 0;corner<4;corner++)
-	{
-		int x = xx[corner]; 
-		int y = yy[corner]; 
-		for (int ix = -radius;ix<radius+1;ix++)
-		{
-			iix = ix +x;
-			for (int iy = -radius;iy<radius+1;iy++)
-			{
-				iiy = iy +y;
-				if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
-				{
-					bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*3;
-					float dist = sqrt(ix*ix+iy*iy);
-					if ((dist < radius && dist > radius*0.75) || dist < radius * 0.25) bufp[0]=bufp[1]=bufp[2]=255;
-				}
-			}
-		}
-	}
+	for (int corner = 0;corner<4;corner++)displayPattern(xx[corner],yy[corner],radius); 
 
 	/*display calibration info*/
 	char info[1000];
@@ -217,5 +217,6 @@ void CGui::saveScreen(int a)
 
 void CGui::update()
 {
-  SDL_UpdateRect(screen,0,0,0,0);
+//  SDL_UpdateRect(screen,0,0,0,0);
+  SDL_Flip(screen);
 }
