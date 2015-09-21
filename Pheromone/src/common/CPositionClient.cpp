@@ -67,6 +67,7 @@ int CPositionClient::checkForData()
 		memset(data,0,numBytes);
 		int lengthReceived = recv(mySocket,data,numBytes,NETWORK_BLOCK);
 		if (lengthReceived > 0){
+			data[lengthReceived] = 0;
 			char *token;
 			token = strtok(data, "\n");
 			while( token != NULL ) 

@@ -230,6 +230,8 @@ int main(int argc,char* argv[])
 
 	globalTimer.pause();
 	while (stop == false){
+		//get the latest data from localization system and check if the calibration finished
+		client->checkForData();
 		stop = (globalTimer.getTime()/1000000>experimentTime);
 		if (calibration==false && placement==false)
 		{
@@ -282,12 +284,10 @@ int main(int argc,char* argv[])
 			int calibRadius = initRadius/(cameraHeight-robotHeight)*cameraHeight;		//slightly enlarge to compensate for the higher distance from the camera
 			gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected,calibRadius);
 			client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight);
+			client->checkForData();
 		}else if (placement){
 			 gui->displayPlacementInfo(client->numSearched,client->numDetected);
 		}
-
-		//get the latest data from localization system and check if the calibration finished
-		client->checkForData();
 		calibration = client->calibrated==false;
 
 		//update GUI etc
