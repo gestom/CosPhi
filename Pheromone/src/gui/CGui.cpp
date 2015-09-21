@@ -19,7 +19,7 @@ CGui::CGui(int *wi,int *he,bool dualMonitor)
 		screen = SDL_SetVideoMode(width,height,24,SDL_FULLSCREEN); 
 	}
 	if (screen == NULL)fprintf(stderr,"Couldn't set SDL video mode: %s\n",SDL_GetError());
-	SDL_WM_SetCaption("Robot revue vision system","Robot revue vision system");
+	SDL_WM_SetCaption("CosPhi-Phero","Artificial Pheromone System");
 	smallFont =  TTF_OpenFont("../etc/DejaVuSansCondensed.ttf",24);
 	if(!smallFont)printf("Unable to open font: %s\n", TTF_GetError());
 	TTF_SetFontStyle(smallFont, TTF_STYLE_NORMAL);

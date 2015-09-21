@@ -415,8 +415,8 @@ int CTransformation::calibrate2D(STrackedObject *inp,float dimX,float dimY,float
 	STrackedObject o[4];
 	/*specific to the pheromone system - compensates the fact, that the calibration patterns are displayed in a lower position than the robots
 	assumes that the camera above the field centre*/
-	float iX = dimX/cameraHeight*robotHeight*2;
-	float iY = dimY/cameraHeight*robotHeight*2;
+	float iX = dimX/cameraHeight*robotHeight/2;
+	float iY = dimY/cameraHeight*robotHeight/2;
 
 	//float iX = dimX/(inp[0].x+inp[1].x+inp[2].x+inp[3].x)*4*off;
 	//float iY = dimY/(inp[0].x+inp[1].x+inp[2].x+inp[3].x)*4*off;

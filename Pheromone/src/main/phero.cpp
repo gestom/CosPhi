@@ -21,13 +21,13 @@ if you will use this software for your research, please cite the aforementioned 
 /*---------The following values need to be adjusted by the user during the system set-up -------------*/
 float arenaLength     = 0.92;	//screen width (or arena length) in meters
 float arenaWidth      = 0.52;	//screen height (or arena width) in meters
-float cameraHeight    = 1.0;	//camera height above the screen
-float robotHeight     = 0.02;	//height of the pattern from robot's base
+float cameraHeight    = 0.85;	//camera height above the screen
+float robotHeight     = 0.025;	//height of the pattern from robot's base
 float robotDiameter   = 0.04;	//robot diameter
 char whyconIP[] = "localhost";	//IP of a machine that runs the localization
-bool dualMonitor      = true;	//do you want the pheromone system to be displayed on a secondary screen?
-int  imageWidth= 1600;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
-int  imageHeight = 900;	//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+bool dualMonitor      = false;	//do you want the pheromone system to be displayed on a secondary screen?
+int  imageWidth= 1920;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+int  imageHeight = 1080;	//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
 /*---------The previous values need to be adjusted by the user during the system set-up -------------*/
 
 
@@ -144,6 +144,7 @@ void processEvents()
 
 	//generate new random positions to start
 	if (keys[SDLK_p] && lastKeys[SDLK_p] == false) randomPlacement();
+	if (keys[SDLK_c] && lastKeys[SDLK_c] == false) calibration = true;
 
 	//save an image
 	if (keys[SDLK_s] && lastKeys[SDLK_s] == false) image->saveBmp();
@@ -218,7 +219,7 @@ int main(int argc,char* argv[])
 	for details, see the chapter 2 of paper Arvin, Krajnik, Turgut, Yue: "CosPhi: Artificial Pheromone System for Robotic Swarms Research", IROS 2015*/
 	pherofield[0] = new CPheroField(imageWidth,imageHeight,evaporation,diffusion,influence);
 	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,1);
-	pherofield[2] = new CPheroField(imageWidth,imageHeight,0.1,0,-2);
+	pherofield[2] = new CPheroField(imageWidth,imageHeight,0.1,0,-5);
 
 	/*connect to the localization system*/
 	client = new CPositionClient();
@@ -232,22 +233,28 @@ int main(int argc,char* argv[])
 		stop = (globalTimer.getTime()/1000000>experimentTime);
 		if (calibration==false && placement==false)
 		{
+			int leader = 0;
 			/*cause the leading robot to release the pheromone 0 that other robots follow*/
-			for (int i = 0;i<1;i++)pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStrength);
-	
+			for (int i = 0;i<numBots;i++)
+			{
+				if (client->getID(i) == 0){
+				       	pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStrength);
+					leader = i;
+				}
+			}
 			/*cause the leading robot to release pheromone 1 that is used for obstacle avoidance and 2 that temporarily suppresses pheromone 0*/
 			float dist = 0.030;	//distance of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
 			float addPhi = 0;	//angle of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
-			float phi = client->getPhi(0);
+			float phi = client->getPhi(leader);
 		
 			/*is the leader close to the arena edge ?*/
-			if ((client->getX(0)<avoidDistance && cos(phi)<0) || (client->getX(0)>arenaLength-avoidDistance && cos(phi) > 0 )|| (client->getY(0)<avoidDistance && sin(phi)<0) || (client->getY(0)>arenaWidth-avoidDistance && sin(phi)>0))
+			if ((client->getX(leader)<avoidDistance && cos(phi)<0) || (client->getX(leader)>arenaLength-avoidDistance && cos(phi) > 0 )|| (client->getY(leader)<avoidDistance && sin(phi)<0) || (client->getY(leader)>arenaWidth-avoidDistance && sin(phi)>0))
 			{
 				/*leader is close to the arena edge -> release pheromone 1 that causes the robot to turn away */
-				pherofield[1]->addTo((client->getX(0)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(0)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,35);
+				pherofield[1]->addTo((client->getX(leader)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(leader)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,35);
 			}else{
 				/*leader is not close to the arena edge -> release pheromone 2 suporessed pheromone 0, so that the leader does not pick it's own pheromone */
-				pherofield[2]->addTo((client->getX(0)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(0)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,45);
+				pherofield[2]->addTo((client->getX(leader)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(leader)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,45);
 			}
 			/*save positions for later analysis*/
 			logRobotPositions();
@@ -266,8 +273,8 @@ int main(int argc,char* argv[])
 		initRadius = robotDiameter/arenaLength*imageWidth/2;	//calculate robot radius in pixels, so that it matches the real robot dimensions
 		for (int i = 0;i<numBots && placement;i++)
 		{
-			 gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius);
-			 if (client->exists(i))  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,40);
+			 gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius+10);
+			 if (client->exists(i))  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
 		}
 	
 		//experiment preparation phase 1: draw calibration, contact WhyCon to calibrate and draw initial robot positions

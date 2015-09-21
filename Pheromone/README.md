@@ -24,12 +24,12 @@ The pheromone system is described in a short, late-breaking paper [[1](#referenc
 2. Then, run the Pheromone simulator itself: <b>../bin/phero E N</b>, where <i>E</i> is the half-life of the first pheromone (in seconds) and <i>N</i> is the number of robots on the field.
 3. If you run in dual-monitor mode, the pheromones will appear in a borderless window. You can move this window to the horizontal LCD monitor using <i>ALT+mouse drag</i>. If you run a single-monitor setup, the pheromones will appear in fullscreen.
 4. At first, the pheromone system will display four patterns at the corners of the screen and request calibration of the <i>SwarmCon</i> system. At this point, you should place your robots on the screen so that the <i>SwarmCon</i> can detect all the robots and calibration patterns.
-5. Once detected, the system performs calibration and blue circles should appear aroung the individual robots. If these are misaligned, then your camera might be oriented opposite to the screen orientation - you can correct it by turning the camera (or the screen) by 180 degrees.
+5. Once detected, the system performs calibration and blue circles should appear aroung the individual robots. If these are slightly misaligned, you can press <b>C</b> to re-calibrate again. If the circles are terribly misaligned, then your camera might be oriented opposite to the screen orientation - you can correct it by turning the camera (or the screen) by 180 degrees.
 6. Pressing SPACE start the pheromone simulation - as the robot with ID 0 moves, a pheromone track appears behind it.
 
 ###Some additional remarks
 1. At this point, you can start experimenting with the system by changing evaporation rates, adding diffusion etc.
-2. We have tried to comment the code so an experienced programmer should be able to alter the system accordingly. However, if you have any questions regarding the code, feel free to contact [me](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) or [Farshad](http://scholar.google.co.uk/citations?user=cUdtAowAAAAJ&hl=en)
+2. We have tried to comment the code so an experienced programmer should be able to alter the system accordingly. However, if you have any questions regarding the code, feel free to contact [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) or [Farshad](http://scholar.google.co.uk/citations?user=cUdtAowAAAAJ&hl=en)
 3. If you use this system for your research, please don't forget to cite the two [papers](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/cite.bib), that describe the components of this system.
 4. Have fun!
 </ol>

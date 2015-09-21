@@ -42,6 +42,7 @@ public:
   float getPhi(int i);
   float getTime(int i);
   bool exists(int i);
+  int getID(int i);
 
   /*resets detection timers*/ 
   void resetTime();
@@ -57,8 +58,9 @@ private:
   float yArray[MAX_POSITIONS];
   float pArray[MAX_POSITIONS];
   bool vArray[MAX_POSITIONS];
+  int idArray[MAX_POSITIONS];
 
-
+  int robotOrder;
   CTimer timer;
   int mySocket;
   TLogModule module;

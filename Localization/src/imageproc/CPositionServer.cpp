@@ -97,7 +97,7 @@ void* serverLoop(void* serv)
 		STrackedObject o;
 		for (int i=0;i<server->numObjects;i++){
 			o=server->object[i];
-			sprintf(buffer,"%sRobot %03i %.3f %.3f %.3f\n",buffer,i,o.x,o.y,o.yaw*180/M_PI);
+			sprintf(buffer,"%sRobot %03i %.3f %.3f %.3f\n",buffer,o.ID,o.x,o.y,o.yaw*180/M_PI);
 		}
 		if (server->calibrationFinished)
 		{

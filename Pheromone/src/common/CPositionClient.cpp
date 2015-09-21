@@ -11,6 +11,7 @@ CPositionClient::CPositionClient()
 	calibrated = true;
 	numDetected = -1;
 	numSearched = -1;
+	robotOrder = 0;
 }
 
 CPositionClient::~CPositionClient()
@@ -62,7 +63,7 @@ int CPositionClient::checkForData()
 	int numBytes = 0;
 	ioctl(mySocket,FIONREAD,&numBytes);
 	if (numBytes > 0){
-		char data[numBytes];
+		char data[numBytes+10];
 		memset(data,0,numBytes);
 		int lengthReceived = recv(mySocket,data,numBytes,NETWORK_BLOCK);
 		if (lengthReceived > 0){
@@ -73,20 +74,31 @@ int CPositionClient::checkForData()
 				if (strncmp(token,"Robot",5)==0){
 					sscanf(token,"Robot %i %f %f %f \n",&id,&x,&y,&phi);
 					if (id >=0 && id < MAX_POSITIONS){
-						xArray[id] = x;
-						yArray[id] = y;
-						pArray[id] = phi/180*M_PI;
-						vArray[id] = true;
-						tArray[id] = timer.getTime()/1000000.0;
+						xArray[robotOrder] = x;
+						yArray[robotOrder] = y;
+						pArray[robotOrder] = phi/180*M_PI;
+						vArray[robotOrder] = true;
+						tArray[robotOrder] = timer.getTime()/1000000.0;
+						idArray[robotOrder++] = id;
 					}
 				}
-				if (strncmp(token,"Detected",6)==0) sscanf(token,"Detected %i %i\n",&numDetected,&numSearched);
-				if (strncmp(token,"Calibrated",11)==0) calibrated = true;
+				else if (strncmp(token,"Detected",6)==0){
+				       	sscanf(token,"Detected %i %i \n",&numDetected,&numSearched);
+					robotOrder=0;
+				}
+				else if (strncmp(token,"Calibrated",11)==0) calibrated = true;
+				else printf("Unknown incoming data: -%s- %i\n",token,(int)strlen(token));
 				token = strtok(NULL, "\n");
 			}
 		}
 	}
 	return numBytes;
+}
+
+int CPositionClient::getID(int i)
+{
+	if (i >= 0 && i < MAX_POSITIONS) return idArray[i];
+	return -1;
 }
 
 float CPositionClient::getX(int i)
