@@ -229,6 +229,8 @@ int main(int argc,char* argv[])
 	randomPlacement();
 
 	globalTimer.pause();
+	CTimer performanceTimer;
+	performanceTimer.start();
 	while (stop == false){
 		//get the latest data from localization system and check if the calibration finished
 		client->checkForData();
@@ -282,7 +284,8 @@ int main(int argc,char* argv[])
 		//experiment preparation phase 1: draw calibration, contact WhyCon to calibrate and draw initial robot positions
 		if (calibration){
 			int calibRadius = initRadius/(cameraHeight-robotHeight)*cameraHeight;		//slightly enlarge to compensate for the higher distance from the camera
-			gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected,calibRadius);
+			gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected,calibRadius,performanceTimer.getTime()/1000);
+			performanceTimer.reset();
 			client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight);
 			client->checkForData();
 		}else if (placement){

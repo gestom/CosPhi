@@ -11,7 +11,7 @@ CGui::CGui(int *wi,int *he,bool dualMonitor)
 	{
 		height = *he;
 		width = *wi ;
-		screen = SDL_SetVideoMode(width,height,24,SDL_SWSURFACE|SDL_NOFRAME); 
+		screen = SDL_SetVideoMode(width,height,24,SDL_HWSURFACE|SDL_NOFRAME); 
 	}else{
 		const SDL_VideoInfo* info = SDL_GetVideoInfo();
 		*he = height = info->current_h;
@@ -89,7 +89,7 @@ void CGui::displayRobot(int x, int y,float phi,int id,int radius)
 
 }
 
-void CGui::displayCalibrationInfo(float camHeight,int numBots,int numVisible,int radius)
+void CGui::displayCalibrationInfo(float camHeight,int numBots,int numVisible,int radius,int refreshTime)
 {
 	/*display calibration patterns in the screen corners*/
 	Uint8 *bufp;
@@ -131,7 +131,7 @@ void CGui::displayCalibrationInfo(float camHeight,int numBots,int numVisible,int
 
 	rect.x = width/4;
 	rect.y = height/2-fontSize;
-	sprintf(info,"Calibrating the localization system - assuming that camera is %.2f m above the screen.",camHeight);
+	sprintf(info,"Calibrating the localization system - assuming that camera is %.2f m above the screen. GUI refresh: %i ms",camHeight,refreshTime);
 	text = TTF_RenderUTF8_Blended(smallFont, info, ok_col);
 	rect.x =  width/2 - text->w/2; 
 	SDL_BlitSurface(text, NULL, screen, &rect);
