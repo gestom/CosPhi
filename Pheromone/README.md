@@ -26,6 +26,7 @@ The pheromone system is described in a short, late-breaking paper [[1](#referenc
 4. At first, the pheromone system will display four patterns at the corners of the screen and request calibration of the <i>SwarmCon</i> system. At this point, you should place your robots on the screen so that the <i>SwarmCon</i> can detect all the robots and calibration patterns.
 5. Once detected, the system performs calibration and blue circles should appear aroung the individual robots. If these are slightly misaligned, you can press <b>C</b> to re-calibrate again. If the circles are terribly misaligned, then your camera might be oriented opposite to the screen orientation - you can correct it by turning the camera (or the screen) by 180 degrees.
 6. Pressing SPACE start the pheromone simulation - as the robot with ID 0 moves, a pheromone track appears behind it.
+7. Recalculation of the pheromones is computationally heavy. On slower machines, there can be a significant lag between the robot position and the displayed pheromone. This can be solved simply by reducing image dimensions / screen resolution in <b>phero.cpp</b>.
 
 ###Some additional remarks
 1. At this point, you can start experimenting with the system by changing evaporation rates, adding diffusion etc.
