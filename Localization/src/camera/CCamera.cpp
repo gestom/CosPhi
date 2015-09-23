@@ -155,15 +155,17 @@ int CCamera::loadConfig(const char* filename)
 
 int CCamera::saveConfig(const char* filename)
 {
-	FILE* file = fopen(filename,"w");
-	if (file == NULL) return -1;
-	int exp,cntr,gain,brt;
-	exp = getDeviceExposition(); 
-	cntr = getDeviceContrast(); 
-	gain = getDeviceGain();
-	brt = getDeviceBrightness();
-	fprintf(file,"%i %i %i %i\n",exp,cntr,gain,brt);	
-        fclose(file);	
+	if (cameraType == CT_WEBCAM){
+		FILE* file = fopen(filename,"w");
+		if (file == NULL) return -1;
+		int exp,cntr,gain,brt;
+		exp = getDeviceExposition(); 
+		cntr = getDeviceContrast(); 
+		gain = getDeviceGain();
+		brt = getDeviceBrightness();
+		fprintf(file,"%i %i %i %i\n",exp,cntr,gain,brt);	
+		fclose(file);
+	}
 	return 0;	
 }
 int CCamera::renewImage(CRawImage* image,bool move)
@@ -206,6 +208,7 @@ int CCamera::renewImage(CRawImage* image,bool move)
 			int key;
 			int data = AVI_read_frame(aviFile,aviBuffer1,&key);
 			if (data < 0) return -1;
+			if (move) readNextFrame = true; else readNextFrame=false; 
 			if (jpeg_decode(&aviBuffer2, (unsigned char*) aviBuffer1, &width, &height) < 0) {
 				printf("jpeg decode errors\n");
 				return -1;
@@ -217,9 +220,9 @@ int CCamera::renewImage(CRawImage* image,bool move)
 			}
 		}else{
 			Pyuv422torgb24(aviBuffer2,image->data,width,height);
+			if (move) readNextFrame = true; else readNextFrame=false; 
 			return 0;
 		}
-		if (move) readNextFrame = true; else readNextFrame=false; 
 	}
 	return -1;
 }

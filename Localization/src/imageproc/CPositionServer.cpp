@@ -14,6 +14,7 @@ CPositionServer::CPositionServer()
 	cameraHeight=fieldWidth=fieldLength=1.0;
 	positionUpdate=robotHeight=robotDiameter=0;
 	stop = false;
+	updateTime=0;
 }
 
 CPositionServer::~CPositionServer()
@@ -97,7 +98,7 @@ void* serverLoop(void* serv)
 	while (connected && server->stop == false){
 		/*send robot positions*/
 		sem_wait(sem);
-		sprintf(buffer,"Detected %i %i %i \n",server->numFound,server->numObjects,server->positionUpdate);
+		sprintf(buffer,"Detected %i %i %i %ld \n",server->numFound,server->numObjects,server->positionUpdate,server->updateTime);
 		server->positionUpdate = 0;
 		STrackedObject o;
 		for (int i=0;i<server->numObjects;i++){
@@ -159,16 +160,18 @@ void CPositionServer::finishCalibration()
 	calibrationFinished = true;
 }
 
-void CPositionServer::setNumOfPatterns(int numF,int numO)
+void CPositionServer::setNumOfPatterns(int numF,int numO,int64_t updateTim)
 {
-	if ((numObjects != numO || numFound != numF) && command != SC_CALIBRATE){
+	//if (true||((numObjects != numO || numFound != numF) && command != SC_CALIBRATE))
+	//{
 		sem_wait(&dataSem);
 		numFound = numF;
 		numObjects = numO;
+		updateTime = updateTim;
 		if (numObjects > NUM_OBJECTS) numObjects = NUM_OBJECTS;
 		if (numObjects < 0) numObjects = 0;
 		sem_post(&dataSem);
-	}
+	//}
 }
 
 int CPositionServer::updatePosition(STrackedObject o,int num)

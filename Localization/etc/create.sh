@@ -27,7 +27,7 @@ for j in $(seq 0 $(($v-1)));do
 for i in $(seq 0 $(($h-1)));do
 echo -ne Creating actual robot patterns $(($i+$j*$h)) of  $(($v*$h)) \\r 
 sj=60/$v
-si=70/$v
+si=70/$h
 x=$(($i*400+650)); 
 y=$(($j*400+250));
 ix=$((($j*10+5)*$sj/10+30));

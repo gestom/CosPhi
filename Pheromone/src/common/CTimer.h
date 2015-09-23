@@ -29,8 +29,8 @@ class CTimer
 
 		/*is the timer running ?*/
 		bool paused();
+		int64_t getRealTime();
 	private:
-		int getRealTime();
 		int startTime;
 		int pauseTime;
 		bool running;

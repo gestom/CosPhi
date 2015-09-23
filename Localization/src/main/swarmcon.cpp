@@ -322,6 +322,7 @@ int main(int argc,char* argv[])
 	globalTimer.start();
 
 	int frameID =0;
+	int64_t frameTime = 0;
 	while (stop == false)
 	{
 		if (useGui){
@@ -331,7 +332,7 @@ int main(int argc,char* argv[])
 		}
 		numFound = numStatic = 0;
 		timer.reset();
-
+		frameTime = globalTimer.getRealTime();
 		//track the robots found in the last attempt 
 		for (int i = 0;i<numBots;i++){
 			if (currentSegmentArray[i].valid){
@@ -363,7 +364,7 @@ int main(int argc,char* argv[])
 		evalTime = timer.getTime();
 
 		//pack up the data for sending to other systems (e.g. artificial pheromone one)
-		server->setNumOfPatterns(numFound,numBots);
+		server->setNumOfPatterns(numFound,numBots,frameTime);
 		for (int i = 0;i<numBots;i++) server->updatePosition(objectArray[i],i);
 
 		//check if there are some commands comming over the network interface - for communication with the pheromone system 

@@ -48,8 +48,10 @@ public:
   void resetTime();
 
   int numSearched;
+  int updated;
   float robotDiameter;
   int numDetected;
+  int64_t frameTime;
   bool calibrated;
 
 private:

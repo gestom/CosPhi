@@ -17,7 +17,7 @@ void CTimer::reset(int timeout)
   pauseTime = startTime;
 }
 
-int CTimer::getRealTime()
+int64_t CTimer::getRealTime()
 {
   struct  timeval currentTime;
   gettimeofday(&currentTime, NULL);

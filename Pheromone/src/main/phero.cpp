@@ -315,7 +315,7 @@ int main(int argc,char* argv[])
 		//update GUI etc
 		gui->update();
 		processEvents();
-		printf("GUI refresh: %i ms\n",performanceTimer.getTime()/1000);
+		printf("GUI refresh: %i ms, frame delay %.0f - %i ms\n",performanceTimer.getTime()/1000,client->updated,(performanceTimer.getRealTime()-client->frameTime)/1000.0);
 		performanceTimer.reset();
 	}
 	fclose(robotPositionLog);

@@ -44,7 +44,7 @@ class CPositionServer{
 		int sendPosition(int socket);
 		EServerCommand getCommand();
 		int closeConnection(int socket);
-		void setNumOfPatterns(int numF,int numO);
+		void setNumOfPatterns(int numF,int numO,int64_t frameTime);
 		void finishCalibration();
 
 		bool stop;		
@@ -54,7 +54,8 @@ class CPositionServer{
 		STrackedObject object[NUM_OBJECTS];
 		sem_t dataSem,connectSem;
 		bool debug;
-		int numObjects,numFound,positionUpdate;
+		int numObjects,numFound;
+		int positionUpdate;
 		pthread_t* thread;
 
 		/*specific for communication with the pheromone server*/
@@ -62,6 +63,7 @@ class CPositionServer{
 		EServerCommand command;
 		bool calibration;
 		bool calibrationFinished;
+		int64_t updateTime;
 };
 #endif
 /* end of CPositionServer.h */
