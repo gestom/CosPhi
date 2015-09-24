@@ -27,8 +27,8 @@ float circleDiameter = 0.03;
 
 /*Adjust the X and Y dimensions of the coordinate system 
 in case you are using the artificial pheromone system, adjust the dimensions in phero.cpp*/
-float fieldLength = 1.13-0.04;		
-float fieldWidth = 0.95-0.04;
+float fieldLength = 1.00;
+float fieldWidth = 1.00;
 //----------------------------------------------------------------------------
 
 /*-----These params are provided by the artificial pheromone system ----------------------
@@ -43,7 +43,6 @@ int  screenWidth= 1920;
 int  screenHeight = 1080;
 
 //save raw video for postprocessing
-bool saveVideo = true;
 int numFound = 0;
 int numStatic = 0;
 ETransformType transformType = TRANSFORM_2D;
@@ -64,6 +63,8 @@ STrackedObject calibTmp[CALIB_STEPS];
 int calibStep = CALIB_STEPS+2;
 TLogModule module = LOG_MODULE_MAIN;
 bool useGui = false;
+bool saveVideo = true;
+bool saveLog = true;
 bool displayTime = false;
 int numSaved = 0;
 bool stop = false;
@@ -222,7 +223,8 @@ void processKeys()
 
 	//process keys 
 	keys = SDL_GetKeyState(&keyNumber);
-
+	bool shiftPressed = keys[SDLK_RSHIFT] || keys[SDLK_LSHIFT];
+ 
 	//program control - (s)top, (p)ause+move one frame and resume
 	if (keys[SDLK_ESCAPE]) stop = true;
 	if (keys[SDLK_SPACE] && lastKeys[SDLK_SPACE] == false){ moveOne = 10000000; moveVal = 1000000;};
@@ -255,14 +257,14 @@ void processKeys()
 	if (keys[SDLK_3] && lastKeys[SDLK_3] == false) trans->transformType = TRANSFORM_3D;
 
 	//camera low-level settings 
-	if (keys[SDLK_c] && keys[SDLK_RSHIFT] == false) camera->changeContrast(-1);
-	if (keys[SDLK_c] && keys[SDLK_RSHIFT] == true) camera->changeContrast(1);
-	if (keys[SDLK_g] && keys[SDLK_RSHIFT] == false) camera->changeGain(-1);
-	if (keys[SDLK_g] && keys[SDLK_RSHIFT] == true) camera->changeGain(1);
-	if (keys[SDLK_e] && keys[SDLK_RSHIFT] == false) camera->changeExposition(-1);
-	if (keys[SDLK_e] && keys[SDLK_RSHIFT] == true) camera->changeExposition(1);
-	if (keys[SDLK_b] && keys[SDLK_RSHIFT] == false) camera->changeBrightness(-1);
-	if (keys[SDLK_b] && keys[SDLK_RSHIFT] == true) camera->changeBrightness(1);
+	if (keys[SDLK_c] && shiftPressed == false) camera->changeContrast(-1);
+	if (keys[SDLK_c] && shiftPressed == true) camera->changeContrast(1);
+	if (keys[SDLK_g] && shiftPressed == false) camera->changeGain(-1);
+	if (keys[SDLK_g] && shiftPressed == true) camera->changeGain(1);
+	if (keys[SDLK_e] && shiftPressed == false) camera->changeExposition(-1);
+	if (keys[SDLK_e] && shiftPressed == true) camera->changeExposition(1);
+	if (keys[SDLK_b] && shiftPressed == false) camera->changeBrightness(-1);
+	if (keys[SDLK_b] && shiftPressed == true) camera->changeBrightness(1);
 
 	//display help
 	if (keys[SDLK_h] && lastKeys[SDLK_h] == false) displayHelp = displayHelp == false; 
@@ -278,25 +280,35 @@ void processKeys()
 	memcpy(lastKeys,keys,keyNumber);
 }
 
+//process command line arguments 
+void processArgs(int argc,char* argv[]) 
+{
+	if (argc > 2) numBots = atoi(argv[2]);
+	if (argc > 2) useGui=true;
+	for (int i = 3;i<argc;i++){
+		if (strcmp(argv[i],"nogui")==0) useGui=false;
+		if (strcmp(argv[i],"nolog")==0) saveLog=false;
+		if (strcmp(argv[i],"novideo")==0) saveVideo=false;
+	}
+}
+
 int main(int argc,char* argv[])
 {
 	//initialize logging system, camera and network connection 
-	initializeLogging();
+	processArgs(argc,argv);
+	if (saveLog) initializeLogging();
 	if (argc < 2) {
 		fprintf(stderr,"usage: %s imageSource num_robots\ne.g. %s /dev/video0 1\n",argv[0],argv[0]);
 		return 0;
 	}
-	const char* cameraDevice = argv[1];
 	camera = new CCamera();
 	server = new CPositionServer();
 	server->init("6666"); 
 
 	moveOne = moveVal;
 	moveOne  = 0;
-	if (argc > 2) numBots = atoi(argv[2]);
-	if (argc > 2) useGui=true;
-	if (argc > 3 && strcmp(argv[3],"nogui")==0) useGui=false;
-	camera->init(cameraDevice,&imageWidth,&imageHeight,saveVideo);
+	//process arguments
+	camera->init(argv[1],&imageWidth,&imageHeight,saveVideo);
 	camera->loadConfig("../etc/camera.cfg");
 
 	//determine gui size so that it fits the screen
@@ -365,7 +377,8 @@ int main(int argc,char* argv[])
 
 		//pack up the data for sending to other systems (e.g. artificial pheromone one)
 		server->setNumOfPatterns(numFound,numBots,frameTime);
-		for (int i = 0;i<numBots;i++) server->updatePosition(objectArray[i],i);
+		for (int i = 0;i<numBots;i++) server->updatePosition(objectArray[i],i,frameTime);
+		server->clearToSend();
 
 		//check if there are some commands comming over the network interface - for communication with the pheromone system 
 		EServerCommand command = server->getCommand();
@@ -410,7 +423,7 @@ int main(int argc,char* argv[])
 			moveOne = moveVal;
 			for (int i = 0;i<numBots;i++){
 			       	//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
-			       	if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+			       	if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
 			}
 			if (moveVal > 0) frameID++;
 		}else{
@@ -420,7 +433,7 @@ int main(int argc,char* argv[])
 				//gui->saveScreen(runs++);
 				for (int i = 0;i<numBots;i++){
 				       		//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
-						if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+						if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
 				}
 				moveOne = moveVal; 
 				if (moveVal > 0) frameID++;

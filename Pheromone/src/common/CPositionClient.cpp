@@ -64,6 +64,7 @@ int CPositionClient::checkForData()
 	int numBytes = 0;
 	ioctl(mySocket,FIONREAD,&numBytes);
 	CTimer lagTimer;
+	int64_t detectTime;
 	if (numBytes > 0){
 		char data[numBytes+10];
 		memset(data,0,numBytes);
@@ -75,7 +76,7 @@ int CPositionClient::checkForData()
 			while( token != NULL ) 
 			{
 				if (strncmp(token,"Robot",5)==0){
-					sscanf(token,"Robot %i %f %f %f \n",&id,&x,&y,&phi);
+					sscanf(token,"Robot %i %f %f %f %ld \n",&id,&x,&y,&phi,&detectTime);
 					if (id >=0 && id < MAX_POSITIONS){
 						xArray[robotOrder] = x;
 						yArray[robotOrder] = y;
@@ -86,7 +87,7 @@ int CPositionClient::checkForData()
 					}
 				}
 				else if (strncmp(token,"Detected",6)==0){
-				       	sscanf(token,"Detected %i %i %i %ld \n",&numDetected,&numSearched,&updated,&frameTime);
+				       	sscanf(token,"Detected %i of %i at %ld, %i updated. \n",&numDetected,&numSearched,&frameTime,&updated);
 					robotOrder=0;
 				}
 				else if (strncmp(token,"Calibrated",11)==0) calibrated = true;

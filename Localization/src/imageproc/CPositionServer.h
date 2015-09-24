@@ -40,18 +40,20 @@ class CPositionServer{
 		CPositionServer();
 		~CPositionServer();
 		int init(const char* port);
-		int updatePosition(STrackedObject object,int i);
+		int updatePosition(STrackedObject object,int i,int64_t updateTime);
 		int sendPosition(int socket);
 		EServerCommand getCommand();
 		int closeConnection(int socket);
 		void setNumOfPatterns(int numF,int numO,int64_t frameTime);
 		void finishCalibration();
+		void clearToSend();
 
 		bool stop;		
 		int connected;
 		int serverSocket;
 		int mySocket;
 		STrackedObject object[NUM_OBJECTS];
+		int64_t lastDetectionArray[NUM_OBJECTS];
 		sem_t dataSem,connectSem;
 		bool debug;
 		int numObjects,numFound;
@@ -63,6 +65,7 @@ class CPositionServer{
 		EServerCommand command;
 		bool calibration;
 		bool calibrationFinished;
+		int numConnections;
 		int64_t updateTime;
 };
 #endif

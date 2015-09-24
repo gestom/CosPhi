@@ -15,6 +15,8 @@ CPositionServer::CPositionServer()
 	positionUpdate=robotHeight=robotDiameter=0;
 	stop = false;
 	updateTime=0;
+	numConnections=0;
+	for (int i = 0;i<NUM_OBJECTS;i++)lastDetectionArray[i] = -1;
 }
 
 CPositionServer::~CPositionServer()
@@ -39,6 +41,7 @@ void* connectLoop(void *serv)
 			if (debug) fprintf(stdout,"Incoming connection accepted on socket level %i.",newServer);
 			sem_wait(&server->connectSem);
 			server->mySocket = newServer;
+			server->numConnections++;
 			sem_post(&server->connectSem);
 			pthread_t* thread=(pthread_t*)malloc(sizeof(pthread_t));
 			pthread_create(thread,NULL,&serverLoop,(void*)server);
@@ -98,12 +101,12 @@ void* serverLoop(void* serv)
 	while (connected && server->stop == false){
 		/*send robot positions*/
 		sem_wait(sem);
-		sprintf(buffer,"Detected %i %i %i %ld \n",server->numFound,server->numObjects,server->positionUpdate,server->updateTime);
+		sprintf(buffer,"Detected %i of %i at %ld, %i updated. \n",server->numFound,server->numObjects,server->updateTime,server->positionUpdate);
 		server->positionUpdate = 0;
 		STrackedObject o;
 		for (int i=0;i<server->numObjects;i++){
 			o=server->object[i];
-			sprintf(buffer,"%sRobot %03i %.3f %.3f %.3f \n",buffer,o.ID,o.x,o.y,o.yaw*180/M_PI);
+			sprintf(buffer,"%sRobot %03i %.3f %.3f %.3f %ld \n",buffer,o.ID,o.x,o.y,o.yaw*180/M_PI,server->lastDetectionArray[i]);
 		}
 		if (server->calibrationFinished)
 		{
@@ -146,6 +149,10 @@ void* serverLoop(void* serv)
 	return NULL;
 }
 
+void CPositionServer::clearToSend()
+{
+}
+
 EServerCommand CPositionServer::getCommand()
 {
 	sem_wait(&dataSem);
@@ -174,11 +181,12 @@ void CPositionServer::setNumOfPatterns(int numF,int numO,int64_t updateTim)
 	//}
 }
 
-int CPositionServer::updatePosition(STrackedObject o,int num)
+int CPositionServer::updatePosition(STrackedObject o,int num,int64_t updateTime)
 {
 	if (num < numObjects && num >= 0){
 		sem_wait(&dataSem);
 		object[num] = o;
+		lastDetectionArray[num] = updateTime;
 		positionUpdate++;
 		sem_post(&dataSem);
 	}

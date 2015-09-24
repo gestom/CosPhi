@@ -251,7 +251,7 @@ int main(int argc,char* argv[])
 			/*PHEROMONE 1 - released by the leading robot*/
 			for (int i = 0;i<numBots;i++)
 			{
-				if (client->getID(i) == 0){
+				if (client->getID(i) == 2){
 				       	pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStrength);
 					leader = i;
 				}
@@ -315,7 +315,7 @@ int main(int argc,char* argv[])
 		//update GUI etc
 		gui->update();
 		processEvents();
-		printf("GUI refresh: %i ms, frame delay %.0f - %i ms\n",performanceTimer.getTime()/1000,client->updated,(performanceTimer.getRealTime()-client->frameTime)/1000.0);
+		printf("GUI refresh: %i ms, updated %i frame delay %.0f ms\n",performanceTimer.getTime()/1000,client->updated,(performanceTimer.getRealTime()-client->frameTime)/1000.0);
 		performanceTimer.reset();
 	}
 	fclose(robotPositionLog);
