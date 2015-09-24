@@ -16,15 +16,16 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 
 ####Quick setup for initial testing
 
-1. Install the <a href="#libraries">SDL libraries</a>.
-2. Download the software from GitHub and go to the <b>Localization/src</b> directory.
-3. Adjust the camera resolution in the <b>main/swarmcon.cpp</b>.
-4. Compile the software - just type <b>make</b>.
-5. Download, resize and print one circular <a href="etc/test.pdf">pattern</a> - you have the pattern also in the <b>Localization/etc/test.pdf</b> file.
-6. Try a test run - you need to run the binary from the <b>bin</b> directory. Type <b>./swarmcon /dev/videoX 1</b>, where X is the number of the camera and 1 tells the system to track one pattern.</li> 
-7. You should see the image with some numbers below the circle. Pressing <b>D</b> shows the segmentation result.
-8. At this point, you can also change camera brightness, exposure, contrast by pressing <i>(SHIFT) b, e, c</i> respectively.
-9. Open your browser to view localhost:6666. You should see the circle position.
+1. Install the required <a href="#libraries">libraries</a>.
+1. Check the working modes of your camera <b>luvcview -L</b>. Run <b>luvcview</b> and adjust your camera exposure, brightness etc. settings.
+1. Download the software from GitHub and go to the <b>Localization/src</b> directory.
+1. Adjust the camera resolution in the <b>main/swarmcon.cpp</b>.
+1. Compile the software - just type <b>make</b>.
+1. Download, resize and print one circular <a href="etc/test.pdf">pattern</a> - you have the pattern also in the <b>Localization/etc/test.pdf</b> file.
+1. Try a test run - you need to run the binary from the <b>bin</b> directory. Type <b>./swarmcon /dev/videoX 1</b>, where X is the number of the camera and 1 tells the system to track one pattern.</li> 
+1. You should see the image with some numbers below the circle. Pressing <b>D</b> shows the segmentation result.
+1. At this point, you can also change camera brightness, exposure, contrast by pressing <i>(SHIFT) b, e, c</i> respectively.
+1. Open your browser to view localhost:6666. You should see the circle position.
 
 ####Advanced setup for more robots in a rectangular field
 
@@ -46,14 +47,15 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 3. If your camera does not support MJPEG, <b>swarmcon</b> will save the video feed as a serie of bitmaps, that you can process later as well.
 4. You can run <b>swarmcon video_file_name Y</b> to process that video in the same way as when using the camera, i.e. <b>video_file_name</b> instead of <b>/dev/videoX</b>.
 5. Processing a saved video rather than the camera feed is likely to provide more precise results.
-6. Running the system as <b>./swarmcon /dev/videoX Y nogui</b> causes text-only output - this can speed-up postprocessing.
+6. Running the system with a <b>nogui</b> argument e.g. <b>./swarmcon /dev/video0 1 nogui</b> causes text-only output - this can speed-up postprocessing.
+7. Logs and videos might be large - to prevent saving logs and videos, run the system with <b>nolog</b> or <b>novideo</b> argument.
 
 ####Some additional remarks
 
-1. At this point, you can start experimenting with the syste by adding whatever features you might think useful.
-2. We have tried to comment the code so an experienced programmer should be able to alter the system accordingly. However, if you have any questions regarding the code, feel free to contact [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) or [Matias Nitsche](https://scholar.google.co.uk/citations?user=Z0hQoRUAAAAJ&hl=en&oi=ao)
-3. If you use this localization system for your research, please don't forget to cite at least one relevant paper from these [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/WhyCon.bib) records.
-4. Have fun!
+2. At this point, you can start experimenting with the syste by adding whatever features you might think useful.
+3. We have tried to comment the code so an experienced programmer should be able to alter the system accordingly. However, if you have any questions regarding the code, feel free to contact [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) or [Matias Nitsche](https://scholar.google.co.uk/citations?user=Z0hQoRUAAAAJ&hl=en&oi=ao)
+4. If you use this localization system for your research, please don't forget to cite at least one relevant paper from these [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/WhyCon.bib) records.
+5. Have fun!
 </ol>
 
 <hr>
@@ -64,6 +66,7 @@ All the following libraries are probably in your packages.
 1. <b>libsdl1.2-dev</b> for graphical user interface.
 2. <b>libsdl-ttf2.0-dev</b> to print stuff in the GUI.
 3. <b>libncurses5-dev</b> to print stuff on the terminal.
+4. <b>luvcview</b> to set-up the camera.
 
 ###References
 1. T. Krajník, M. Nitsche et al.: <b>[External localization system for mobile robotics.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2013_icar_whycon.pdf)</b> International Conference on Advanced Robotics (ICAR), 2013. [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2013_icar_whycon.bib)].
