@@ -40,6 +40,7 @@ int initBrightness = 255;	//brightness of the patterns at randomly-generated pos
 int initBorder = 100;		//defines minimal distance of the randomly-generated initial positions from the arena boundary
 int initRadius = 50;		//radius of the randomly-generated positions on the display 
 float avoidDistance = 0.10;	//minimal distance to trigger pheromone 2 release - this pheromone causes the leading robot to turn away from an obstacle  
+int leaderID = 0;		//ID of the leader robot
 /*---------Adjust the previous variables to define your experiment duration, initial conditions etc.-------------*/
 
 /*variables read from the command line*/
@@ -251,7 +252,7 @@ int main(int argc,char* argv[])
 			/*PHEROMONE 1 - released by the leading robot*/
 			for (int i = 0;i<numBots;i++)
 			{
-				if (client->getID(i) == 2){
+				if (client->getID(i) == leaderID){
 				       	pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStrength);
 					leader = i;
 				}
