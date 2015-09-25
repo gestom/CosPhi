@@ -13,6 +13,7 @@ CPositionClient::CPositionClient()
 	numSearched = -1;
 	frameTime = -1;
 	robotOrder = 0;
+	updates = 0;
 }
 
 CPositionClient::~CPositionClient()
@@ -65,6 +66,7 @@ int CPositionClient::checkForData()
 	ioctl(mySocket,FIONREAD,&numBytes);
 	CTimer lagTimer;
 	int64_t detectTime;
+	updates=0;
 	if (numBytes > 0){
 		char data[numBytes+10];
 		memset(data,0,numBytes);
@@ -87,8 +89,9 @@ int CPositionClient::checkForData()
 					}
 				}
 				else if (strncmp(token,"Detected",6)==0){
-				       	sscanf(token,"Detected %i of %i at %ld, %i updated. \n",&numDetected,&numSearched,&frameTime,&updated);
+				       	sscanf(token,"Detected %i of %i at %ld. \n",&numDetected,&numSearched,&frameTime);
 					robotOrder=0;
+					updates++;
 				}
 				else if (strncmp(token,"Calibrated",11)==0) calibrated = true;
 				else printf("Unknown incoming data: -%s- %i\n",token,(int)strlen(token));

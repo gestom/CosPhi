@@ -23,7 +23,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-#define NUM_CONNECTIONS 100
+#define MAX_CONNECTIONS 100
 #define NUM_OBJECTS 100
 
 typedef enum{
@@ -41,23 +41,29 @@ class CPositionServer{
 		~CPositionServer();
 		int init(const char* port);
 		int updatePosition(STrackedObject object,int i,int64_t updateTime);
-		int sendPosition(int socket);
+		int sendInfo(int socket,char *buffer);
 		EServerCommand getCommand();
 		int closeConnection(int socket);
 		void setNumOfPatterns(int numF,int numO,int64_t frameTime);
 		void finishCalibration();
 		void clearToSend();
+		int addConnection(int socket);
+		int removeConnection(int socket);
 
 		bool stop;		
-		int connected;
 		int serverSocket;
-		int mySocket;
+
+		int sockets[MAX_CONNECTIONS];
+		int numConnections;
+
+		/*detected object data*/
 		STrackedObject object[NUM_OBJECTS];
 		int64_t lastDetectionArray[NUM_OBJECTS];
-		sem_t dataSem,connectSem;
-		bool debug;
 		int numObjects,numFound;
-		int positionUpdate;
+
+		/*semaphores - */
+		sem_t connectSem;
+		bool debug;
 		pthread_t* thread;
 
 		/*specific for communication with the pheromone server*/
@@ -65,7 +71,6 @@ class CPositionServer{
 		EServerCommand command;
 		bool calibration;
 		bool calibrationFinished;
-		int numConnections;
 		int64_t updateTime;
 };
 #endif

@@ -205,8 +205,8 @@ int main(int argc,char* argv[])
 	image = new CRawImage(imageWidth,imageHeight);
 
 	//read number of robots and pheromone half-life from the command line
-	numBots = atoi(argv[1]);
-	float evaporation = atof(argv[2]);
+	numBots = atoi(argv[2]);
+	float evaporation = atof(argv[1]);
 
 	float diffusion = 0;
 	float influence = 1.0;
@@ -315,7 +315,7 @@ int main(int argc,char* argv[])
 		//update GUI etc
 		gui->update();
 		processEvents();
-		printf("GUI refresh: %i ms, updated %i frame delay %.0f ms\n",performanceTimer.getTime()/1000,client->updated,(performanceTimer.getRealTime()-client->frameTime)/1000.0);
+		printf("GUI refresh: %i ms, updates %i frame delay %.0f ms\n",performanceTimer.getTime()/1000,client->updates,(performanceTimer.getRealTime()-client->frameTime)/1000.0);
 		performanceTimer.reset();
 	}
 	fclose(robotPositionLog);

@@ -48,7 +48,7 @@ public:
   void resetTime();
 
   int numSearched;
-  int updated;
+  int updates;
   float robotDiameter;
   int numDetected;
   int64_t frameTime;
