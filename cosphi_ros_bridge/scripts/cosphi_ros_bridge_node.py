@@ -14,10 +14,12 @@ def main():
    s.connect((TCP_IP, TCP_PORT))
    #init ROS Node
    rospy.init_node('cosphi_ros_bridge_node')
-   pub = rospy.Publisher('poses', String,queue_size=10)
+   #to send all the robots at one string like the original CosPhi 
+   #but as a ROS topic 
+   pub = rospy.Publisher('/cosphi_ros_bridge/poses', String,queue_size=10)
    
    rate = rospy.Rate(100)
-
+   print("connected to the CosPhi- Topics are Publishing....")
    while not rospy.is_shutdown():
       data = s.recv(BUFFER_SIZE)
       pub.publish(data)
@@ -27,7 +29,7 @@ def main():
       for index in range(len(Array_Robots)-2):
          Array_All = Array_Robots[index+1].split()
          ID = Array_All[1]
-         Topic_Name = 'cosphi_ros_bridge/2D'+ID
+         Topic_Name = '/cosphi_ros_bridge/robot'+ID
          pub1 = rospy.Publisher(Topic_Name, Pose2D, queue_size=10)
          X = float(Array_All[2])
          Y = float(Array_All[3])
