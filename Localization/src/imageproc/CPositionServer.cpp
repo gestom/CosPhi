@@ -146,7 +146,7 @@ void CPositionServer::clearToSend()
 	char buffer[10000];
 
 	/*send robot positions*/
-	sprintf(buffer,"Detected %i of %i at %ld. \n",numFound,numObjects,updateTime);
+	sprintf(buffer,"Detected %i of %i at %ld \n",numFound,numObjects,updateTime);
 	STrackedObject o;
 	for (int i=0;i<numObjects;i++){
 		o=object[i];
