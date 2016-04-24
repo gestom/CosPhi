@@ -4,7 +4,7 @@ OBJS+=$(OBJSC)
 
 include ../Mk/local.Mk
 CXXINCLUDE+=-I./  -I../common 
-CXXFLAGS+=-Wall
+CXXFLAGS+=-Wall 
 
 all: $(OBJS)
 

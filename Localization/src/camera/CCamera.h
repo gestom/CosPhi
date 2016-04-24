@@ -16,7 +16,16 @@
 #include <stdlib.h>
 #include <time.h>
 #include <CTimer.h>
- 
+
+//---START--ROS---
+#ifdef USE_ROS
+#include <ros/package.h>
+#include <image_transport/image_transport.h>
+#endif
+//---END--ROS---
+
+
+
 extern "C" {
 #include "v4l2uvc.h"
 }
@@ -33,8 +42,10 @@ typedef enum{
 	CT_WEBCAM,
 	CT_FILELOADER,
 	CT_VIDEOLOADER,
+	CT_ROS_CAM,
 	CT_NUMBER
 }ECameraType;
+ 
 
 class CCamera
 {
@@ -42,11 +53,10 @@ class CCamera
 	public:
 
 	CCamera();
-	int init(const char *deviceName,int *wi,int *he,bool saveI = true);
+	int init(const char *deviceName,int *wi,int *he,bool saveI,int argc,char *argv[]);
 	~CCamera();
 	int renewImage(CRawImage* image,bool a);
 	int initFileLoader(const char *deviceName,int *wi,int *he);
-
 	void setGain(int value);
 	int getGain();
 	void setContrast(int value);
@@ -67,6 +77,9 @@ class CCamera
 	int getDeviceWhiteTemperature();
 	int fileNum;		
 	ECameraType cameraType;
+
+	bool running;
+	bool stop;
 
 	int saveConfig(const char* filename);
 	int loadConfig(const char* filename);
@@ -100,6 +113,7 @@ class CCamera
 	avi_t *aviFile; 
 	char *aviBuffer1; 
 	unsigned char *aviBuffer2; 
+
 };
 #endif
 /* end of CCamera.h */

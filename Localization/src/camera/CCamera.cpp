@@ -7,12 +7,15 @@
 #include "CCamera.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 
 extern "C" {
 #include "utils.h"
 #include "color.h"
 }
+
+static CRawImage *rosImage;
 
 //-----------------------------------------------------------------------------
 CCamera::CCamera()
@@ -28,11 +31,17 @@ CCamera::CCamera()
 	videoIn = (struct vdIn*) calloc(1,sizeof(struct vdIn));
 	globalTimer.reset();
 	globalTimer.start();
+	running = false;
+	stop = false;
 	return;
 }
 
 CCamera::~CCamera()
 {
+	stop = true;
+#ifdef USE_ROS
+	while (running) usleep(100000);
+#endif
 	close_v4l2(videoIn);
 	free(videoIn);
 	free(aviBuffer1);
@@ -62,7 +71,41 @@ int CCamera::initFileLoader(const char *deviceName,int *wi,int *he)
 	return 0;
 }
 
-int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
+#ifdef USE_ROS
+
+
+void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+{
+	ROS_INFO("Incoming image %ix%i %ibpp.",(int)msg->width,(int)msg->height,(int)msg->step/msg->width);
+	if (rosImage->bpp != (int)(msg->step/msg->width) || rosImage->width != (int)msg->width || rosImage->height != (int)msg->height)
+	{
+		ROS_ERROR("ROS image format differs from the expected one ROS %ix%i %ibpp, Expected: %ix%i %ibpp. Fix image dimensions in main/swarmcon.cpp",msg->width,msg->height,msg->step/msg->width,rosImage->width,rosImage->height,rosImage->bpp);
+		//TODO implement image format conversions here 
+	}else{
+		//TODO implement semaphores here 
+		memcpy(rosImage->data,(void*)&msg->data[0],msg->step*msg->height);
+	}
+}
+
+void* rosLoop(void* camerai)
+{
+	CCamera *camera = (CCamera*) camerai;
+	char* ahoi[] = {"../bin/swarmcon"};
+	int val = 1;
+	ros::init(val,ahoi, "object_detector");
+	ros::NodeHandle rosHandle;
+	image_transport::ImageTransport imageTransport(rosHandle);
+	image_transport::Subscriber imageSubscriber = imageTransport.subscribe("/usb_cam/image_raw", 1, imageCallback);
+	while (camera->stop==false && ros::ok()){
+	       	ros::spinOnce();
+		usleep(30000);
+	}
+	camera->running = false;
+	return NULL;
+}
+#endif
+
+int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI,int argc,char* argv[])
 {
 	save = saveI;
 	//format = V4L2_PIX_FMT_YUYV;
@@ -74,11 +117,24 @@ int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
 
 	time_t timeNow;
 	time(&timeNow);
-	char timeStr[100];
+	char timeStr[1000];
 	strftime(timeStr, sizeof(timeStr), "%Y-%m-%d_%H:%M:%S",localtime(&timeNow));
 	sprintf(avifilename,"output/%s.avi",timeStr);
 	if (strncmp(deviceName,"/dev/",5)==0) cameraType = CT_WEBCAM; else cameraType = CT_FILELOADER;
 	if (strncmp(&deviceName[strlen(deviceName)-4],".avi",4)==0) cameraType = CT_VIDEOLOADER;
+
+	#ifdef USE_ROS
+	rosImage = new CRawImage(*wi,*he);
+
+	pthread_t* rosThread;
+
+	cameraType = CT_ROS_CAM;
+	running = true;
+	stop = false;
+	rosThread=(pthread_t*)malloc(sizeof(pthread_t));
+	pthread_create(rosThread,NULL,&rosLoop,(void*)this);
+	#endif
+
 	if (cameraType == CT_WEBCAM){
 		int ret = init_videoIn(videoIn,(char *)deviceName, wi,he,fps,format,grabemethod,avifilename);		
 		if (ret < 0) {
@@ -168,6 +224,7 @@ int CCamera::saveConfig(const char* filename)
 	}
 	return 0;	
 }
+
 int CCamera::renewImage(CRawImage* image,bool move)
 {
 	if (cameraType == CT_WEBCAM){
@@ -224,6 +281,14 @@ int CCamera::renewImage(CRawImage* image,bool move)
 			return 0;
 		}
 	}
+	#ifdef USE_ROS
+	if (cameraType == CT_ROS_CAM)
+	{
+		//TODO implement semaphores here 
+		memcpy(image->data,rosImage->data,rosImage->size);
+		return 0;
+	}
+	#endif
 	return -1;
 }
 

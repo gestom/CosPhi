@@ -15,7 +15,7 @@
 //-----These parameters need to be adjusted by the user -----------------------
 
 //Adjust camera resolution here
-int  imageWidth= 960;
+int  imageWidth= 1280;
 int  imageHeight = 720;
 
 //Adjust the black circle diameter [m] 
@@ -308,7 +308,7 @@ int main(int argc,char* argv[])
 	moveOne = moveVal;
 	moveOne  = 0;
 	//process arguments
-	camera->init(argv[1],&imageWidth,&imageHeight,saveVideo);
+	camera->init(argv[1],&imageWidth,&imageHeight,saveVideo,argc,argv);
 	camera->loadConfig("../etc/camera.cfg");
 
 	//determine gui size so that it fits the screen
