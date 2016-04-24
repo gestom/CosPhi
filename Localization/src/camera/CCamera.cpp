@@ -105,7 +105,7 @@ void* rosLoop(void* camerai)
 }
 #endif
 
-int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI,int argc,char* argv[])
+int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
 {
 	save = saveI;
 	//format = V4L2_PIX_FMT_YUYV;

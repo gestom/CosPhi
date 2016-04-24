@@ -53,7 +53,7 @@ class CCamera
 	public:
 
 	CCamera();
-	int init(const char *deviceName,int *wi,int *he,bool saveI,int argc,char *argv[]);
+	int init(const char *deviceName,int *wi,int *he,bool saveI);
 	~CCamera();
 	int renewImage(CRawImage* image,bool a);
 	int initFileLoader(const char *deviceName,int *wi,int *he);

@@ -308,7 +308,7 @@ int main(int argc,char* argv[])
 	moveOne = moveVal;
 	moveOne  = 0;
 	//process arguments
-	camera->init(argv[1],&imageWidth,&imageHeight,saveVideo,argc,argv);
+	camera->init(argv[1],&imageWidth,&imageHeight,saveVideo);
 	camera->loadConfig("../etc/camera.cfg");
 
 	//determine gui size so that it fits the screen
