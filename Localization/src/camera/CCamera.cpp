@@ -95,7 +95,7 @@ void* rosLoop(void* camerai)
 	ros::init(val,ahoi, "object_detector");
 	ros::NodeHandle rosHandle;
 	image_transport::ImageTransport imageTransport(rosHandle);
-	image_transport::Subscriber imageSubscriber = imageTransport.subscribe("/usb_cam/image_raw", 1, imageCallback);
+	image_transport::Subscriber imageSubscriber = imageTransport.subscribe(camera->directory, 1, imageCallback);
 	while (camera->stop==false && ros::ok()){
 	       	ros::spinOnce();
 		usleep(30000);
@@ -114,7 +114,7 @@ int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
 	if (save) videoIn->toggleAvi = 1; else videoIn->toggleAvi = 0;
 	const float fps = 30.0;
 	const int grabemethod = 1; 
-
+	
 	time_t timeNow;
 	time(&timeNow);
 	char timeStr[1000];
@@ -127,7 +127,7 @@ int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
 	rosImage = new CRawImage(*wi,*he);
 
 	pthread_t* rosThread;
-
+	strcpy(directory,deviceName);
 	cameraType = CT_ROS_CAM;
 	running = true;
 	stop = false;

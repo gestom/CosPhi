@@ -83,6 +83,7 @@ class CCamera
 
 	int saveConfig(const char* filename);
 	int loadConfig(const char* filename);
+	char directory[1000];
 	private:
 	int getDeviceGain();
 	int getDeviceContrast();
@@ -106,7 +107,6 @@ class CCamera
 	bool autoexposure;
 	struct vdIn *videoIn;
 	int width, height;
-	char directory[1000];
 	char avifilename[100];
 	CTimer globalTimer;
 	bool save,readNextFrame;
