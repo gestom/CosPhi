@@ -24,7 +24,12 @@
 #endif
 //---END--ROS---
 
-
+//---START--OPENCV---
+#ifdef USE_OPENCV
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#endif
+//---END--OPENCV---
 
 extern "C" {
 #include "v4l2uvc.h"
@@ -43,9 +48,9 @@ typedef enum{
 	CT_FILELOADER,
 	CT_VIDEOLOADER,
 	CT_ROS_CAM,
+	CT_OPENCV,
 	CT_NUMBER
 }ECameraType;
- 
 
 class CCamera
 {
@@ -113,7 +118,9 @@ class CCamera
 	avi_t *aviFile; 
 	char *aviBuffer1; 
 	unsigned char *aviBuffer2; 
-
+#ifdef USE_OPENCV
+	cv::VideoCapture *openCVDevice;
+#endif
 };
 #endif
 /* end of CCamera.h */

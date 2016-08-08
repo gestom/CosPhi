@@ -9,10 +9,16 @@ LXXLIBS+=-L/usr/local/lib
 LXXLIBS+=-lpthread
 
 #----------ROS START: uncomment the following lines if you want to use ROS
-CXXDEFINE=-DUSE_ROS
-LXXLIBS+=-L/opt/ros/indigo/lib/ 
-LXXLIBS+=-lroscpp -limage_transport -lrosconsole
+#CXXDEFINE=-DUSE_ROS
+#LXXLIBS+=-L/opt/ros/indigo/lib/ 
+#LXXLIBS+=-lroscpp -limage_transport -lrosconsole
 #----------ROS END 
+
+#----------OPENCV START: uncomment the following lines if you want to use OPENCV
+#CXXDEFINE=-DUSE_OPENCV
+#LXXLIBS+=-g `pkg-config opencv --libs` 
+#LXXLIBS+=-lroscpp -limage_transport -lrosconsole
+#----------OPENCV END 
 
 COPY_ETC_CMD=../etc/copy.sh
 COPY_ETC_SRC=../etc

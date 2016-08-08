@@ -15,7 +15,9 @@ extern "C" {
 #include "color.h"
 }
 
+#ifdef USE_ROS
 static CRawImage *rosImage;
+#endif
 
 //-----------------------------------------------------------------------------
 CCamera::CCamera()
@@ -41,6 +43,10 @@ CCamera::~CCamera()
 	stop = true;
 #ifdef USE_ROS
 	while (running) usleep(100000);
+#endif
+#ifdef USE_OPENCV
+	openCVDevice->release();
+	delete openCVDevice;
 #endif
 	close_v4l2(videoIn);
 	free(videoIn);
@@ -135,6 +141,27 @@ int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
 	pthread_create(rosThread,NULL,&rosLoop,(void*)this);
 	#endif
 
+	#ifdef USE_OPENCV
+	if (strlen(deviceName)==1){
+		openCVDevice = new cv::VideoCapture(atoi(deviceName));
+	}else{
+		openCVDevice = new cv::VideoCapture(deviceName);
+	}
+	if(!openCVDevice->isOpened()){
+		fprintf(stderr,"Cannot init camera device %s.\n",deviceName);
+		return -1; 
+	}
+	cv::Mat frame;
+	if (!openCVDevice->read(frame)){
+		fprintf(stderr,"Cannot read from camera device %s.\n",deviceName);
+		return -1; 
+	}
+	*wi = frame.cols;
+	*he = frame.rows;
+	cameraType = CT_OPENCV;
+	printf("OPENCV\n");
+	#endif
+
 	if (cameraType == CT_WEBCAM){
 		int ret = init_videoIn(videoIn,(char *)deviceName, wi,he,fps,format,grabemethod,avifilename);		
 		if (ret < 0) {
@@ -227,6 +254,7 @@ int CCamera::saveConfig(const char* filename)
 
 int CCamera::renewImage(CRawImage* image,bool move)
 {
+	cameraType = CT_OPENCV;
 	if (cameraType == CT_WEBCAM){
 		if (move){
 			int ret = uvcGrab(videoIn);
@@ -286,6 +314,19 @@ int CCamera::renewImage(CRawImage* image,bool move)
 	{
 		//TODO implement semaphores here 
 		memcpy(image->data,rosImage->data,rosImage->size);
+		return 0;
+	}
+	#endif
+	#ifdef USE_OPENCV
+	if (cameraType == CT_OPENCV)
+	{
+		cv::Mat img;
+		if (!openCVDevice->read(img)){
+			fprintf(stderr,"Cannot read from camera.\n");
+			return -1; 
+		}
+		//TODO eventual conversions
+		memcpy(image->data,img.data,image->size);
 		return 0;
 	}
 	#endif
