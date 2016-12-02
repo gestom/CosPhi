@@ -11,6 +11,7 @@ CPheroField::CPheroField(int wi,int he,float evapor,float diffuse,float influ)
 	height = he;
 	size = width*height;
 	data = (float*)calloc(size,sizeof(float));
+	tmpData = (float*)calloc(size,sizeof(float));
 }
 
 CPheroField::~CPheroField()
@@ -18,11 +19,13 @@ CPheroField::~CPheroField()
 	free(lastX);
 	free(lastY);
 	free(data);
+	free(tmpData);
 }
 
 void CPheroField::clear()
 {
 	memset(data,0,size*sizeof(float));
+	memset(tmpData,0,size*sizeof(float));
 }
 
 void CPheroField::addTo(int x, int y,int id,int num,int radius)
@@ -110,8 +113,10 @@ void CPheroField::recompute()
 	for (int i = 0;i<size;i++) data[i]=data[i]*decay;
 	if (diffusion > 0.0){
 		float diffuse = pow(2,-timex/1000000.0/diffusion);
+		diffuse = 1.0;
 		for (int i = width+1;i<size;i++){
 			if (i%width == 0) i++;
+			//tmpData[i-width] = data[i];
 			diffH = (data[i-1] - data[i])/2;
 			data[i] += diffH*(1-diffuse);
 			diffV = (data[i-width] - data[i])/2;
@@ -120,6 +125,7 @@ void CPheroField::recompute()
 			data[i-width] -= diffV*(1-diffuse);
 		}
 	}
+	//memcpy(data,tmpData,size*sizeof(float));
 	//printf("Recompute took %.0f %f\n",timer.getTime()-timex,diffuse);
 	timer.reset();
 	timer.start();
