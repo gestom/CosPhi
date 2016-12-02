@@ -10,23 +10,16 @@ CGui::CGui(int *wi,int *he,bool dualMonitor)
 	sdlWindow = NULL;
 	height = *he;
 	width = *wi ;
-	sdlWindow = SDL_CreateWindow( "Wnd2", SDL_WINDOWPOS_CENTERED_DISPLAY(1), SDL_WINDOWPOS_CENTERED_DISPLAY(1), width,height, SDL_WINDOW_FULLSCREEN );
+	if (dualMonitor)
+	{
+		sdlWindow = SDL_CreateWindow( "Pheromone", SDL_WINDOWPOS_CENTERED_DISPLAY(1), SDL_WINDOWPOS_CENTERED_DISPLAY(1), width,height, SDL_WINDOW_FULLSCREEN );
+	}else{
+		sdlWindow = SDL_CreateWindow( "Pheromone", SDL_WINDOWPOS_CENTERED_DISPLAY(0), SDL_WINDOWPOS_CENTERED_DISPLAY(0), width,height, 0 );
+	}
 	screen = SDL_GetWindowSurface(sdlWindow);
 	SDL_GetWindowSize(sdlWindow,wi,he);
 	height = *he;
 	width = *wi;
-	printf("%i %i\n",*wi,*he);
-	if (dualMonitor)
-	{
-		height = *he;
-		width = *wi ;
-		//screen = SDL_SetVideoMode(width,height,24,SDL_HWSURFACE|SDL_NOFRAME); 
-	}else{
-		//const SDL_VideoInfo* info = SDL_GetVideoInfo();
-		//*he = height = info->current_h;
-		//*wi = width = info->current_w;
-		//screen = SDL_SetVideoMode(width,height,24,SDL_FULLSCREEN); 
-	}
 	
 	if (screen == NULL)fprintf(stderr,"Couldn't set SDL video mode: %s\n",SDL_GetError());
 	//SDL_WM_SetCaption("CosPhi-Phero","Artificial Pheromone System");
@@ -52,6 +45,7 @@ void CGui::displayInitialPositions(int x, int y,float phi,int id,int radius)
 {
 	int iix,iiy;
 	Uint8 *bufp;
+	int rat = screen->pitch/width;
 	for (int ix = -radius;ix<radius;ix++)
 	{
 		iix = ix +x;
@@ -60,7 +54,7 @@ void CGui::displayInitialPositions(int x, int y,float phi,int id,int radius)
 			iiy = iy +y;
 			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
 			{
-				bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*3;
+				bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*rat;
 				float dist = sqrt(ix*ix+iy*iy);
 				float ang = atan2(iy,ix)-phi;
 				if (ang > +M_PI) ang-=2*M_PI;
@@ -75,6 +69,7 @@ void CGui::displayRobot(int x, int y,float phi,int id,int radius)
 {
 	int iix,iiy;
 	Uint8 *bufp;
+	int rat = screen->pitch/width;
 	for (int ix = -radius;ix<radius;ix++)
 	{
 		iix = ix +x;
@@ -83,7 +78,7 @@ void CGui::displayRobot(int x, int y,float phi,int id,int radius)
 			iiy = iy +y;
 			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
 			{
-				bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*3;
+				bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*rat;
 				float dist = sqrt(ix*ix+iy*iy);
 				float ang = atan2(iy,ix)-phi;
 				if (ang > +M_PI) ang-=2*M_PI;
@@ -103,6 +98,7 @@ void CGui::displayPattern(int x, int y, int radius)
 {
 	Uint8 *bufp;
 	int iix,iiy;
+	int rat = screen->pitch/width; 
 	for (int ix = -radius;ix<radius+1;ix++)
 	{
 		iix = ix +x;
@@ -111,7 +107,7 @@ void CGui::displayPattern(int x, int y, int radius)
 			iiy = iy +y;
 			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
 			{
-				bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*3;
+				bufp = (Uint8 *)screen->pixels + iiy*screen->pitch + iix*rat;
 				float dist = sqrt(ix*ix+iy*iy);
 				if ((dist < radius && dist > radius*0.75) || dist < radius * 0.25) bufp[0]=bufp[1]=bufp[2]=255; else bufp[0]=bufp[1]=bufp[2]=0;
 			}
