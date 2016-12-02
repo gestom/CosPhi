@@ -7,6 +7,7 @@
 #include <CTimer.h>
 #include <math.h>
 #include <CPheroField.h>
+#include <CCue.h>
 
 /**
 @author Tom Krajnik
@@ -24,6 +25,8 @@ public:
 
   /*combine pheromones into a grayscale image according to their influence*/
   void combinePheromones(CPheroField *p[],int numPheromones,int color);
+  void addCues(CCue *c[],int number);
+  void displayCircle(int x, int y, int radius,int intensity);
 
   /*saving and loading - provide a name*/
   void saveBmp(const char* name);

@@ -76,6 +76,33 @@ void CRawImage::combinePheromones(CPheroField *p[],int number,int color)
 	}
 }
 
+void CRawImage::addCues(CCue *c[],int number)
+{
+	for (int i = 0;i<number;i++) displayCircle(c[i]->x,c[i]->y,c[i]->diameter/2.0,c[i]->intensity);
+}
+
+void CRawImage::displayCircle(int x, int y, int radius,int intensity)
+{
+	unsigned char *bufp;
+	int iix,iiy;
+	if (intensity < 0) intensity = 0;
+	if (intensity > 255) intensity = 255;
+	for (int ix = -radius;ix<radius+1;ix++)
+	{
+		iix = ix +x;
+		for (int iy = -radius;iy<radius+1;iy++)
+		{
+			iiy = iy +y;
+			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
+			{
+				bufp = data + (iiy*width + iix)*3;
+				float dist = sqrt(ix*ix+iy*iy);
+				if (dist < radius) bufp[0]=bufp[1]=bufp[2]=intensity; else bufp[0]=bufp[1]=bufp[2]=0;
+			}
+		}
+	}
+}
+
 int CRawImage::getSaveNumber()
 {
 	char name[100];
