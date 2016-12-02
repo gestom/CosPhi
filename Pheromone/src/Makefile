@@ -5,8 +5,8 @@ SUBDIRS+=main
 
 OBJS=$(wildcard ../obj/*.o)
 LXXLIBS+=-L/usr/local/lib
-LXXLIBS+=-lSDL
-LXXLIBS+=-lSDL_ttf
+LXXLIBS+=-lSDL2
+LXXLIBS+=-lSDL2_ttf
 
 COPY_ETC_CMD=../etc/copy.sh
 COPY_ETC_SRC=../etc

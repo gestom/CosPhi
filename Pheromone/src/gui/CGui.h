@@ -3,8 +3,9 @@
 
 #include "CRawImage.h"
 #include <math.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+//#include <SDL/SDL.h>
 
 /*
 author Tom Krajnik tkrajnik@lincoln.ac.uk
@@ -45,6 +46,7 @@ public:
 
 private:
   SDL_Surface *screen;
+  SDL_Window *sdlWindow;
   int width,height;
   TTF_Font *smallFont;
   int averageTime,maxTime,numStats;	

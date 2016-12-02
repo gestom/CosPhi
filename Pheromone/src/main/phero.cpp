@@ -6,7 +6,6 @@
 #include "CRawImage.h"
 #include "CPheroField.h"
 #include "CPositionClient.h"
-#include <SDL/SDL.h>
 
 #define MAX_ROBOTS 100
 
@@ -19,15 +18,15 @@ if you will use this software for your research, please cite the aforementioned 
 */
 
 /*---------The following values need to be adjusted by the user during the system set-up -------------*/
-float arenaLength     = 0.92;	//screen width (or arena length) in meters
-float arenaWidth      = 0.52;	//screen height (or arena width) in meters
-float cameraHeight    = 0.85;	//camera height above the screen
-float robotHeight     = 0.025;	//height of the pattern from robot's base
-float robotDiameter   = 0.04;	//robot diameter
-char whyconIP[] = "localhost";	//IP of a machine that runs the localization
-bool dualMonitor      = true;	//do you want the pheromone system to be displayed on a secondary screen?
-int  imageWidth= 1920;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
-int  imageHeight = 1080;	//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+float arenaLength     	= 0.92;		//screen width (or arena length) in meters
+float arenaWidth      	= 0.52;		//screen height (or arena width) in meters
+float cameraHeight    	= 0.85;		//camera height above the screen
+float robotHeight     	= 0.025;	//height of the pattern from robot's base
+float robotDiameter   	= 0.04;		//robot diameter
+char whyconIP[] 	= "localhost";	//IP of a machine that runs the localization
+bool dualMonitor      	= true;		//do you want the pheromone system to be displayed on a secondary screen?
+int  imageWidth		= 1920;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+int  imageHeight 	= 1020;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
 /*---------The previous values need to be adjusted by the user during the system set-up -------------*/
 
 
@@ -65,7 +64,7 @@ bool stop = false;
 SDL_Event event;
 int keyNumber = 1000;
 Uint8 lastKeys[1000];
-Uint8 *keys = NULL;
+const Uint8 *keys = NULL;
 bool leftMousePressed = false;
 bool rightMousePressed = false;
 
@@ -107,7 +106,7 @@ bool randomPlacement()
 /*process mouse and keyboard events coming from the GUI*/
 void processEvents()
 {
-	keys = SDL_GetKeyState(&keyNumber);
+	keys = SDL_GetKeyboardState(&keyNumber);
 	SDL_ShowCursor(leftMousePressed||rightMousePressed);
 
 	//mouse events - allows to use the mouse to draw pheromone track 
@@ -125,8 +124,8 @@ void processEvents()
 	}
 
 	//terminate 
-	if (keys[SDLK_ESCAPE]) stop = true;
-	if ((keys[SDLK_LCTRL] || keys[SDLK_RCTRL]) && keys[SDLK_c]) stop = true;
+	if (keys[SDL_SCANCODE_ESCAPE]) stop = true;
+	if ((keys[SDL_SCANCODE_LCTRL] || keys[SDL_SCANCODE_RCTRL]) && keys[SDL_SCANCODE_C]) stop = true;
 
 	//press space to start the experiment
 	if (keys[SDLK_SPACE] && lastKeys[SDLK_SPACE] == false && calibration == false){

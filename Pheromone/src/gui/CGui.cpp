@@ -4,22 +4,32 @@
 
 CGui::CGui(int *wi,int *he,bool dualMonitor)
 {
-	SDL_Init(SDL_INIT_VIDEO|SDL_HWSURFACE|SDL_HWACCEL);
+	SDL_Init(SDL_INIT_VIDEO);
 	if(TTF_Init() == -1)printf("Unable to initialize SDL_ttf: %s\n", TTF_GetError());
 	screen = NULL;
+	sdlWindow = NULL;
+	height = *he;
+	width = *wi ;
+	sdlWindow = SDL_CreateWindow( "Wnd2", SDL_WINDOWPOS_CENTERED_DISPLAY(1), SDL_WINDOWPOS_CENTERED_DISPLAY(1), width,height, SDL_WINDOW_FULLSCREEN );
+	screen = SDL_GetWindowSurface(sdlWindow);
+	SDL_GetWindowSize(sdlWindow,wi,he);
+	height = *he;
+	width = *wi;
+	printf("%i %i\n",*wi,*he);
 	if (dualMonitor)
 	{
 		height = *he;
 		width = *wi ;
-		screen = SDL_SetVideoMode(width,height,24,SDL_HWSURFACE|SDL_NOFRAME); 
+		//screen = SDL_SetVideoMode(width,height,24,SDL_HWSURFACE|SDL_NOFRAME); 
 	}else{
-		const SDL_VideoInfo* info = SDL_GetVideoInfo();
-		*he = height = info->current_h;
-		*wi = width = info->current_w;
-		screen = SDL_SetVideoMode(width,height,24,SDL_FULLSCREEN); 
+		//const SDL_VideoInfo* info = SDL_GetVideoInfo();
+		//*he = height = info->current_h;
+		//*wi = width = info->current_w;
+		//screen = SDL_SetVideoMode(width,height,24,SDL_FULLSCREEN); 
 	}
+	
 	if (screen == NULL)fprintf(stderr,"Couldn't set SDL video mode: %s\n",SDL_GetError());
-	SDL_WM_SetCaption("CosPhi-Phero","Artificial Pheromone System");
+	//SDL_WM_SetCaption("CosPhi-Phero","Artificial Pheromone System");
 	smallFont =  TTF_OpenFont("../etc/DejaVuSansCondensed.ttf",14);
 	if(!smallFont)printf("Unable to open font: %s\n", TTF_GetError());
 	TTF_SetFontStyle(smallFont, TTF_STYLE_NORMAL);
@@ -217,6 +227,9 @@ void CGui::saveScreen(int a)
 
 void CGui::update()
 {
-//  SDL_UpdateRect(screen,0,0,0,0);
-  SDL_Flip(screen);
+	//  SDL_UpdateRect(screen,0,0,0,0);
+	//SDL_Flip(screen);
+	// SDL_(screen);
+	//SDL_RenderPresent(screen)
+	SDL_UpdateWindowSurface(sdlWindow);
 }
