@@ -5,6 +5,10 @@
 CGui::CGui(int *wi,int *he,bool dualMonitor)
 {
 	SDL_Init(SDL_INIT_VIDEO|SDL_HWSURFACE|SDL_HWACCEL);
+	window = SDL_CreateWindow("An SDL2 window",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,*wi,*he,SDL_HWSURFACE|SDL_NOFRAME);
+
+
+
 	if(TTF_Init() == -1)printf("Unable to initialize SDL_ttf: %s\n", TTF_GetError());
 	screen = NULL;
 	if (dualMonitor)
