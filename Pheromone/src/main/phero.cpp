@@ -26,8 +26,8 @@ float robotHeight     = 0.025;	//height of the pattern from robot's base
 float robotDiameter   = 0.04;	//robot diameter
 char whyconIP[] = "localhost";	//IP of a machine that runs the localization
 bool dualMonitor      = true;	//do you want the pheromone system to be displayed on a secondary screen?
-int  imageWidth= 1280;//1920;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
-int  imageHeight = 720;//1080;	//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+int  imageWidth= 1920;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+int  imageHeight = 1080;	//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
 /*---------The previous values need to be adjusted by the user during the system set-up -------------*/
 
 
@@ -209,7 +209,7 @@ int main(int argc,char* argv[])
 	numBots = atoi(argv[2]);
 	float evaporation = atof(argv[1]);
 
-	float diffusion = 0;
+	float diffusion = 0.0;
 	float influence = 1.0;
 
 	/*initialize the pheromone fields

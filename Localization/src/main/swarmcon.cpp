@@ -261,8 +261,8 @@ void processKeys()
 	if (keys[SDLK_c] && shiftPressed == true) camera->changeContrast(1);
 	if (keys[SDLK_g] && shiftPressed == false) camera->changeGain(-1);
 	if (keys[SDLK_g] && shiftPressed == true) camera->changeGain(1);
-	if (keys[SDLK_e] && shiftPressed == false) camera->changeExposition(-1);
-	if (keys[SDLK_e] && shiftPressed == true) camera->changeExposition(1);
+	if (keys[SDLK_e] && shiftPressed == false) camera->changeExposition(-100);
+	if (keys[SDLK_e] && shiftPressed == true) camera->changeExposition(100);
 	if (keys[SDLK_b] && shiftPressed == false) camera->changeBrightness(-1);
 	if (keys[SDLK_b] && shiftPressed == true) camera->changeBrightness(1);
 
@@ -370,7 +370,7 @@ int main(int argc,char* argv[])
 				if (currentSegmentArray[i].x == lastSegmentArray[i].x) numStatic++;
 			}
 		}
-		printf("Pattern detection time: %i us. Found: %i Static: %i. Clients %i.\n",globalTimer.getTime(),numFound,numStatic,server->numConnections);
+		//printf("Pattern detection time: %i us. Found: %i Static: %i. Clients %i.\n",globalTimer.getTime(),numFound,numStatic,server->numConnections);
 		evalTime = timer.getTime();
 
 		//pack up the data for sending to other systems (e.g. artificial pheromone one)
@@ -420,7 +420,7 @@ int main(int argc,char* argv[])
 			//for real camera, continue with capturing of another frame even if not all robots have been found
 			moveOne = moveVal;
 			for (int i = 0;i<numBots;i++){
-			       	//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+			       	printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
 			       	if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
 			}
 			if (moveVal > 0) frameID++;
