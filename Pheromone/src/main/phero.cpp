@@ -232,6 +232,8 @@ int main(int argc,char* argv[])
 	globalTimer.pause();
 	CTimer performanceTimer;
 	performanceTimer.start();
+	CCue *cueArray[10];
+	cueArray[0] = new CCue(1000,1000,100,200);
 	while (stop == false){
 		//get the latest data from localization system and check if the calibration finished
 		stop = (globalTimer.getTime()/1000000>experimentTime);
@@ -274,51 +276,65 @@ int main(int argc,char* argv[])
 			/*save positions for later analysis*/
 			logRobotPositions();
 		}
-
 		//convert the pheromone field to grayscale image
-		image->combinePheromones(pherofield,3,0);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc. 
-		gui->drawImage(image);
-		
-	
-		//experiment preparation phase 2: draw initial and real robot positions
-		initRadius = robotDiameter/arenaLength*imageWidth/2;	//calculate robot radius in pixels, so that it matches the real robot dimensions
-		for (int i = 0;i<numBots && placement;i++)
+		image->combinePheromones(pherofield,3,0);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc.
+
+
+		//handle cues 
+		int j = 0;
+		for (int i = 0;i<numBots;i++)
 		{
-			 gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius+10);
-			 if (client->exists(i) && calibration == false)  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
+			float dx = client->getX(i)*imageWidth/arenaLength-cueArray[j]->x;
+			float dy = client->getY(i)*imageHeight/arenaWidth-cueArray[j]->y;
+			float dist = sqrt(dx*dx+dy*dy);
+			printf("%.3f %.3f %i %i\n",client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,cueArray[j]->x,cueArray[j]->y);
+			printf("%.3f %.3f %i %i\n",client->getX(i),client->getY(i),cueArray[j]->x,cueArray[j]->y);
+			if (dist < cueArray[j]->diameter) cueArray[j]->diameterRate = -10; else cueArray[j]->diameterRate = 0;
 		}
-	
-		/*this chunk of code is used to determine lag*/
-		/*float t = globalTimer.getTime()/1000000.0;	
-		for (int i = 0;i<numBots;i++){
-			if (client->exists(i)){
-				gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
-				float dx = fabs(100+50*t-client->getX(i)*imageWidth/arenaLength);
-				float dy = fabs(imageHeight/2-client->getY(i)*imageHeight/arenaWidth);
-				printf("Distance: %.3f Lag: %f \n",sqrt(dx*dx+dy*dy),sqrt(dx*dx+dy*dy)/50);
+		cueArray[j]->recompute();
+		image->addCues(cueArray,1); 
+		gui->drawImage(image);
+
+
+			//experiment preparation phase 2: draw initial and real robot positions
+			initRadius = robotDiameter/arenaLength*imageWidth/2;	//calculate robot radius in pixels, so that it matches the real robot dimensions
+			for (int i = 0;i<numBots && placement;i++)
+			{
+				gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius+10);
+				if (client->exists(i) && calibration == false)  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
 			}
+
+			/*this chunk of code is used to determine lag*/
+			/*float t = globalTimer.getTime()/1000000.0;	
+			  for (int i = 0;i<numBots;i++){
+			  if (client->exists(i)){
+			  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
+			  float dx = fabs(100+50*t-client->getX(i)*imageWidth/arenaLength);
+			  float dy = fabs(imageHeight/2-client->getY(i)*imageHeight/arenaWidth);
+			  printf("Distance: %.3f Lag: %f \n",sqrt(dx*dx+dy*dy),sqrt(dx*dx+dy*dy)/50);
+			  }
+			  }
+			  gui->displayPattern(100+t*50,imageHeight/2,initRadius);*/
+
+
+			//experiment preparation phase 1: draw calibration, contact WhyCon to calibrate and draw initial robot positions
+			if (calibration){
+				int calibRadius = initRadius/(cameraHeight-robotHeight)*cameraHeight;		//slightly enlarge to compensate for the higher distance from the camera
+				gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected,calibRadius,performanceTimer.getTime()/1000);
+				client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight);
+				client->checkForData();
+			}else if (placement){
+				gui->displayPlacementInfo(client->numSearched,client->numDetected);
+			}
+			calibration = client->calibrated==false;
+
+
+			//update GUI etc
+			gui->update();
+			processEvents();
+			printf("GUI refresh: %i ms, updates %i frame delay %.0f ms\n",performanceTimer.getTime()/1000,client->updates,(performanceTimer.getRealTime()-client->frameTime)/1000.0);
+			performanceTimer.reset();
 		}
-		gui->displayPattern(100+t*50,imageHeight/2,initRadius);*/
-
-
-		//experiment preparation phase 1: draw calibration, contact WhyCon to calibrate and draw initial robot positions
-		if (calibration){
-			int calibRadius = initRadius/(cameraHeight-robotHeight)*cameraHeight;		//slightly enlarge to compensate for the higher distance from the camera
-			gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected,calibRadius,performanceTimer.getTime()/1000);
-			client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight);
-			client->checkForData();
-		}else if (placement){
-			 gui->displayPlacementInfo(client->numSearched,client->numDetected);
-		}
-		calibration = client->calibrated==false;
-
-
-		//update GUI etc
-		gui->update();
-		processEvents();
-		printf("GUI refresh: %i ms, updates %i frame delay %.0f ms\n",performanceTimer.getTime()/1000,client->updates,(performanceTimer.getRealTime()-client->frameTime)/1000.0);
-		performanceTimer.reset();
-	}
 	fclose(robotPositionLog);
 	if (globalTimer.getTime()/1000000<experimentTime) {
 		remove(logFileName); 
