@@ -54,15 +54,16 @@ CRawImage::CRawImage(unsigned char *datai,int wi,int he)
 	numSaved = 0;
 }
 
-void CRawImage::combinePheromones(CPheroField *p[],int number,int color,int pheroMax)
+void CRawImage::combinePheromones(CPheroField *p[],int number,int color,float pheroMax)
 {
 	float v;
+	int maxPher = (int)(255*pheroMax);
 	if (color > 0){
 		for (int i = 0;i<size;i+=3)
 		{	
 			v = 0;
 			for (int j = 0;j<number;j++) v+=p[j]->data[i/3]*p[j]->influence;
-			data[i+color%3]=fmax(fmin(v,255),1);
+			data[i+color%3]=fmax(fmin(v,maxPher),1);
 			data[i+(color+1)%3]=0;
 			data[i+(color+2)%3]=0;
 		}
@@ -71,7 +72,7 @@ void CRawImage::combinePheromones(CPheroField *p[],int number,int color,int pher
 		{
 			v = 0;
 			for (int j = 0;j<number;j++) v+=p[j]->data[i/3]*p[j]->influence;
-			data[i+1]=data[i+2]=data[i]=fmax(fmin(v,pheroMax),1);
+			data[i+1]=data[i+2]=data[i]=fmax(fmin(v,maxPher),1);
 		}
 	}
 }
@@ -81,7 +82,7 @@ void CRawImage::addCues(CCue *c[],int number)
 	for (int i = 0;i<number;i++) displayCue(c[i]->x*width,c[i]->y*height,c[i]->diameter/2.0,c[i]->intensity);
 }
 
-void CRawImage::displayCue(int x, int y, int radius,int intensity)
+void CRawImage::displayCue(int x, int y, int radius,float intensity)
 {
 	unsigned char *bufp;
 	int iix,iiy;
@@ -98,7 +99,7 @@ void CRawImage::displayCue(int x, int y, int radius,int intensity)
 			{
 				bufp = data + (iiy*width + iix)*3;
 				float dist = sqrt(ix*ix+iy*iy);
-				intens = intensity;
+				intens = intensity*255;
 				//if (dist > 0.8*radius) intens = intensity*(1.0-(dist/radius-0.8)/0.2);
 				if (dist < radius) bufp[0]=bufp[1]=bufp[2]=intens;// else bufp[0]=bufp[1]=bufp[2]=0;
 			}

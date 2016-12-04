@@ -35,7 +35,7 @@ class CPheroField
 
 		/*inject pheromone around every pixel on a line
 		  between the last and current injected position*/
-		void addTo(int x, int y,int id,int num,int radius = 25);
+		void addTo(int x, int y,int id,int num,int radius = 30);
 
 		/*read pheromone value at a given spot*/
 		float get(int x, int y);

@@ -9,10 +9,26 @@ CCue::CCue(float xi,float yi,float intens,float diam, float diamRate,float inten
 	intensity = intens;
 	diameterRate = diamRate;
 	intensityRate = intensRate;
+	robots = 0;
 }
 
 CCue::~CCue()
 {
+}
+
+void CCue::addRobot()
+{
+	robots++;
+}
+
+int CCue::getRobots()
+{
+	return robots;
+}
+
+void CCue::resetRobots()
+{
+	robots = 0;
 }
 
 void CCue::recompute()

@@ -18,8 +18,10 @@ class CCue
 		CCue(float xi,float yi,float intensity,float diameter, float diameterRate = 0,float intesityRate = 0);
 		~CCue();
 
-		/*apply diminishing*/
 		void recompute();
+		void addRobot();
+		int getRobots();
+		void resetRobots();
 
 		float intensity;		//cue intensity 
 		float diameter;			//cue diameter
@@ -30,6 +32,7 @@ class CCue
 		float x,y;
 
 		CTimer timer;
+		int robots;
 };
 
 #endif
