@@ -32,6 +32,7 @@ float fieldWidth = 1.00;
 float robotDiameter = 0.00;		//diameter of the pattern's outer white circle 
 float robotHeight = 0.00;		//height of the robot (pattern height)	
 float cameraHeight = 1.00;		//height of the camera above the field 
+float calibrationPatternOffset = 0.00;	//distance of the calibration patterns from the field edge 
 //----------------------------------------------------------------------------
 
 //Max GUI dimensions 
@@ -50,8 +51,8 @@ CTransformation *trans;				//allows to transform from image to metric coordinate
 
 /*variables related to (auto) calibration*/
 const int calibrationSteps = 20;			//how many measurements to average to estimate calibration pattern position (manual calib)
-const int autoCalibrationSteps = 30; 			//how many measurements to average to estimate calibration pattern position (automatic calib)  
-const int autoCalibrationPreSteps = 10;		//how many measurements to discard before starting to actually auto-calibrating (automatic calib)  
+const int autoCalibrationSteps = 10; 			//how many measurements to average to estimate calibration pattern position (automatic calib)  
+const int autoCalibrationPreSteps = 5;		//how many measurements to discard before starting to actually auto-calibrating (automatic calib)  
 int calibNum = 5;				//number of objects acquired for calibration (5 means calibration winished inactive)
 STrackedObject calib[5];			//array to store calibration patterns positions
 STrackedObject calibTmp[calibrationSteps];	//array to store several measurements of a given calibration pattern
@@ -169,7 +170,7 @@ void autocalibration()
 				calib[i].y = calib[i].y/(autoCalibrationSteps-autoCalibrationPreSteps);
 				calib[i].z = calib[i].z/(autoCalibrationSteps-autoCalibrationPreSteps);
 			}
-			trans->calibrate2D(calib,fieldLength,fieldWidth,robotDiameter/2,robotHeight,cameraHeight);
+			trans->calibrate2D(calib,fieldLength,fieldWidth,robotDiameter/2+calibrationPatternOffset,robotHeight,cameraHeight);
 			trans->calibrate3D(calib,fieldLength,fieldWidth);
 			trans->calibrate4D(calib,fieldLength,fieldWidth);
 			calibNum++;
@@ -335,6 +336,7 @@ int main(int argc,char* argv[])
 
 	int frameID =0;
 	int64_t frameTime = 0;
+	int64_t lastFrameTime = 0;
 	while (stop == false)
 	{
 		if (useGui){
@@ -344,6 +346,7 @@ int main(int argc,char* argv[])
 		}
 		numFound = numStatic = 0;
 		timer.reset();
+		lastFrameTime = frameTime;
 		frameTime = globalTimer.getRealTime();
 		//track the robots found in the last attempt 
 		for (int i = 0;i<numBots;i++){
@@ -368,6 +371,12 @@ int main(int argc,char* argv[])
 				objectArray[i] = trans->transform(currentSegmentArray[i],false);
 				numFound++;
 				if (currentSegmentArray[i].x == lastSegmentArray[i].x) numStatic++;
+				STrackedObject lastObject = trans->transform(lastSegmentArray[i],false);
+				objectArray[i].vx = (objectArray[i].x-lastObject.x)/((frameTime-lastFrameTime)/1000000.0);
+				objectArray[i].vy = (objectArray[i].y-lastObject.y)/((frameTime-lastFrameTime)/1000000.0);
+				objectArray[i].s = sqrt(objectArray[i].vx*objectArray[i].vx+objectArray[i].vy*objectArray[i].vy);
+			}else{
+			
 			}
 		}
 		//printf("Pattern detection time: %i us. Found: %i Static: %i. Clients %i.\n",globalTimer.getTime(),numFound,numStatic,server->numConnections);
@@ -393,6 +402,7 @@ int main(int argc,char* argv[])
 			fieldWidth = server->fieldWidth;
 			cameraHeight = server->cameraHeight;
 			robotDiameter = server->robotDiameter;
+			calibrationPatternOffset = server->calibOffset;
 			robotHeight = server->robotHeight;
 		}
 
@@ -420,8 +430,8 @@ int main(int argc,char* argv[])
 			//for real camera, continue with capturing of another frame even if not all robots have been found
 			moveOne = moveVal;
 			for (int i = 0;i<numBots;i++){
-			       	printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
-			       	if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+			       	printf("Frame %i Object %03i %03i %.5f %.5f %.5f %.5f %.5f %.5f\n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw,objectArray[i].vx,objectArray[i].vy,objectArray[i].s);
+			       	if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f V: %.5f %.5f\n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw,objectArray[i].vx,objectArray[i].vy);
 			}
 			if (moveVal > 0) frameID++;
 		}else{

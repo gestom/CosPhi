@@ -30,15 +30,19 @@ public:
   int init(const char *ip,const char* port);
 
   /*ask WhyCon to calibrate its coordinate system given the provided parameters*/
-  void calibrate(int numRobots,float fieldLength,float fieldWidth,float camHeight,float robotDiameter,float robotHeight);
+  void calibrate(int numRobots,float fieldLength,float fieldWidth,float camHeight,float robotDiameter,float robotHeight,float calibOffset);
 
   /*read incoming messages*/
   int checkForData();
+
+  int getPheroTime(int i);
+  void setPheroTime(int i,int t);
 
   /*get positions, orientations and latest detection information 
    of the individual robots provided by the WhyCon system*/
   float getX(int i);
   float getY(int i);
+  float getSpeed(int i);
   float getPhi(int i);
   float getTime(int i);
   bool exists(int i);
@@ -55,12 +59,14 @@ public:
   bool calibrated;
 
 private:
+  float sArray[MAX_POSITIONS];
   float tArray[MAX_POSITIONS];
   float xArray[MAX_POSITIONS];
   float yArray[MAX_POSITIONS];
   float pArray[MAX_POSITIONS];
   bool vArray[MAX_POSITIONS];
   int idArray[MAX_POSITIONS];
+  int pheroTime[MAX_POSITIONS];
 
   int robotOrder;
   CTimer timer;

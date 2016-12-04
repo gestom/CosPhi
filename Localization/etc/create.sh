@@ -43,4 +43,4 @@ echo $id $r1 $r0 >>ID.txt
 id=$(($id+1))
 done
 done
-convert result.png -density 100x100 result_$h\_$v.pdf
+convert result.png -density 200x200 result_$h\_$v.pdf

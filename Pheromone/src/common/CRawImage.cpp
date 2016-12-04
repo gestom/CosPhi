@@ -54,7 +54,7 @@ CRawImage::CRawImage(unsigned char *datai,int wi,int he)
 	numSaved = 0;
 }
 
-void CRawImage::combinePheromones(CPheroField *p[],int number,int color)
+void CRawImage::combinePheromones(CPheroField *p[],int number,int color,int pheroMax)
 {
 	float v;
 	if (color > 0){
@@ -71,14 +71,40 @@ void CRawImage::combinePheromones(CPheroField *p[],int number,int color)
 		{
 			v = 0;
 			for (int j = 0;j<number;j++) v+=p[j]->data[i/3]*p[j]->influence;
-			data[i+1]=data[i+2]=data[i]=fmax(fmin(v,255),1);
+			data[i+1]=data[i+2]=data[i]=fmax(fmin(v,pheroMax),1);
 		}
 	}
 }
 
 void CRawImage::addCues(CCue *c[],int number)
 {
-	for (int i = 0;i<number;i++) displayCircle(c[i]->x,c[i]->y,c[i]->diameter/2.0,c[i]->intensity);
+	for (int i = 0;i<number;i++) displayCue(c[i]->x*width,c[i]->y*height,c[i]->diameter/2.0,c[i]->intensity);
+}
+
+void CRawImage::displayCue(int x, int y, int radius,int intensity)
+{
+	unsigned char *bufp;
+	int iix,iiy;
+	if (intensity < 0) intensity = 0;
+	if (intensity > 255) intensity = 255;
+	int intens = intensity;
+	for (int ix = -radius;ix<radius+1;ix++)
+	{
+		iix = ix +x;
+		for (int iy = -radius;iy<radius+1;iy++)
+		{
+			iiy = iy +y;
+			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
+			{
+				bufp = data + (iiy*width + iix)*3;
+				float dist = sqrt(ix*ix+iy*iy);
+				intens = intensity;
+				//if (dist > 0.8*radius) intens = intensity*(1.0-(dist/radius-0.8)/0.2);
+				if (dist < radius) bufp[0]=bufp[1]=bufp[2]=intens;// else bufp[0]=bufp[1]=bufp[2]=0;
+			}
+		}
+	}
+
 }
 
 void CRawImage::displayCircle(int x, int y, int radius,int intensity)
@@ -97,7 +123,89 @@ void CRawImage::displayCircle(int x, int y, int radius,int intensity)
 			{
 				bufp = data + (iiy*width + iix)*3;
 				float dist = sqrt(ix*ix+iy*iy);
-				if (dist < radius) bufp[0]=bufp[1]=bufp[2]=intensity; else bufp[0]=bufp[1]=bufp[2]=0;
+				if (dist < radius) bufp[0]=bufp[1]=bufp[2]=intensity;// else bufp[0]=bufp[1]=bufp[2]=0;
+			}
+		}
+	}
+}
+
+void CRawImage::displayRobot(int x, int y,float phi,int id,int radius)
+{
+	int iix,iiy;
+	unsigned char *bufp;
+	for (int ix = -radius;ix<radius;ix++)
+	{
+		iix = ix +x;
+		for (int iy = -radius;iy<radius;iy++)
+		{
+			iiy = iy +y;
+			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
+			{
+				bufp = data + (iiy*width + iix)*3;
+				float dist = sqrt(ix*ix+iy*iy);
+				float ang = atan2(iy,ix)-phi;
+				if (ang > +M_PI) ang-=2*M_PI;
+				if (ang < -M_PI) ang+=2*M_PI;
+				if (dist < radius && fabs(ang) > 0.1 && dist > radius-10)
+				{
+					bufp[1]=bufp[2]=0;
+					bufp[0]=255;
+				}
+			}
+		}
+	}
+
+}
+
+
+void CRawImage::displayInitialPositions(int x, int y,float phi,int id,int radius)
+{
+	int iix,iiy;
+	unsigned char *bufp;
+	for (int ix = -radius;ix<radius;ix++)
+	{
+		iix = ix +x;
+		for (int iy = -radius;iy<radius;iy++)
+		{
+			iiy = iy +y;
+			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
+			{
+				bufp = data + (iiy*width + iix)*3;
+				float dist = sqrt(ix*ix+iy*iy);
+				float ang = atan2(iy,ix)-phi;
+				if (ang > +M_PI) ang-=2*M_PI;
+				if (ang < -M_PI) ang+=2*M_PI;
+				if (dist < radius-10 || (fabs(ang) > 0.1 && dist < radius)) bufp[0]=bufp[1]=bufp[2]=id;
+			}
+		}
+	}
+}
+
+void CRawImage::displayCalibrationPatterns(int radius,int offset)
+{
+	int oX = 0;
+	int oY = 0;
+	int xx[] = {radius+oX+offset,radius+oX+offset,width-radius-oX-offset,width-radius-oX-offset};
+	int yy[] = {radius+oY+offset,height-radius-oY-offset,radius+oY+offset,height-radius-oY-offset};
+	for (int corner = 0;corner<4;corner++)displayPattern(xx[corner],yy[corner],radius); 
+}
+
+void CRawImage::displayPattern(int x, int y, int radius)
+{
+	unsigned char *bufp;
+	int iix,iiy;
+//	int rat = screen->pitch/width; 
+	for (int ix = -radius;ix<radius+1;ix++)
+	{
+		iix = ix +x;
+		for (int iy = -radius;iy<radius+1;iy++)
+		{
+			iiy = iy +y;
+			if (iix >= 0 && iix < width && iiy >=0 && iiy < height)
+			{
+				bufp = data + (iiy*width + iix)*3;
+				float dist = sqrt(ix*ix+iy*iy);
+				if ((dist < radius && dist > radius*0.75) || dist < radius * 0.25) bufp[0]=bufp[1]=bufp[2]=255; else bufp[0]=bufp[1]=bufp[2]=0;
 			}
 		}
 	}

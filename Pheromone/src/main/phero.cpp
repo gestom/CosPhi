@@ -26,12 +26,14 @@ float robotDiameter   	= 0.04;		//robot diameter
 char whyconIP[] 	= "localhost";	//IP of a machine that runs the localization
 bool dualMonitor      	= true;		//do you want the pheromone system to be displayed on a secondary screen?
 int  imageWidth		= 1920;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
-int  imageHeight 	= 1020;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+int  imageHeight 	= 1080;		//adjust manually in case of dualMonitor = true, otherwise leave for auto-detection
+float  calibOffset 	= 0.02;		//move the calibration patterns by calibOffset pixels inside of the arena
 /*---------The previous values need to be adjusted by the user during the system set-up -------------*/
 
 
+
 /*---------Adjust the following variables to define your experiment duration, initial conditions etc.------------*/
-int pheroStrength = 50;		//default pheromone strength released by the leader robot
+int pheroStrength = 55;		//default pheromone strength released by the leader robot
 int experimentTime = 180;	//experiment duration is 3 minutes by default
 bool calibration = true;	//re-calibrate the localization system at each start 
 bool placement = true;		//randomly generate initial positions of robots at the experiment start
@@ -40,6 +42,7 @@ int initBorder = 100;		//defines minimal distance of the randomly-generated init
 int initRadius = 50;		//radius of the randomly-generated positions on the display 
 float avoidDistance = 0.10;	//minimal distance to trigger pheromone 2 release - this pheromone causes the leading robot to turn away from an obstacle  
 int leaderID = 0;		//ID of the leader robot
+float pheroTime = 10;		//time of pheromone release
 /*---------Adjust the previous variables to define your experiment duration, initial conditions etc.-------------*/
 
 /*variables read from the command line*/
@@ -106,6 +109,7 @@ bool randomPlacement()
 /*process mouse and keyboard events coming from the GUI*/
 void processEvents()
 {
+//	SDL_PumpEvents();
 	keys = SDL_GetKeyboardState(&keyNumber);
 	SDL_ShowCursor(leftMousePressed||rightMousePressed);
 
@@ -128,26 +132,26 @@ void processEvents()
 	if ((keys[SDL_SCANCODE_LCTRL] || keys[SDL_SCANCODE_RCTRL]) && keys[SDL_SCANCODE_C]) stop = true;
 
 	//press space to start the experiment
-	if (keys[SDLK_SPACE] && lastKeys[SDLK_SPACE] == false && calibration == false){
+	if (keys[SDL_SCANCODE_SPACE] && lastKeys[SDL_SCANCODE_SPACE] == false && calibration == false){
 		placement = false;
 		globalTimer.reset();
 		globalTimer.start();
 		client->resetTime();
+		for (int i = 0;i<numBots;i++)client->setPheroTime(i,-2*pheroTime*1000000);
 	}
-
 	//clear pheromone fields
-	if (keys[SDLK_c]){
+	if (keys[SDL_SCANCODE_C]){
 	       	pherofield[0]->clear();
 	       	pherofield[1]->clear();
 	       	pherofield[2]->clear();
 	}
 
 	//generate new random positions to start
-	if (keys[SDLK_p] && lastKeys[SDLK_p] == false) randomPlacement();
-	if (keys[SDLK_c] && lastKeys[SDLK_c] == false) calibration = true;
+	if (keys[SDL_SCANCODE_P] && lastKeys[SDL_SCANCODE_P] == false) randomPlacement();
+	if (keys[SDL_SCANCODE_C] && lastKeys[SDL_SCANCODE_C] == false) calibration = true;
 
 	//save an image
-	if (keys[SDLK_s] && lastKeys[SDLK_s] == false) image->saveBmp();
+	if (keys[SDL_SCANCODE_S] && lastKeys[SDL_SCANCODE_S] == false) image->saveBmp();
 	memcpy(lastKeys,keys,keyNumber);
 }
 
@@ -232,16 +236,14 @@ int main(int argc,char* argv[])
 	CTimer performanceTimer;
 	performanceTimer.start();
 	CCue *cueArray[10];
-	cueArray[0] = new CCue(1000,1000,100,200);
+	cueArray[0] = new CCue(0.5,0.5,255,255);
+	leaderID = -10;
 	while (stop == false){
 		//get the latest data from localization system and check if the calibration finished
 		stop = (globalTimer.getTime()/1000000>experimentTime);
 
-
 		/*PHEROMONE DECAY*/ 
 		pherofield[0]->recompute();	//main pheromone half-life (user-settable, usually long)
-		pherofield[1]->recompute();		//collision avoidance pheromone with quick decay
-		pherofield[2]->recompute();		//suppression pheromone with quick decay
 
 		client->checkForData();
 
@@ -253,54 +255,40 @@ int main(int argc,char* argv[])
 			/*PHEROMONE 1 - released by the leading robot*/
 			for (int i = 0;i<numBots;i++)
 			{
-				if (client->getID(i) == leaderID){
+				if (client->getPheroTime(i) + pheroTime*1000000 > globalTimer.getTime()){
 					pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStrength);
 					leader = i;
 				}
 			}
-			/*cause the leading robot to release pheromone 1 that is used for obstacle avoidance and 2 that temporarily suppresses pheromone 0*/
-			float dist = 0.030;	//distance of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
-			float addPhi = 0;	//angle of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
-			float phi = client->getPhi(leader);
 
-			/*is the leader close to the arena edge ?*/
-			if ((client->getX(leader)<avoidDistance && cos(phi)<0) || (client->getX(leader)>arenaLength-avoidDistance && cos(phi) > 0 )|| (client->getY(leader)<avoidDistance && sin(phi)<0) || (client->getY(leader)>arenaWidth-avoidDistance && sin(phi)>0))
-			{
-				/*leader is close to the arena edge -> release pheromone 1 that causes the robot to turn away */
-				pherofield[1]->addTo((client->getX(leader)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(leader)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,35);
-			}else{
-				/*leader is not close to the arena edge -> release pheromone 2 suporessed pheromone 0, so that the leader does not pick it's own pheromone */
-				pherofield[2]->addTo((client->getX(leader)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(leader)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,45);
-			}
-			/*save positions for later analysis*/
 			logRobotPositions();
 		}
 		//convert the pheromone field to grayscale image
-		image->combinePheromones(pherofield,3,0);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc.
+		image->combinePheromones(pherofield,1,0,220);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc.
 
-
-		//handle cues 
+		//CUES HANDLING
 		int j = 0;
-		for (int i = 0;i<numBots;i++)
-		{
-			float dx = client->getX(i)*imageWidth/arenaLength-cueArray[j]->x;
-			float dy = client->getY(i)*imageHeight/arenaWidth-cueArray[j]->y;
-			float dist = sqrt(dx*dx+dy*dy);
-			printf("%.3f %.3f %i %i\n",client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,cueArray[j]->x,cueArray[j]->y);
-			printf("%.3f %.3f %i %i\n",client->getX(i),client->getY(i),cueArray[j]->x,cueArray[j]->y);
-			if (dist < cueArray[j]->diameter) cueArray[j]->diameterRate = -10; else cueArray[j]->diameterRate = 0;
-		}
 		cueArray[j]->recompute();
 		image->addCues(cueArray,1); 
-		gui->drawImage(image);
+		//is a given robot inside of a cue
+		for (int i = 0;i<numBots;i++)
+		{
+			float dx = client->getX(i)*imageWidth/arenaLength-cueArray[j]->x*imageWidth;
+			float dy = client->getY(i)*imageHeight/arenaWidth-cueArray[j]->y*imageHeight;
+			float dist = sqrt(dx*dx+dy*dy);
 
+			//if (dist < cueArray[j]->diameter/2) cueArray[j]->diameterRate = -10; else cueArray[j]->diameterRate = 0;
+			if (dist < cueArray[j]->diameter/2){
+			       	if (client->getSpeed(i)<0.003) client->setPheroTime(i,globalTimer.getTime());
+				//image->displayInitialPositions(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),initBrightness,initRadius-5);
+			}
+		}
 
 		//experiment preparation phase 2: draw initial and real robot positions
 		initRadius = robotDiameter/arenaLength*imageWidth/2;	//calculate robot radius in pixels, so that it matches the real robot dimensions
-		for (int i = 0;i<numBots && placement;i++)
-		{
-			gui->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius+10);
-			if (client->exists(i) && calibration == false)  gui->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
+		for (int i = 0;i<numBots&&placement;i++) image->displayInitialPositions(initX[i],initY[i],initA[i],initBrightness,initRadius+10);
+		for (int i = 0;i<numBots && placement && calibration == false;i++){
+		       	if (client->exists(i))  image->displayRobot(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,client->getPhi(i),0,initRadius+10);
 		}
 
 		/*this chunk of code is used to determine lag*/
@@ -319,19 +307,17 @@ int main(int argc,char* argv[])
 		//experiment preparation phase 1: draw calibration, contact WhyCon to calibrate and draw initial robot positions
 		if (calibration){
 			int calibRadius = initRadius/(cameraHeight-robotHeight)*cameraHeight;		//slightly enlarge to compensate for the higher distance from the camera
-			gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected,calibRadius,performanceTimer.getTime()/1000);
-			client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight);
+			image->displayCalibrationPatterns(calibRadius,calibOffset/arenaLength*imageWidth);
+			client->calibrate(numBots,arenaLength,arenaWidth,cameraHeight,robotDiameter,robotHeight,calibOffset);
 			client->checkForData();
-		}else if (placement){
-			gui->displayPlacementInfo(client->numSearched,client->numDetected);
 		}
 		calibration = client->calibrated==false;
-
-
-		//update GUI etc
+		gui->drawImage(image);
+		if (calibration) gui->displayCalibrationInfo(cameraHeight,client->numSearched,client->numDetected,performanceTimer.getTime()/1000);
+	       	if (placement && calibration == false)	gui->displayPlacementInfo(client->numSearched,client->numDetected);
 		gui->update();
 		processEvents();
-		printf("GUI refresh: %i ms, updates %i frame delay %.0f ms\n",performanceTimer.getTime()/1000,client->updates,(performanceTimer.getRealTime()-client->frameTime)/1000.0);
+		printf("GUI refresh: %i ms, updates %i frame delay %.0f ms %i %i\n",performanceTimer.getTime()/1000,client->updates,(performanceTimer.getRealTime()-client->frameTime)/1000.0,calibration,leaderID);
 		performanceTimer.reset();
 	}
 	fclose(robotPositionLog);

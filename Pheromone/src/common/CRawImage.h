@@ -24,9 +24,15 @@ public:
   ~CRawImage();
 
   /*combine pheromones into a grayscale image according to their influence*/
-  void combinePheromones(CPheroField *p[],int numPheromones,int color);
+  void combinePheromones(CPheroField *p[],int numPheromones,int color,int pheroMax);
   void addCues(CCue *c[],int number);
+
+  void displayRobot(int x, int y,float phi,int id,int radius);
   void displayCircle(int x, int y, int radius,int intensity);
+  void displayCue(int x, int y, int radius,int intensity);
+  void displayPattern(int x, int y, int radius);
+  void displayInitialPositions(int x, int y,float phi,int id,int radius);
+  void displayCalibrationPatterns(int radius,int offset);
 
   /*saving and loading - provide a name*/
   void saveBmp(const char* name);

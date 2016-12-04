@@ -30,7 +30,7 @@ CCircleDetect::CCircleDetect(int wi,int he,int idi)
 	threshold = maxThreshold/2;
 	numFailed = maxFailed;
 	track = true;
-	circularityTolerance = 0.02;
+	circularityTolerance = 0.03;
 
 	//initialization - fixed params
 	width = wi;
@@ -423,6 +423,7 @@ SSegment CCircleDetect::findSegment(CRawImage* image, SSegment init)
 									//if (lastTrackOK == false) identifySegment(&outer);
 									//outer.ID =ID;
 									outer.valid = inner.valid = true;
+									threshold = (outer.mean*(outer.size-inner.size)+inner.mean*inner.size)/outer.size;
 									threshold = (outer.mean+inner.mean)/2;
 									if (track) ii = start -1;
 								}else{

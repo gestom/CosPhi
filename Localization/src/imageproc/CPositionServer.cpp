@@ -11,7 +11,7 @@ CPositionServer::CPositionServer()
 	calibration = false;
 	calibrationFinished = false;
 	cameraHeight=fieldWidth=fieldLength=1.0;
-	robotHeight=robotDiameter=0;
+	calibOffset=robotHeight=robotDiameter=0;
 	stop = false;
 	updateTime=0;
 	numConnections=0;
@@ -130,7 +130,7 @@ int CPositionServer::sendInfo(int connid,char* buffer)
 			{
 				if (strncmp(token,"Calibrate",9)==0)
 				{
-					sscanf(token,"Calibrate %i %f %f %f %f %f\n",&numObjects,&fieldLength,&fieldWidth,&cameraHeight,&robotDiameter,&robotHeight);
+					sscanf(token,"Calibrate %i %f %f %f %f %f %f\n",&numObjects,&fieldLength,&fieldWidth,&cameraHeight,&robotDiameter,&robotHeight,&calibOffset);
 					printf("Calibrate command received\n");
 					command = SC_CALIBRATE;
 				}
@@ -150,7 +150,7 @@ void CPositionServer::clearToSend()
 	STrackedObject o;
 	for (int i=0;i<numObjects;i++){
 		o=object[i];
-		sprintf(buffer,"%sRobot %03i %.3f %.3f %.3f %ld \n",buffer,o.ID,o.x,o.y,o.yaw*180/M_PI,lastDetectionArray[i]);
+		sprintf(buffer,"%sRobot %03i %.3f %.3f %.3f %.3f %ld \n",buffer,o.ID,o.x,o.y,o.yaw*180/M_PI,o.s,lastDetectionArray[i]);
 	}
 	if (calibrationFinished)
 	{

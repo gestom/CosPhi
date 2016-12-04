@@ -26,7 +26,7 @@ public:
   void drawImage(CRawImage* image);
 
   /*displays the calibration circles the the display corners + WhyCon information*/
-  void displayCalibrationInfo(float camHeight,int numBots,int numVisible,int radius,int refreshTime);
+  void displayCalibrationInfo(float camHeight,int numBots,int numVisible,int refreshTime);
 
   /*displays the positions of the robots to place when starting an experiment*/
   void displayInitialPositions(int x, int y,float phi,int id,int radius);
@@ -45,6 +45,7 @@ public:
   void saveScreen(int a);
 
 private:
+  SDL_Renderer* renderer;
   SDL_Surface *screen;
   SDL_Window *sdlWindow;
   int width,height;

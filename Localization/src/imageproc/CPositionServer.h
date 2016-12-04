@@ -67,7 +67,7 @@ class CPositionServer{
 		pthread_t* thread;
 
 		/*specific for communication with the pheromone server*/
-		float fieldWidth,fieldLength,cameraHeight,robotHeight,robotDiameter;
+		float fieldWidth,fieldLength,cameraHeight,robotHeight,robotDiameter,calibOffset;
 		EServerCommand command;
 		bool calibration;
 		bool calibrationFinished;

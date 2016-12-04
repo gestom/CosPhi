@@ -15,7 +15,7 @@ class CCue
 {
 	public:
 
-		CCue(int xi,int yi,float intensity,float diameter, float diameterRate = 0,float intesityRate = 0);
+		CCue(float xi,float yi,float intensity,float diameter, float diameterRate = 0,float intesityRate = 0);
 		~CCue();
 
 		/*apply diminishing*/
@@ -27,7 +27,7 @@ class CCue
 		float diameterRate;		//affects growing/shrinking 
 		float intensityRate;		//affects cue intensity 
 
-		int x,y;
+		float x,y;
 
 		CTimer timer;
 };

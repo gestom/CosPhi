@@ -22,7 +22,8 @@ typedef enum{
 }ETransformType;
 
 typedef struct{
-	float x,y,z,d;
+	float x,y,z,d,vx,vy,s;
+	bool moving;
 	float pitch,roll,yaw;
 	float roundness;
 	float bwratio;

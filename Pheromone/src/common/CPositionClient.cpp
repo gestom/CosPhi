@@ -6,6 +6,7 @@ CPositionClient::CPositionClient()
 {
 	module = LOG_MODULE_CLIENT;
 	for (int i =0 ; i < MAX_POSITIONS;i++) vArray[i] = false;
+	for (int i =0 ; i < MAX_POSITIONS;i++) pheroTime[i] = 0;
 	timer.reset();
 	timer.start();
 	calibrated = true;
@@ -48,11 +49,11 @@ void CPositionClient::resetTime()
 	for (int i =0 ; i < MAX_POSITIONS;i++) vArray[i] = false;
 }
 
-void CPositionClient::calibrate(int numRobots,float fieldLength,float fieldWidth,float camHeight,float robotDiameter,float robotHeight)
+void CPositionClient::calibrate(int numRobots,float fieldLength,float fieldWidth,float camHeight,float robotDiameter,float robotHeight,float calibOffset)
 {
 	if (calibrated == true){
 		char buffer[1000];
-		sprintf(buffer,"Calibrate %i %.3f %.3f %.3f %.3f %.3f \n",numRobots,fieldLength,fieldWidth,camHeight,robotDiameter,robotHeight);
+		sprintf(buffer,"Calibrate %i %.3f %.3f %.3f %.3f %.3f %.3f \n",numRobots,fieldLength,fieldWidth,camHeight,robotDiameter,robotHeight,calibOffset);
 		if (send(mySocket,(void*)buffer,strlen(buffer),MSG_NOSIGNAL) != (int)strlen(buffer)) fprintf(stderr,"Network error - could not send calibrate command\n");
 		calibrated = false;
 	}
@@ -60,7 +61,7 @@ void CPositionClient::calibrate(int numRobots,float fieldLength,float fieldWidth
 
 int CPositionClient::checkForData()
 {
-	float x,y,phi;
+	float x,y,phi,s;
 	int id = 0;
 	int numBytes = 0;
 	ioctl(mySocket,FIONREAD,&numBytes);
@@ -78,10 +79,11 @@ int CPositionClient::checkForData()
 			while( token != NULL ) 
 			{
 				if (strncmp(token,"Robot",5)==0){
-					sscanf(token,"Robot %i %f %f %f %ld \n",&id,&x,&y,&phi,&detectTime);
+					sscanf(token,"Robot %i %f %f %f %f %ld \n",&id,&x,&y,&phi,&s,&detectTime);
 					if (id >=0 && id < MAX_POSITIONS){
 						xArray[robotOrder] = x;
 						yArray[robotOrder] = y;
+						sArray[robotOrder] = s;
 						pArray[robotOrder] = phi/180*M_PI;
 						vArray[robotOrder] = true;
 						tArray[robotOrder] = timer.getTime()/1000000.0;
@@ -102,6 +104,17 @@ int CPositionClient::checkForData()
 	return numBytes;
 }
 
+int CPositionClient::getPheroTime(int i)
+{
+	if (i >= 0 && i < MAX_POSITIONS) return  pheroTime[i];
+	return 0;
+}
+
+void CPositionClient::setPheroTime(int i,int t)
+{
+	if (i >= 0 && i < MAX_POSITIONS) pheroTime[i] = t;
+}
+
 int CPositionClient::getID(int i)
 {
 	if (i >= 0 && i < MAX_POSITIONS) return idArray[i];
@@ -111,6 +124,12 @@ int CPositionClient::getID(int i)
 float CPositionClient::getX(int i)
 {
 	if (i >= 0 && i < MAX_POSITIONS) return xArray[i];
+	return 0;
+}
+
+float CPositionClient::getSpeed(int i)
+{
+	if (i >= 0 && i < MAX_POSITIONS) return sArray[i];
 	return 0;
 }
 
