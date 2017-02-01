@@ -71,7 +71,8 @@ void CRawImage::combinePheromones(CPheroField *p[],int number,int color,float ph
 		for (int i = 0;i<size;i+=3)
 		{
 			v = 0;
-			for (int j = 0;j<number;j++) v+=p[j]->data[i/3]*p[j]->influence;
+			v=p[0]->data[i/3]*p[0]->influence;
+			if (p[0]->idField[i/3]== p[1]->idField[i/3]) v+=p[1]->data[i/3]*p[1]->influence;
 			data[i+1]=data[i+2]=data[i]=fmax(fmin(v,maxPher),1);
 		}
 	}

@@ -31,11 +31,11 @@ class CPheroField
 		void recompute();
 
 		/*inject pheromone to a given spot*/
-		void add(int x, int y,int id,int num,int radius);
+		void add(int x, int y,int id,int num,int radius,int ID);
 
 		/*inject pheromone around every pixel on a line
 		  between the last and current injected position*/
-		void addTo(int x, int y,int id,int num,int radius = 30);
+		void addTo(int x, int y,int id,int num,int radius,int ID);
 
 		/*read pheromone value at a given spot*/
 		float get(int x, int y);
@@ -54,8 +54,9 @@ class CPheroField
 		int *lastY;
 
 		CTimer timer;
-		float* data;
-		float* tmpData;
+		float *data;
+		float *tmpData;
+		int *idField;
 };
 
 #endif

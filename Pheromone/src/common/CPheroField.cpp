@@ -12,6 +12,7 @@ CPheroField::CPheroField(int wi,int he,float evapor,float diffuse,float influ)
 	size = width*height;
 	data = (float*)calloc(size,sizeof(float));
 	tmpData = (float*)calloc(size,sizeof(float));
+	idField = (int*)calloc(size,sizeof(int));
 }
 
 CPheroField::~CPheroField()
@@ -20,15 +21,17 @@ CPheroField::~CPheroField()
 	free(lastY);
 	free(data);
 	free(tmpData);
+	free(idField);
 }
 
 void CPheroField::clear()
 {
 	memset(data,0,size*sizeof(float));
+	memset(idField,0,size*sizeof(int));
 	memset(tmpData,0,size*sizeof(float));
 }
 
-void CPheroField::addTo(int x, int y,int id,int num,int radius)
+void CPheroField::addTo(int x, int y,int id,int num,int radius,int ID)
 {
 	id = id%MAX_ID;
 	int dx = x-lastX[id];
@@ -53,7 +56,7 @@ void CPheroField::addTo(int x, int y,int id,int num,int radius)
 		float f = (float)dy/(float)dx;
 		for (int ix = sx;ix<=ex;ix++)
 		{
-			add(ix,iy,id,num,radius);
+			add(ix,iy,id,num,radius,ID);
 			iy+=f;
 		}
 	}else{
@@ -69,7 +72,7 @@ void CPheroField::addTo(int x, int y,int id,int num,int radius)
 		float f = (float)dx/(float)dy;
 		for (int iy = sy;iy<=ey;iy++)
 		{
-			add(ix,iy,id,num,radius);
+			add(ix,iy,id,num,radius,ID);
 			ix+=f;
 		}
 
@@ -86,7 +89,7 @@ float CPheroField::get(int x, int y)
 	return -1;
 }
 
-void CPheroField::add(int x, int y,int id,int num,int radius)
+void CPheroField::add(int x, int y,int id,int num,int radius,int ID)
 {
 	id = id%MAX_ID;
 	int pos = 0;
@@ -98,6 +101,7 @@ void CPheroField::add(int x, int y,int id,int num,int radius)
 			if (iix >= 0 && iix < width && iiy >=0 && iiy < height){
 				pos = (iix+iiy*width);
 				data[pos] += num*(1-fmin(sqrt(ix*ix+iy*iy)/radius,1));
+				idField[pos] = ID;
 			}
 		}
 	}

@@ -31,6 +31,7 @@ float  calibOffset 	= 0.02;		//move the calibration patterns by calibOffset pixe
 /*---------The previous values need to be adjusted by the user during the system set-up -------------*/
 
 /*---------Adjust the following variables to define your experiment duration, initial conditions etc.------------*/
+int pheroRadius = 30;		//default pheromone radius released by the leader robot
 int pheroStrength = 55;		//default pheromone strength released by the leader robot
 int experimentTime = 600;	//experiment duration is 3 minutes by default
 bool calibration = true;	//re-calibrate the localization system at each start 
@@ -203,8 +204,8 @@ void processEvents()
 			if (event.button.button == SDL_BUTTON_RIGHT)rightMousePressed = false;
 			if (event.button.button == SDL_BUTTON_LEFT)leftMousePressed = false;
 		}
-		if (leftMousePressed) pherofield[0]->add(event.motion.x,event.motion.y,0,pheroStrength,35);
-		if (rightMousePressed) pherofield[1]->addTo(event.motion.x,event.motion.y,1,pheroStrength,35);
+		if (leftMousePressed) pherofield[0]->add(event.motion.x,event.motion.y,0,pheroStrength,35,0);
+		if (rightMousePressed) pherofield[1]->addTo(event.motion.x,event.motion.y,1,pheroStrength,35,0);
 	}
 
 	//terminate 
@@ -328,8 +329,7 @@ int main(int argc,char* argv[])
 	*evaporation defines pheromone's half-life, diffusion its spreading over time and strength determines how the pheromone influences the LCD-displayed image
 	for details, see the chapter 2 of paper Arvin, Krajnik, Turgut, Yue: "CosPhi: Artificial Pheromone System for Robotic Swarms Research", IROS 2015*/
 	pherofield[0] = new CPheroField(imageWidth,imageHeight,evaporation,diffusion,influence);
-	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,1);
-	pherofield[2] = new CPheroField(imageWidth,imageHeight,0.1,0,-5);
+	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,-5);
 
 	/*connect to the localization system*/
 	client = new CPositionClient();
@@ -346,6 +346,7 @@ int main(int argc,char* argv[])
 
 		/*PHEROMONE DECAY*/ 
 		pherofield[0]->recompute();	//main pheromone half-life (user-settable, usually long)
+		pherofield[1]->recompute();	//main pheromone half-life (user-settable, usually long)
 
 		client->checkForData();
 
@@ -356,16 +357,23 @@ int main(int argc,char* argv[])
 			/*PHEROMONE 1 - released by the leading robot*/
 			for (int i = 0;i<numBots;i++)
 			{
-				float pheroStr = getPheroStrength(client->getID(i));
+				int robotID = client->getID(i);
+				float pheroStr = getPheroStrength(robotID);
 				if (pheroStr > 0){
-					pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStr);
+					pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStr,pheroRadius,robotID);
 				}
+
+				/*cause the leading robot to release pheromone 1 that is used for obstacle avoidance and 2 that temporarily suppresses pheromone 0*/
+				float dist = 0.030;	//distance of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
+				float addPhi = 0;	//angle of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
+				float phi = client->getPhi(i);
+				pherofield[1]->addTo((client->getX(i)+dist*cos(phi+addPhi))*imageWidth/arenaLength,(client->getY(i)+dist*sin(phi+addPhi))*imageHeight/arenaWidth,0,pheroStrength,45,robotID);
 			}
 
 			logRobotPositions();
 		}
 		//convert the pheromone field to grayscale image
-		image->combinePheromones(pherofield,1,0,pheromoneIntensity);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc.
+		image->combinePheromones(pherofield,2,0,pheromoneIntensity);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc.
 
 		//CUES HANDLING
 		for (int j = 0;j<numCues;j++)
