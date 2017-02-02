@@ -31,14 +31,16 @@ float  calibOffset 	= 0.02;		//move the calibration patterns by calibOffset pixe
 /*---------The previous values need to be adjusted by the user during the system set-up -------------*/
 
 /*---------Adjust the following variables to define your experiment duration, initial conditions etc.------------*/
-int pheroStrength = 55;		//default pheromone strength released by the leader robot
-int experimentTime = 600;	//experiment duration is 3 minutes by default
-bool calibration = true;	//re-calibrate the localization system at each start 
-bool placement = true;		//randomly generate initial positions of robots at the experiment start
-int initBrightness = 255;	//brightness of the patterns at randomly-generated positions
-int initBorder = 100;		//defines minimal distance of the randomly-generated initial positions from the arena boundary
-int initRadius = 50;		//radius of the randomly-generated positions on the display 
-float avoidDistance = 0.10;	//minimal distance to trigger pheromone 2 release - this pheromone causes the leading robot to turn away from an obstacle  
+float blackPheromoneDistance = 0.020;	//distance of the black pheromone release relatively to the robot 
+int blackPheromoneRadius = 55;		//radius of the black pheromone
+int pheroStrength = 55;			//default pheromone strength released by the leader robot
+int experimentTime = 600;		//experiment duration is 3 minutes by default
+bool calibration = true;		//re-calibrate the localization system at each start 
+bool placement = true;			//randomly generate initial positions of robots at the experiment start
+int initBrightness = 255;		//brightness of the patterns at randomly-generated positions
+int initBorder = 100;			//defines minimal distance of the randomly-generated initial positions from the arena boundary
+int initRadius = 50;			//radius of the randomly-generated positions on the display 
+float avoidDistance = 0.10;		//minimal distance to trigger pheromone 2 release - this pheromone causes the leading robot to turn away from an obstacle  
 float pheroTime = 10;		
 int cueSizeArray[2] 		= {100,100};	
 float cueIntensityArray[2] 	= {255,255};	
@@ -328,7 +330,7 @@ int main(int argc,char* argv[])
 	*evaporation defines pheromone's half-life, diffusion its spreading over time and strength determines how the pheromone influences the LCD-displayed image
 	for details, see the chapter 2 of paper Arvin, Krajnik, Turgut, Yue: "CosPhi: Artificial Pheromone System for Robotic Swarms Research", IROS 2015*/
 	pherofield[0] = new CPheroField(imageWidth,imageHeight,evaporation,diffusion,influence);
-	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,-5);
+	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,-5.0);
 
 	/*connect to the localization system*/
 	client = new CPositionClient();
@@ -345,6 +347,7 @@ int main(int argc,char* argv[])
 
 		/*PHEROMONE DECAY*/ 
 		pherofield[0]->recompute();	//main pheromone half-life (user-settable, usually long)
+		pherofield[1]->recompute();	//main pheromone half-life (user-settable, usually long)
 
 		client->checkForData();
 
@@ -356,11 +359,10 @@ int main(int argc,char* argv[])
 			for (int i = 0;i<numBots;i++)
 			{
 				float pheroStr = getPheroStrength(client->getID(i));
-				float dist = 0.030;			//distance of the pheromone release relatively to the leader (controls pheromone 1 only) 
 				float phi = client->getPhi(i);
 				if (pheroStr > 0){
 					pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStr);
-					pherofield[1]->addTo((client->getX(i)+dist*cos(phi))*imageWidth/arenaLength,(client->getY(i)+dist*sin(phi))*imageHeight/arenaWidth,0,pheroStr,45);
+					pherofield[1]->addTo((client->getX(i)+blackPheromoneDistance*cos(phi))*imageWidth/arenaLength,(client->getY(i)+blackPheromoneDistance*sin(phi))*imageHeight/arenaWidth,i,pheroStr,blackPheromoneRadius);
 				}
 			}
 

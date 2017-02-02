@@ -14,3 +14,8 @@ SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS=0 ../bin/phero  experimentTime[s] evaporation[s
 e.g.:
 
 SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS=0 ../bin/phero 60 20 1 1.0 0.9 0 0.2 1.0 0 0
+
+
+ADDITIONAL INFO:
+
+Black spot parameters are around line 35 of Pheromone/src/main/phero.cpp
