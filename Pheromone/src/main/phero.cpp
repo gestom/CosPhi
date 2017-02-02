@@ -204,8 +204,8 @@ void processEvents()
 			if (event.button.button == SDL_BUTTON_RIGHT)rightMousePressed = false;
 			if (event.button.button == SDL_BUTTON_LEFT)leftMousePressed = false;
 		}
-		if (leftMousePressed) pherofield[0]->add(event.motion.x,event.motion.y,0,pheroStrength,35,0);
-		if (rightMousePressed) pherofield[1]->addTo(event.motion.x,event.motion.y,1,pheroStrength,35,0);
+		if (leftMousePressed) pherofield[0]->add(event.motion.x,event.motion.y,0,pheroStrength,pheroRadius,0);
+		if (rightMousePressed) pherofield[1]->addTo(event.motion.x,event.motion.y,1,pheroStrength,pheroRadius,0);
 	}
 
 	//terminate 
