@@ -328,8 +328,7 @@ int main(int argc,char* argv[])
 	*evaporation defines pheromone's half-life, diffusion its spreading over time and strength determines how the pheromone influences the LCD-displayed image
 	for details, see the chapter 2 of paper Arvin, Krajnik, Turgut, Yue: "CosPhi: Artificial Pheromone System for Robotic Swarms Research", IROS 2015*/
 	pherofield[0] = new CPheroField(imageWidth,imageHeight,evaporation,diffusion,influence);
-	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,1);
-	pherofield[2] = new CPheroField(imageWidth,imageHeight,0.1,0,-5);
+	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,-5);
 
 	/*connect to the localization system*/
 	client = new CPositionClient();
@@ -357,15 +356,18 @@ int main(int argc,char* argv[])
 			for (int i = 0;i<numBots;i++)
 			{
 				float pheroStr = getPheroStrength(client->getID(i));
+				float dist = 0.030;			//distance of the pheromone release relatively to the leader (controls pheromone 1 only) 
+				float phi = client->getPhi(i);
 				if (pheroStr > 0){
 					pherofield[0]->addTo(client->getX(i)*imageWidth/arenaLength,client->getY(i)*imageHeight/arenaWidth,i,pheroStr);
+					pherofield[1]->addTo((client->getX(i)+dist*cos(phi))*imageWidth/arenaLength,(client->getY(i)+dist*sin(phi))*imageHeight/arenaWidth,0,pheroStr,45);
 				}
 			}
 
 			logRobotPositions();
 		}
 		//convert the pheromone field to grayscale image
-		image->combinePheromones(pherofield,1,0,pheromoneIntensity);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc.
+		image->combinePheromones(pherofield,2,0,pheromoneIntensity);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc.
 
 		//CUES HANDLING
 		for (int j = 0;j<numCues;j++)
