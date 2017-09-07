@@ -1,6 +1,6 @@
-##CosΦ: An Artificial Pheromone System for Robotic Swarms
+## CosΦ: An Artificial Pheromone System for Robotic Swarms
 
-###Why to study pheromones?
+### Why to study pheromones?
 Pheromones serve as a common means of communication for most animals.
 Using pheromone-based communication, simple life-forms like bees, ants and termites form communities that exhibit complex and intelligent behaviour.
 The phenomena of <b>swarm intelligence</b>, which naturally emerges from interaction of large amounts of simple individuals, is in the focus of the swarm robotics research.
@@ -20,18 +20,18 @@ In contrast to other systems, CosΦ can simulate several pheromones while precis
 Along with the precise localization system [[2](#references)], CosΦ allows for an affordable way to perform <b>repeatable experiments</b> in swarm robotics.
 So far, the system was used to study cue-based aggregation [[1](#references)] and leader-follower interactions [[3,4](#references)].
   
-###Can I use it ?
+### Can I use it ?
 
 CosΦ is fully open-source and free.
 The CosΦ system is composed of two software modules: the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) module, which is a derivative of the [WhyCon](http://purl.org/robotics/whycon) system [[2](#references)], and the [Pheromone simulator](https://github.com/gestom/CosPhi/tree/master/Pheromone), which simulates the individual pheromones and displays them on the horizontal LCD. Note, that the full version of the software will be released after its presentation at the IROS 2015 conference.
 If you use this software for your work, please cite the two papers that describe these software modules - here is their [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/cite.bib).
 
-###How can I use it ?
+### How can I use it ?
 First, get the software from this GitHub repository. 
 After that, set up the [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) localization system.
 Then, set up the [Pheromone](https://github.com/gestom/CosPhi/tree/master/Pheromone) simulator.
 
-###References
+### References
 1. F. Arvin, T. Krajník, A. E. Turgut, and S. Yue: <b>[COSΦ: Artificial Pheromone System for Robotic Swarms Research.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.pdf)</b>In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_iros_pheromone.bib)].
 2. T. Krajník, M. Nitsche et al.: <b>[A Practical Multirobot Localization System.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.pdf)</b>Journal of Intelligent and Robotic Systems (JINT), 2014 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.bib)].
 3. T. Krajnik, F. Arvin, A. E. Turgut, S. Yue, and T. Duckett: <b>[COSΦ: Vision-based Artificial Pheromone System for Robotic Swarms.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.pdf)</b> In: International Conference on Robotics and Automation. Late breaking poster session. 2015 [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_icralbp_pheromone.bib)].
