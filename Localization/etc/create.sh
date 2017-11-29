@@ -37,8 +37,8 @@ convert result.png \
 -fill black -stroke none -draw "ellipse $x,$y 130,160 0,360" \
 -fill white -stroke none -draw "ellipse $x,$(($y+10)) $ix,$iy 0,360" \
 result.png
-r0=$(printf %.3f $(echo $ix/130|bc -l))
-r1=$(printf %.3f $(echo $iy/160|bc -l))
+r0=$(echo $ix|awk '{print $1/130}')
+r1=$(echo $iy|awk '{print $1/160}')
 echo $id $r1 $r0 >>ID.txt
 id=$(($id+1))
 done

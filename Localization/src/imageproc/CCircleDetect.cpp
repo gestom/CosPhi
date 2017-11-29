@@ -244,6 +244,7 @@ void CCircleDetect::identifySegment(SSegment* segment)
 		}
 	}
 	segment->ID = index;
+	if (segment->m1/segment->m0 > 0.9) segment->ID = -1;
 }
 
 void CCircleDetect::clearCalibMask()
