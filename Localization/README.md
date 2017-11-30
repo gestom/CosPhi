@@ -1,20 +1,20 @@
-##SwarmCon - marker-based localization system for swarm robotics
+## SwarmCon - marker-based localization system for swarm robotics
 
-###What is SwarmCon ?
+### What is SwarmCon ?
 SwarmCon is a minimalistic version of the <a href="http://www.youtube.com/watch?v=KgKrN8_EmUA">WhyCon</a> localization system intended for swarm applications.
 While the core of the <i>SwarmCon</i> system is the same as the <i>WhyCon</i> one, it was designed to have as least dependencies as possible.
 Moreover, the <i>SwarmCon</i> is especially intended for external localization of ground-robot swarms.
 Thus, unlike <i>WhyCon</i>, <i>SwarmCon</i> can distinguish between individual robots and calculate their heading.
 
-###Who did it ?
+### Who did it ?
 The <i>WhyCon</i> system was developed as a joint project between the University of Buenos Aires, Czech Technical University and University of Lincoln in UK.
 The main contributors were [Matias Nitsche](https://scholar.google.co.uk/citations?user=Z0hQoRUAAAAJ&hl=en&oi=ao), [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) and [Jan Faigl](https://scholar.google.co.uk/citations?user=-finD_sAAAAJ&hl=en).
 <i>WhyCon</i> was first presented on International Conference on Advanced Robotics 2013 [[1](#references)], later in the Journal of Intelligent and Robotics Systems [[2](#references)] and finally at the Workshop on Open Source Aerial Robotics during the International Conference on Intelligent Robotic Systems, 2015 [[3](#references)]. Its early version was also presented at the International Conference of Robotics and Automation, 2013 [[4](#references)].
 If you decide to use this software for your research, please cite <i>WhyCon</i> using the one of the references provided in this [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/WhyCon.bib) file.
 
-###Setting up SwarmCon
+### Setting up SwarmCon
 
-####Quick setup for initial testing
+#### Quick setup for initial testing
 
 1. Install the required <a href="#libraries">libraries</a>.
 1. Check the available resolutions, framerates and formats of your USB camera by running <b>luvcview -L</b>. 
@@ -28,7 +28,7 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 1. At this point, you can also change camera brightness, exposure, contrast by pressing <i>(SHIFT) b, e, c</i> respectively. These settings are stored in <i>etc/camera.cfg</i> and reloaded on restart.
 1. Open your browser to view localhost:6666. You should see the circle position.
 
-####Advanced setup for more robots in a rectangular field
+#### Advanced setup for more robots in a rectangular field
 
 1. Calibrate your camera using the MATLAB (or Octave) calibration toolbox and put the <b>Calib_Results.m</b> in the <b>etc</b> directory. (this step is not necessary, but it improves localization precision)
 2. Go to the <b>etc</b> directory and call <b>create.sh N M</b> to generate patterns for <b>NxM</b> robots.
@@ -41,7 +41,7 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 8. Each pattern will have four numbers - ID, heading and x,y in mm.
 9. Pressing <b>+</b>,<b>-</b> changes the number of localized patterns.
 
-####To postprocess the stored videos
+#### To postprocess the stored videos
 
 1. To create a log of the robot positions, simply create an <b>output</b> folder at the directory where you run the <b>swarmcon</b>.
 2. If your camera supports the MJPEG format, then the system will create a video in the <b>output</b> folder as well.
@@ -51,7 +51,7 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 6. Running the system with a <b>nogui</b> argument e.g. <b>./swarmcon /dev/video0 1 nogui</b> causes text-only output - this can speed-up postprocessing.
 7. Logs and videos might be large - to prevent saving logs and videos, run the system with <b>nolog</b> or <b>novideo</b> argument.
 
-####Some additional remarks
+#### Some additional remarks
 
 2. At this point, you can start experimenting with the syste by adding whatever features you might think useful.
 3. We have tried to comment the code so an experienced programmer should be able to alter the system accordingly. However, if you have any questions regarding the code, feel free to contact [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) or [Matias Nitsche](https://scholar.google.co.uk/citations?user=Z0hQoRUAAAAJ&hl=en&oi=ao)
@@ -60,16 +60,16 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 </ol>
 
 <hr>
-###Dependencies
+### Dependencies
 
 All the following libraries are probably in your packages.
 
 1. <b>libsdl1.2-dev</b> for graphical user interface.
 2. <b>libsdl-ttf2.0-dev</b> to print stuff in the GUI.
 3. <b>libncurses5-dev</b> to print stuff on the terminal.
-4. <b>luvcview</b> to set-up the camera.
+4. <b>luvcview</b> or <b>guvcview</b> to set-up the camera.
 
-###References
+### References
 1. T. Krajník, M. Nitsche et al.: <b>[External localization system for mobile robotics.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2013_icar_whycon.pdf)</b> International Conference on Advanced Robotics (ICAR), 2013. [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2013_icar_whycon.bib)].
 2. T. Krajník, M. Nitsche et al.: <b>[A Practical Multirobot Localization System.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.pdf)</b> Journal of Intelligent and Robotic Systems (JINT), 2014. [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_JINT_whycon.bib)].
 3. M. Nitsche, T. Krajník et al.: <b>[WhyCon: An Efficent, Marker-based Localization System.](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_irososar_whycon.pdf)</b> IROS Workshop on Open Source Aerial Robotics, 2015. [[bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/2015_irososar_whycon.bib)].
