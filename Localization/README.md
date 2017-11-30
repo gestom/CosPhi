@@ -17,8 +17,8 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 #### Quick setup for initial testing
 
 1. Install the required <a href="#libraries">libraries</a>.
-1. Check the available resolutions, framerates and formats of your USB camera by running <b>luvcview -L</b>. 
-1. Run <b>luvcview</b> and adjust your camera settings (exposure, brightness etc).
+1. Check the available resolutions, framerates and formats of your USB camera by running <b>guvcview -L</b>. 
+1. Run <b>guvcview</b> and adjust your camera settings (exposure, brightness etc).
 1. Download the software from GitHub and go to the <b>Localization/src</b> directory.
 1. Adjust the camera resolution in the <b>main/swarmcon.cpp</b>.
 1. Compile the software - just type <b>make</b>.
@@ -60,6 +60,7 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 </ol>
 
 <hr>
+
 ### Dependencies
 
 All the following libraries are probably in your packages.
