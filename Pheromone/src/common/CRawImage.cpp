@@ -57,22 +57,56 @@ CRawImage::CRawImage(unsigned char *datai,int wi,int he)
 void CRawImage::combinePheromones(CPheroField *p[],int number,int color)
 {
 	float v;
+	unsigned char* dat;
+	int scale = p[0]->scale; 
+	if (scale == 1){
+		dat = data;
+	} else{
+		 dat = (unsigned char*)malloc(size/scale/scale);
+	}
 	if (color > 0){
-		for (int i = 0;i<size;i+=3)
+		for (int i = 0;i<size/scale/scale;i+=3)
 		{	
 			v = 0;
 			for (int j = 0;j<number;j++) v+=p[j]->data[i/3]*p[j]->influence;
-			data[i+color%3]=fmax(fmin(v,255),1);
-			data[i+(color+1)%3]=0;
-			data[i+(color+2)%3]=0;
+			dat[i+color%3]=fmax(fmin(v,255),1);
+			dat[i+(color+1)%3]=0;
+			dat[i+(color+2)%3]=0;
 		}
 	}else{
-		for (int i = 0;i<size;i+=3)
+		for (int i = 0;i<size/scale/scale;i+=3)
 		{
 			v = 0;
 			for (int j = 0;j<number;j++) v+=p[j]->data[i/3]*p[j]->influence;
-			data[i+1]=data[i+2]=data[i]=fmax(fmin(v,255),1);
+			dat[i+1]=dat[i+2]=dat[i]=fmax(fmin(v,255),1);
 		}
+		if (scale != 1)
+		{
+			int ix,iy,wi;
+			wi = width/scale;
+			float fx,fy;
+			for (int x = 0;x<width-scale;x++){
+				for (int y = 0;y<height-scale;y++){
+					int pos0 = 3*(y*width+x);
+					ix = x/scale;	
+					iy = y/scale;
+					fx = (float)x/scale-ix;
+					fy = (float)y/scale-iy;
+					int pos00 = 3*(iy*wi+ix);
+					int pos10 = pos00+3; 
+					int pos01 = pos00+wi*3;
+					int pos11 = pos01+3;
+					data[pos0+0] = dat[pos00]*(1-fx)*(1-fy)+dat[pos10]*fx*(1-fy)+dat[pos01]*(1-fx)*fy+dat[pos11]*fx*fy; 
+					data[pos0+1] = dat[pos00+1]*(1-fx)*(1-fy)+dat[pos10+1]*fx*(1-fy)+dat[pos01+1]*(1-fx)*fy+dat[pos11+1]*fx*fy; 
+					data[pos0+2] = dat[pos00+2]*(1-fx)*(1-fy)+dat[pos10+2]*fx*(1-fy)+dat[pos01+2]*(1-fx)*fy+dat[pos11+2]*fx*fy; 
+				}
+			}
+		}
+	}
+
+
+	if (scale != 1){
+		 free(dat);
 	}
 }
 

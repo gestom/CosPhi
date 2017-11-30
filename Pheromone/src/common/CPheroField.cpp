@@ -1,14 +1,16 @@
 #include "CPheroField.h"
 
-CPheroField::CPheroField(int wi,int he,float evapor,float diffuse,float influ)
+CPheroField::CPheroField(int wi,int he,float evapor,float diffuse,float influ,int iScale)
 {
 	evaporation = evapor;
 	diffusion = diffuse;
 	influence = influ;
+	scale = iScale;
+
 	lastX = (int*)calloc(MAX_ID,sizeof(float));
 	lastY = (int*)calloc(MAX_ID,sizeof(float));
-	width =  wi;
-	height = he;
+	width =  wi/scale;
+	height = he/scale;
 	size = width*height;
 	data = (float*)calloc(size,sizeof(float));
 }
@@ -25,9 +27,12 @@ void CPheroField::clear()
 	memset(data,0,size*sizeof(float));
 }
 
-void CPheroField::addTo(int x, int y,int id,int num,int radius)
+void CPheroField::addTo(int x, int y,int id,float num,int radius)
 {
 	id = id%MAX_ID;
+	x = x/scale;
+	y = y/scale;
+	radius = radius/scale;
 	int dx = x-lastX[id];
 	int dy = y-lastY[id];
 	if (fabs(dx) > 100 || fabs(dy) > 100) {
@@ -79,12 +84,17 @@ void CPheroField::addTo(int x, int y,int id,int num,int radius)
 
 float CPheroField::get(int x, int y)
 {
+	x = x/scale;
+	y = y/scale;
 	if (x > 0 && y >0 && x<width && y<height) return data[x+y*width];
 	return -1;
 }
 
-void CPheroField::add(int x, int y,int id,int num,int radius)
+void CPheroField::add(int x, int y,int id,float num,int radius)
 {
+	x = x/scale;
+	y = y/scale;
+	radius = radius/scale;
 	id = id%MAX_ID;
 	int pos = 0;
 	int iix,iiy;
@@ -106,7 +116,7 @@ void CPheroField::recompute()
 {
 	float timex = timer.getTime();
 	float decay = pow(2,-timex/1000000.0/evaporation);
-	int diffV,diffH;
+	float diffV,diffH;
 	for (int i = 0;i<size;i++) data[i]=data[i]*decay;
 	if (diffusion > 0.0){
 		float diffuse = pow(2,-timex/1000000.0/diffusion);
@@ -119,8 +129,8 @@ void CPheroField::recompute()
 			data[i-1] -= diffH*(1-diffuse);
 			data[i-width] -= diffV*(1-diffuse);
 		}
+		printf("Recompute took %.0f %f %f\n",timer.getTime()-timex,diffuse,diffusion);
 	}
-	//printf("Recompute took %.0f %f\n",timer.getTime()-timex,diffuse);
 	timer.reset();
 	timer.start();
 }

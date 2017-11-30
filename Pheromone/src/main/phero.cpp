@@ -32,7 +32,8 @@ int  imageHeight = 720;//1080;	//adjust manually in case of dualMonitor = true, 
 
 
 /*---------Adjust the following variables to define your experiment duration, initial conditions etc.------------*/
-int pheroStrength = 50;		//default pheromone strength released by the leader robot
+int pheroScale = 3;		//relative size of the pheromone field to the GUI - increase to speed-up the calculation
+float pheroStrength = 0.001;	//default pheromone strength released by the leader robot
 int experimentTime = 180;	//experiment duration is 3 minutes by default
 bool calibration = true;	//re-calibrate the localization system at each start 
 bool placement = true;		//randomly generate initial positions of robots at the experiment start
@@ -46,7 +47,7 @@ int leaderID = 0;		//ID of the leader robot
 /*variables read from the command line*/
 int numBots = 1;		//number of robots in the arena
 float evaporation = 1;		//main pheromone half-life	[s]
-float diffusion = 0.0;		//main pheromone diffusion	- not implemented
+float diffusion = 0.0000001;	//main pheromone diffusion	[s]
 
 /*supporting classes and variables*/
 CTimer globalTimer;		//used to terminate the experiment after a given time
@@ -209,8 +210,7 @@ int main(int argc,char* argv[])
 	numBots = atoi(argv[2]);
 	float evaporation = atof(argv[1]);
 
-	float diffusion = 0;
-	float influence = 1.0;
+	float influence = 10000000.0;
 
 	/*initialize the pheromone fields
 	* pheromone field 0 simulates a longer-decay pheromone that the other robots follow
@@ -218,9 +218,9 @@ int main(int argc,char* argv[])
 	* pheromone field 2 is released by the leader to supress pheromone field 0 (this avoids the leader to detect pheromone 0 by its sensors)
 	*evaporation defines pheromone's half-life, diffusion its spreading over time and strength determines how the pheromone influences the LCD-displayed image
 	for details, see the chapter 2 of paper Arvin, Krajnik, Turgut, Yue: "CosPhi: Artificial Pheromone System for Robotic Swarms Research", IROS 2015*/
-	pherofield[0] = new CPheroField(imageWidth,imageHeight,evaporation,diffusion,influence);
-	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,1);
-	pherofield[2] = new CPheroField(imageWidth,imageHeight,0.1,0,-5);
+	pherofield[0] = new CPheroField(imageWidth,imageHeight,evaporation,diffusion,influence,pheroScale);
+	pherofield[1] = new CPheroField(imageWidth,imageHeight,0.1,0,1,pheroScale);
+	pherofield[2] = new CPheroField(imageWidth,imageHeight,0.1,0,-5,pheroScale);
 
 	/*connect to the localization system*/
 	client = new CPositionClient();

@@ -24,18 +24,18 @@ public:
    * pheromone field 2 is released by the leader to supress pheromone field 0 (this avoids the leader to detect pheromone 0 by its sensors)
    *evaporation defines pheromone's half-life, diffusion its spreading over time and strength determines how the pheromone influences the LCD-displayed image
    for details, see the chapter 2 of paper Arvin, Krajnik, Turgut, Yue: "CosPhi: Artificial Pheromone System for Robotic Swarms Research", IROS 2015*/
-  CPheroField(int wi,int he,float evaporation,float diffusion, float influence);
+  CPheroField(int wi,int he,float evaporation,float diffusion, float influencem,int iScale = 1);
   ~CPheroField();
 
   /*apply evaporation and diffusion*/
   void recompute();
 
   /*inject pheromone to a given spot*/
-  void add(int x, int y,int id,int num,int radius);
+  void add(int x, int y,int id,float num,int radius);
 
   /*inject pheromone around every pixel on a line
     between the last and current injected position*/
-  void addTo(int x, int y,int id,int num,int radius = 25);
+  void addTo(int x, int y,int id,float num,int radius = 25);
 
   /*read pheromone value at a given spot*/
   float get(int x, int y);
@@ -54,6 +54,7 @@ public:
   int *lastY;
 
   CTimer timer;
+  int scale;
   float* data;
 };
 
