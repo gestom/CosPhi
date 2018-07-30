@@ -7,7 +7,7 @@ The phenomena of <b>swarm intelligence</b>, which naturally emerges from interac
 Understanding pheromone-based communication is one of the keys that will allow to grasp the principles that are behind emergence of swarm intelligence.
 So far, pheromone-based communication was either simulated or implemented by different chemical (volatile compounds) and physical (RFID tags, light, sound) cues, which were not able to replicate more complex aspects of pheromones as seen in nature. 
 
-###What is CosΦ?
+### What is CosΦ?
 CosΦ is a novel artificial pheromone system that is reliable, accurate and uses off-the-shelf components only: an LCD screen and a low-cost USB camera.
 The horizontally-positioned LCD displays the spatial distribution of the pheromones, which are sensed by the robots that move on the screen. 
 The pheromones are released according to the robots' positions provided by the overhead camera.
