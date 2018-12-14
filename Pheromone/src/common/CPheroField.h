@@ -6,6 +6,8 @@
 #include <string.h>
 #include <CTimer.h>
 #include <math.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
 #define MAX_ID 1000
 
 /**

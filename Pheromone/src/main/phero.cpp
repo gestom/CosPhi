@@ -209,7 +209,7 @@ int main(int argc,char* argv[])
 	numBots = atoi(argv[2]);
 	float evaporation = atof(argv[1]);
 
-	float diffusion = 0;
+	float diffusion = 1.0;
 	float influence = 1.0;
 
 	/*initialize the pheromone fields

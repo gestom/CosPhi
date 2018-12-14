@@ -105,11 +105,16 @@ void CPheroField::add(int x, int y,int id,int num,int radius)
 void CPheroField::recompute()
 {
 	float timex = timer.getTime();
-	float decay = pow(2,-timex/1000000.0/evaporation);
+	float decay = 1;//pow(2,-timex/1000000.0/evaporation);
 	int diffV,diffH;
 	for (int i = 0;i<size;i++) data[i]=data[i]*decay;
 	if (diffusion > 0.0){
-		float diffuse = pow(2,-timex/1000000.0/diffusion);
+		//create an openCV structure
+		cv::Mat mat = cv::Mat(height,width,CV_32F,data);
+		cv::Mat mat1;
+		cv::GaussianBlur( mat, mat, cv::Size( 21, 21 ), 10, 10 );
+		
+		/*float diffuse = pow(2,-timex/1000000.0/diffusion);
 		for (int i = width+1;i<size;i++){
 			if (i%width == 0) i++;
 			diffH = (data[i-1] - data[i])/2;
@@ -118,7 +123,7 @@ void CPheroField::recompute()
 			data[i] += diffV*(1-diffuse);
 			data[i-1] -= diffH*(1-diffuse);
 			data[i-width] -= diffV*(1-diffuse);
-		}
+		}*/
 	}
 	//printf("Recompute took %.0f %f\n",timer.getTime()-timex,diffuse);
 	timer.reset();
