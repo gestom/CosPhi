@@ -172,7 +172,7 @@ void CGui::drawStats(int x,int y,STrackedObject o, bool D2)
 	//sprintf(info,"%.3f %.3f %.3f",o.x,o.y,o.z);
 
 	if (D2){
-		 sprintf(info,"%02i %03i",o.ID,(int)(o.yaw/M_PI*180));
+		 sprintf(info,"%02i %03i",o.ID,(int)(o.pheromone));
 		 text = TTF_RenderUTF8_Blended(smallFont, info, ok_col);
 		 rect.y = y/scale-14;
 		 SDL_BlitSurface(text, NULL, screen, &rect);

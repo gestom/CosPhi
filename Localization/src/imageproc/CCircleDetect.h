@@ -33,6 +33,7 @@ typedef struct{
 	float v0,v1;
 	float r0,r1;
 	int ID;
+	int pheromone;
 }SSegment;
 
 class CCircleDetect
@@ -46,6 +47,8 @@ class CCircleDetect
 		SSegment findSegment(CRawImage* image, SSegment init);
 		bool examineSegment(CRawImage* image,SSegment *segmen,int ii,float areaRatio);
 		SSegment calcSegment(SSegment segment,int size,long int x,long int y,long int cm0,long int cm1,long int cm2);
+		void getSegmentPheromone(CRawImage* image,SSegment* segment);
+		void calibratePheromoneDetection(CRawImage* image);
 
 		void clearCalibMask();
 		void applyCalibMask(CRawImage* image);
@@ -88,6 +91,7 @@ class CCircleDetect
 		int tima,timb,timc,timd,sizer,sizerAll;
 		float diameterRatio;
 		bool ownBuffer;
+		static int *pheromoneCalib;
 		static int *buffer;
 		static int *queue;
 		static int *mask;

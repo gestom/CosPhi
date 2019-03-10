@@ -29,6 +29,7 @@ typedef struct{
 	float error;
 	float esterror;
 	int ID;
+	int pheromone;
 }STrackedObject;
 
 typedef struct{

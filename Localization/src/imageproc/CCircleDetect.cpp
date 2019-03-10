@@ -3,6 +3,7 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
+int* CCircleDetect::pheromoneCalib = NULL;
 int* CCircleDetect::buffer = NULL;
 int* CCircleDetect::queue = NULL;
 int* CCircleDetect::mask = NULL;
@@ -41,6 +42,8 @@ CCircleDetect::CCircleDetect(int wi,int he,int idi)
 	if (buffer == NULL){
 		ownBuffer = true;
 		buffer = (int*)malloc(len*sizeof(int));
+		pheromoneCalib = (int*)malloc(len*sizeof(int));
+		memset(pheromoneCalib,0,len*sizeof(int));
 		queue = (int*)malloc(len*sizeof(int));
 		mask = (int*)malloc(len*sizeof(int));
 		SSegment dummy;
@@ -248,6 +251,39 @@ void CCircleDetect::identifySegment(SSegment* segment)
 	if (segment->m1/segment->m0 > 0.9) segment->ID = -1;
 }
 
+void CCircleDetect::calibratePheromoneDetection(CRawImage* image)
+{
+	int pos;
+	SSegment a;
+	for (int x = 0;x<image->width;x++){
+		a.x = x;
+		for (int y = 0;y<image->height;y++){
+			a.y = y;
+			pos = y*image->width+x;
+			getSegmentPheromone(image,&a);
+			pheromoneCalib[pos] = a.pheromone;
+		}
+	}
+}
+
+void CCircleDetect::getSegmentPheromone(CRawImage* image,SSegment* segment)
+{
+	int pos, posa;
+	int diam = 35;
+	int a = 0;
+	for (int i = 0;i<628;i++){
+		pos = ((int)(segment->y+diam*cos(0.01*i)))*image->width+(segment->x+diam*sin(0.01*i));
+		if (pos > 0 && pos < image->size/image->bpp){
+			a+= image->data[pos*3];
+			a+= image->data[pos*3+1];
+			a+= image->data[pos*3+2];
+		}
+	}
+	pos = ((int)segment->y)*image->width+segment->x;
+	segment->pheromone = a/3/628-pheromoneCalib[pos];
+}
+
+
 void CCircleDetect::clearCalibMask()
 {
 	maskNum = 0;
@@ -422,7 +458,10 @@ SSegment CCircleDetect::findSegment(CRawImage* image, SSegment init)
 									
 									//fiducial identification - experimental only
 									//identifySegment(&outer);
-									if (lastTrackOK == false) identifySegment(&outer);
+									if (lastTrackOK == false){
+									       	identifySegment(&outer);
+									}
+									getSegmentPheromone(image,&outer);
 									//outer.ID =ID;
 									outer.valid = inner.valid = true;
 									threshold = (outer.mean+inner.mean)/2;

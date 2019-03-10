@@ -13,7 +13,6 @@
 #include "CPositionServer.h"
 
 //-----These parameters need to be adjusted by the user -----------------------
-
 //Adjust camera resolution here
 int  imageWidth= 960;
 int  imageHeight = 720;
@@ -23,8 +22,17 @@ float circleDiameter = 0.03;
 
 /*Adjust the X and Y dimensions of the coordinate system 
 in case you are using the artificial pheromone system, adjust the dimensions in phero.cpp*/
-float fieldLength = 1.00;
-float fieldWidth = 1.00;
+float fieldLength = 0.92;
+float fieldWidth = 0.52;
+
+//pheromone - related
+int pheroThreshold = 80;				//threshold when a robot considered to be on the pheromone by pheromone light 
+float initialPheroPositionX = 0.75*fieldLength;
+float initialPheroPositionY = 0.50*fieldWidth;
+float pheroPositionX = initialPheroPositionX;
+float pheroPositionY = initialPheroPositionY;
+float pheroRadius = 0.125+0.01;
+
 //----------------------------------------------------------------------------
 
 /*-----These params are provided by the artificial pheromone system ----------------------
@@ -47,6 +55,9 @@ SSegment currentSegmentArray[MAX_PATTERNS];	//segment array (detected objects in
 SSegment lastSegmentArray[MAX_PATTERNS];	//segment position in the last step (allows for tracking)
 STrackedObject objectArray[MAX_PATTERNS];	//object array (detected objects in metric space)
 CTransformation *trans;				//allows to transform from image to metric coordinates
+float botsMovement = 0;				//overall robot velocity in px/frame
+int   moving = 0;				//movenent indicator
+int firstFrame = 0;
 
 /*variables related to (auto) calibration*/
 const int calibrationSteps = 20;			//how many measurements to average to estimate calibration pattern position (manual calib)
@@ -183,7 +194,7 @@ void autocalibration()
 }
 
 /*initialize logging*/
-bool initializeLogging()
+bool initializeLogging(char * name)
 {
 	//initialize logging system
 	dump = new CDump(NULL,256,1000000);
@@ -194,6 +205,7 @@ bool initializeLogging()
 	time(&timeNow);
 	strftime(timeStr, sizeof(timeStr), "%Y-%m-%d_%H-%M-%S",localtime(&timeNow));
 	sprintf(logFileName,"output/SwarmCon_%s.txt",timeStr);
+	sprintf(logFileName,"output/%s.txt",&name[5]);
 	robotPositionLog = fopen(logFileName,"w");
 	if (robotPositionLog == NULL)
 	{
@@ -296,7 +308,7 @@ int main(int argc,char* argv[])
 {
 	//initialize logging system, camera and network connection 
 	processArgs(argc,argv);
-	if (saveLog) initializeLogging();
+	if (saveLog) initializeLogging(argv[1]);
 	if (argc < 2) {
 		fprintf(stderr,"usage: %s imageSource num_robots\ne.g. %s /dev/video0 1\n",argv[0],argv[0]);
 		return 0;
@@ -337,14 +349,15 @@ int main(int argc,char* argv[])
 	int64_t frameTime = 0;
 	while (stop == false)
 	{
-		if (useGui){
+
+		if (useGui && false){
 			camera->renewImage(image,moveOne-->0);
 		}else{
 			if (camera->renewImage(image,moveOne-->0)==-1)stop = true;
 		}
 		numFound = numStatic = 0;
 		timer.reset();
-		frameTime = globalTimer.getRealTime();
+		frameTime = globalTimer.getTime();
 		//track the robots found in the last attempt 
 		for (int i = 0;i<numBots;i++){
 			if (currentSegmentArray[i].valid){
@@ -363,14 +376,26 @@ int main(int argc,char* argv[])
 		}
 
 		//perform transformations from camera to world coordinates
+		float botsMovement = 0;
 		for (int i = 0;i<numBots;i++){
 			if (currentSegmentArray[i].valid){
 				objectArray[i] = trans->transform(currentSegmentArray[i],false);
 				numFound++;
-				if (currentSegmentArray[i].x == lastSegmentArray[i].x) numStatic++;
+				if (lastSegmentArray[i].valid){
+					float mx = (currentSegmentArray[i].x - lastSegmentArray[i].x);
+					float my = (currentSegmentArray[i].y - lastSegmentArray[i].y);
+					botsMovement += sqrt(mx*mx+my*my);
+				}	
 			}
 		}
-		printf("Pattern detection time: %i us. Found: %i Static: %i. Clients %i.\n",globalTimer.getTime(),numFound,numStatic,server->numConnections);
+		//did the robots move in the last 10 frames, if yes, consider the experiment started
+		if (frameID == 5) detectorArray[0]->calibratePheromoneDetection(image);
+		if (botsMovement > 5.0) moving++;
+		if (moving == 10){
+			firstFrame = frameID;
+		       	globalTimer.reset();
+		}
+		printf("Pattern detection time: %i us. Found: %i Movement: %f. Clients %i.\n",globalTimer.getTime(),numFound,botsMovement,server->numConnections);
 		evalTime = timer.getTime();
 
 		//pack up the data for sending to other systems (e.g. artificial pheromone one)
@@ -428,10 +453,50 @@ int main(int argc,char* argv[])
 			//for postprocessing, try to find all robots before loading next frame
 			if (numFound ==  numBots)
 			{
-				gui->saveScreen(runs++);
+				float dx,dy;
+				int botsOnPheroBright = 0;
+				int botsOnPheroDist = 0;
+				float dBright = 0;
+				float dSpread = 0;
+				float dDist = 0;
+				float gx = 0;
+				float gy = 0;
+				//gui->saveScreen(runs++);
+				dDist = 0;
 				for (int i = 0;i<numBots;i++){
-				       		//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
-						if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+					//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+					if (robotPositionLog != NULL && moving > 10){
+						fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f %i\n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw,objectArray[i].pheromone);
+						//on phero by brightness
+						if (objectArray[i].pheromone > pheroThreshold){
+							gx=gx+objectArray[i].x;
+							gy=gy+objectArray[i].y;
+							botsOnPheroBright++;
+						}
+						//on phero by position
+						dx = objectArray[i].x-pheroPositionX;
+						dy = objectArray[i].y-pheroPositionY;
+						if (objectArray[i].ID != -1){
+							dDist += sqrt(dx*dx+dy*dy);
+							if (sqrt(dx*dx+dy*dy)<pheroRadius) botsOnPheroDist++;		
+						}
+					}
+				}
+				if (robotPositionLog != NULL && moving > 10){
+					gx = gx/botsOnPheroBright;
+					gy = gy/botsOnPheroBright;
+					dBright = 0;
+					dSpread = 0;
+					for (int i = 0;i<numBots;i++){
+						if (objectArray[i].ID != -1){
+							dx=gx-objectArray[i].x;
+							dy=gy-objectArray[i].y;
+							dBright += sqrt(dx*dx+dy*dy);
+							if (objectArray[i].pheromone > pheroThreshold) dSpread += sqrt(dx*dx+dy*dy);
+						}
+					}
+				       	fprintf(robotPositionLog,"Frame %i Time %ld Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
+				       	fprintf(stdout,"Frame %i Time %ld Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
 				}
 				moveOne = moveVal; 
 				if (moveVal > 0) frameID++;

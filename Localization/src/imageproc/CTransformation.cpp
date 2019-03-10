@@ -698,6 +698,7 @@ STrackedObject CTransformation::transform(SSegment segment,bool unbarreli)
 		float d = sqrt(result.x*result.x+result.y*result.y+result.z*result.z);
 		result.d = d;
 	}
+	result.pheromone = segment.pheromone;
 	/*result.pitch = acos(fmin(minor/major,1.0))/M_PI*180.0; //TODO
 	result.roll = segment.horizontal; //TODO*/
 	return result;
