@@ -428,7 +428,7 @@ int main(int argc,char* argv[])
 			//for postprocessing, try to find all robots before loading next frame
 			if (numFound ==  numBots)
 			{
-				//gui->saveScreen(runs++);
+				gui->saveScreen(runs++);
 				for (int i = 0;i<numBots;i++){
 				       		//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
 						if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
@@ -440,7 +440,6 @@ int main(int argc,char* argv[])
 			}
 		}
 
-		//gui->saveScreen(runs);
 		if (useGui) gui->update();
 		if (useGui) processKeys();
 	}

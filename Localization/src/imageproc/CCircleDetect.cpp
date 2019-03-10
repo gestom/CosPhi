@@ -243,6 +243,7 @@ void CCircleDetect::identifySegment(SSegment* segment)
 			index = i;
 		}
 	}
+	printf("SEEEE: %i %f %f\n",index,segment->r0,segment->r1);
 	segment->ID = index;
 	if (segment->m1/segment->m0 > 0.9) segment->ID = -1;
 }
@@ -420,8 +421,8 @@ SSegment CCircleDetect::findSegment(CRawImage* image, SSegment init)
 									if (fabs(normalizeAngle(outer.angle-orient)) > M_PI/2) outer.angle = normalizeAngle(outer.angle+M_PI);
 									
 									//fiducial identification - experimental only
-									identifySegment(&outer);
-									//if (lastTrackOK == false) identifySegment(&outer);
+									//identifySegment(&outer);
+									if (lastTrackOK == false) identifySegment(&outer);
 									//outer.ID =ID;
 									outer.valid = inner.valid = true;
 									threshold = (outer.mean+inner.mean)/2;

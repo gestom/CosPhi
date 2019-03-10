@@ -257,6 +257,7 @@ int main(int argc,char* argv[])
 					leader = i;
 				}
 			}
+
 			/*cause the leading robot to release pheromone 1 that is used for obstacle avoidance and 2 that temporarily suppresses pheromone 0*/
 			float dist = 0.030;	//distance of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
 			float addPhi = 0;	//angle of the pheromone release relatively to the leader (controls pheromones 1 and 2 only) 
@@ -278,7 +279,6 @@ int main(int argc,char* argv[])
 		//convert the pheromone field to grayscale image
 		image->combinePheromones(pherofield,3,0);		//the last value determines the color channel - 0 is for grayscale, 1 is red etc. 
 		gui->drawImage(image);
-		
 	
 		//experiment preparation phase 2: draw initial and real robot positions
 		initRadius = robotDiameter/arenaLength*imageWidth/2;	//calculate robot radius in pixels, so that it matches the real robot dimensions
