@@ -237,45 +237,68 @@ void CGui::drawLine(float sx1,float sx2,float sy1,float sy2)
 	}
 }
 
+
+void CGui::drawEllipse(STrackedObject o,CTransformation *t,float r)
+{
+	STrackedObject a,b,x;
+	a.x = o.x; 
+	a.y = o.y;
+	float ro = 0.85/0.89;
+	for (float p = 0;p<6.28;p+=0.1)
+	{
+		a.x = o.x + r*cos(p);
+		a.y = o.y + r*sin(p);
+		b.x = o.x + r*cos(p+0.1);
+		b.y = o.y + r*sin(p+0.1);
+		a = t->transform2Dinv(a);
+	        a.x = ro*a.x;
+	        a.y = ro*a.y;
+	        t->unTransformXY(&a.x,&a.y);	
+	
+		b = t->transform2Dinv(b);
+	        b.x = ro*b.x;
+	        b.y = ro*b.y;
+	        t->unTransformXY(&b.x,&b.y);	
+		drawLine(a.x,b.x,a.y,b.y);
+	}
+}
+
 void CGui::drawEllipse(SSegment s,STrackedObject t)
 {
 	float sx1,sx2,sy1,sy2;
 	int x,y;
-		sx1 = s.x+s.v0*s.m0*2;
-		sx2 = s.x-s.v0*s.m0*2;
-		sy1 = s.y+s.v1*s.m0*2;
-		sy2 = s.y-s.v1*s.m0*2;
-		drawLine(sx1,sx2,sy1,sy2);
-		sx1 = s.x+s.v1*s.m1*2;
-		sx2 = s.x-s.v1*s.m1*2;
-		sy1 = s.y-s.v0*s.m1*2;
-		sy2 = s.y+s.v0*s.m1*2;
-		drawLine(sx1,sx2,sy1,sy2);
-		for (float a = 0;a<6.28;a+=0.01){
-			float fx = s.x+cos(a)*s.v0*s.m0*2+s.v1*s.m1*2*sin(a);
-			float fy = s.y+s.v1*s.m0*2*cos(a)-s.v0*s.m1*2*sin(a);
-			x = (int)(fx+0.5);
-			y = (int)(fy+0.5);
-			//printf("GGG: %.3f %.3f\n",fx,fy);
-			Uint8 *bufp;
-			if (x > 0 && y > 0 && x<screen->w && y<screen->h){
-				bufp = (Uint8 *)screen->pixels + y*screen->pitch + x*3;
-				*(bufp+screen->format->Rshift/8) = 0;
-				*(bufp+screen->format->Gshift/8) = 255;
-				*(bufp+screen->format->Bshift/8) = 0;
-			}
-
-		}	
-	/*	if (x > 0 && y> 0 && x <screen->w && y < screen->h)
-		{
-//			printf("al %i %i\n",x,y);
-			Uint8 *bufp;
+	sx1 = s.x+s.v0*s.m0*2;
+	sx2 = s.x-s.v0*s.m0*2;
+	sy1 = s.y+s.v1*s.m0*2;
+	sy2 = s.y-s.v1*s.m0*2;
+	drawLine(sx1,sx2,sy1,sy2);
+	sx1 = s.x+s.v1*s.m1*2;
+	sx2 = s.x-s.v1*s.m1*2;
+	sy1 = s.y-s.v0*s.m1*2;
+	sy2 = s.y+s.v0*s.m1*2;
+	drawLine(sx1,sx2,sy1,sy2);
+	for (float a = 0;a<6.28;a+=0.01){
+		float fx = s.x +cos(a)*s.v0*s.m0*2 +s.v1*s.m1*2*sin(a);
+		float fy = s.y +s.v1*s.m0*2*cos(a) -s.v0*s.m1*2*sin(a);
+		x = (int)(fx+0.5);
+		y = (int)(fy+0.5);
+		Uint8 *bufp;
 			bufp = (Uint8 *)screen->pixels + y*screen->pitch + x*3;
 			*(bufp+screen->format->Rshift/8) = 255;
 			*(bufp+screen->format->Gshift/8) = 0;
 			*(bufp+screen->format->Bshift/8) = 0;
-		}
-	}*/
+
+	}	
+	/*	if (x > 0 && y> 0 && x <screen->w && y < screen->h)
+		{
+	//			printf("al %i %i\n",x,y);
+	Uint8 *bufp;
+	bufp = (Uint8 *)screen->pixels + y*screen->pitch + x*3;
+	 *(bufp+screen->format->Rshift/8) = 255;
+	 *(bufp+screen->format->Gshift/8) = 0;
+	 *(bufp+screen->format->Bshift/8) = 0;
+	 }
+	 }*/
 }
 
 

@@ -25,14 +25,6 @@ in case you are using the artificial pheromone system, adjust the dimensions in 
 float fieldLength = 0.92;
 float fieldWidth = 0.52;
 
-//pheromone - related
-int pheroThreshold = 80;				//threshold when a robot considered to be on the pheromone by pheromone light 
-float initialPheroPositionX = 0.75*fieldLength;
-float initialPheroPositionY = 0.50*fieldWidth;
-float pheroPositionX = initialPheroPositionX;
-float pheroPositionY = initialPheroPositionY;
-float pheroRadius = 0.125+0.01;
-
 //----------------------------------------------------------------------------
 
 /*-----These params are provided by the artificial pheromone system ----------------------
@@ -45,6 +37,15 @@ float cameraHeight = 1.00;		//height of the camera above the field
 //Max GUI dimensions 
 int  screenWidth= 1920;
 int  screenHeight = 1080;
+
+//pheromone - related
+int pheroThreshold = 80;				//threshold when a robot considered to be on the pheromone by pheromone light 
+float initialPheroPositionX =  0.77*fieldLength;
+float initialPheroPositionY =   0.455*fieldWidth;
+float pheroPositionX = initialPheroPositionX;
+float pheroPositionY = initialPheroPositionY;
+float pheroRadius = 0.125+0.01;
+
 
 /*robot detection variables*/
 int numBots = 0;		//num of robots to track
@@ -389,7 +390,7 @@ int main(int argc,char* argv[])
 			}
 		}
 		//did the robots move in the last 10 frames, if yes, consider the experiment started
-		if (frameID == 5) detectorArray[0]->calibratePheromoneDetection(image);
+		//if (frameID == 5) detectorArray[0]->calibratePheromoneDetection(image);
 		if (botsMovement > 5.0) moving++;
 		if (moving == 10){
 			firstFrame = frameID;
@@ -427,6 +428,12 @@ int main(int argc,char* argv[])
 			gui->drawTimeStats(evalTime,numBots);
 			gui->displayHelp(displayHelp);
 			gui->guideCalibration(calibNum,fieldLength,fieldWidth);
+			SSegment cue;
+			STrackedObject cuo;
+			cuo.x = pheroPositionX; 
+			cuo.y = pheroPositionY; 
+			gui->drawEllipse(cuo,trans,pheroRadius);
+			//gui->drawEllipse(objectArray[4],trans,0.02);
 		}
 		for (int i = 0;i<numBots && useGui && drawCoords;i++){
 			if (currentSegmentArray[i].valid) gui->drawStats(currentSegmentArray[i].minx-30,currentSegmentArray[i].maxy,objectArray[i],trans->transformType == TRANSFORM_2D);

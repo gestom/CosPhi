@@ -50,7 +50,9 @@ class CTransformation
 		float transformX(float x,float y);
 		float transformY(float x,float y);
 		void transformXY(float *ix,float *iy);
+		void unTransformXY(float *ax,float *ay);
 		void transformXYerr(float *ix,float *iy);
+		STrackedObject transform2Dinv(STrackedObject o);
 
 		void unbarrel(unsigned char* src,unsigned char* dst);
 		STrackedObject transform(SSegment segment,bool unbarrel);
@@ -81,6 +83,7 @@ class CTransformation
 		int *pArray;
 
 		float hom[9];
+		float ihom[9];
 		float trf4D[16];
 		float gDimX,gDimY;
 		S3DTransform D3transform[4];

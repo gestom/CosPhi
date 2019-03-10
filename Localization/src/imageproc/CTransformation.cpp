@@ -181,6 +181,22 @@ void CTransformation::transformXYerr(float *ax,float *ay)
 	*ay=rad*y+dy;
 }
 
+void CTransformation::unTransformXY(float *ax,float *ay)
+{
+	float x = *ax;
+	float y = *ay;
+
+	float cx,dx,cy,dy;
+	float r = x*x+y*y;
+	dx = 2*kc[3]*x*y + kc[4]*(r + 2*x*x);
+	cx = (1+kc[1]*r+kc[2]*r*r+kc[5]*r*r*r)*x+dx;
+	*ax = cx = cx*fc[0]+cc[0];
+
+	dy = 2*kc[4]*x*y + kc[3]*(r + 2*y*y);
+	cy = (1+kc[1]*r+kc[2]*r*r+kc[5]*r*r*r)*y+dy;
+	*ay = cy = cy*fc[1]+cc[1];
+}
+
 void CTransformation::transformXY(float *ax,float *ay)
 {
 	float x,y,ix,iy,dx,dy,r,rad;
@@ -237,6 +253,18 @@ STrackedObject CTransformation::transform4D(STrackedObject o)
 	r.y = r.y/s;
 	r.z = r.z/s;
 	r.error = establishError(r);
+	return r; 	
+}
+
+STrackedObject CTransformation::transform2Dinv(STrackedObject o)
+{
+	STrackedObject r;
+	r.x = ihom[0]*o.x+ihom[1]*o.y+ihom[2]; 
+	r.y = ihom[3]*o.x+ihom[4]*o.y+ihom[5];
+	r.z = ihom[6]*o.x+ihom[7]*o.y+ihom[8];
+	r.x = r.x/r.z;
+	r.y = r.y/r.z;
+	r.z = 0;
 	return r; 	
 }
 
@@ -364,6 +392,13 @@ void CTransformation::loadCalibration(const char *str)
 		}
 		fclose(file);
 	}
+
+	MAT est;
+	MAT1 vec;
+	REAL det;
+	for (int i = 0;i<9;i++) est[i/3][i%3]=hom[i];
+	MATINV(3,3,est,vec,&det);
+	for (int i = 0;i<9;i++) ihom[i] = est[i/3][i%3];
 }
 
 void CTransformation::saveCalibration(const char *str)
@@ -460,6 +495,10 @@ int CTransformation::calibrate2D(STrackedObject *inp,float dimX,float dimY,float
 	MATINV(8,1,est,vec,&det); 
 	for (int i = 0;i<8;i++)  hom[i] = vec[i][0];
 	hom[8] = 1;
+
+
+
+
 	transformType = TRANSFORM_2D;
 	return 0;
 }

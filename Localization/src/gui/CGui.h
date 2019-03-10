@@ -20,6 +20,7 @@ public:
   void clearStats();
   void saveScreen(int a = -1);
   void update();
+  void drawEllipse(STrackedObject o,CTransformation *t,float radius);
   void drawEllipse(SSegment s,STrackedObject t);
   void drawLine(float sx1,float sx2,float sy1,float sy2);
   void displayHelp(bool extended);

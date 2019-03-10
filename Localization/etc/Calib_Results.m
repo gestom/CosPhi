@@ -7,10 +7,10 @@
 
 
 %-- Focal length:
-fc = [ 1920 ; 1080 ];
+fc = [ 960 ; 540 ];
 
 %-- Principal point:
-cc = [ 960 ; 540 ];
+cc = [ 480 ; 272 ];
 
 %-- Skew coefficient:
 alpha_c = 0.000000000000000;
