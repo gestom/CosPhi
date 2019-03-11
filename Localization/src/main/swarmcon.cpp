@@ -515,7 +515,7 @@ int main(int argc,char* argv[])
 				if (moveOne-- < -10) moveOne = moveVal;
 			}
 		}
-		pheroPosition.x = initialPheroPosition.x - advectionSpeed*(frameID-firstFrame)/20.0/60.0/3.0;
+		pheroPosition.x = initialPheroPosition.x - advectionSpeed*(frameID-firstFrame)/20.0/60.0/5.0;
 		if (useGui) gui->update();
 		if (useGui) processKeys();
 	}
