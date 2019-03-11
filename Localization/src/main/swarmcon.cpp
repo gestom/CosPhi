@@ -43,7 +43,7 @@ int pheroThreshold = 80;				//threshold when a robot considered to be on the phe
 STrackedObject initialPheroPosition;
 STrackedObject pheroPosition;
 float pheroRadius = 0.125+0.01;
-
+float advectionSpeed = 0;
 
 /*robot detection variables*/
 int numBots = 0;		//num of robots to track
@@ -300,6 +300,7 @@ void processArgs(int argc,char* argv[])
 		if (strcmp(argv[i],"nogui")==0) useGui=false;
 		if (strcmp(argv[i],"nolog")==0) saveLog=false;
 		if (strcmp(argv[i],"novideo")==0) saveVideo=false;
+		if (strcmp(argv[i],"advection")==0) advectionSpeed = atof(argv[i+1]);
 	}
 }
 
@@ -346,6 +347,8 @@ int main(int argc,char* argv[])
 
 	int frameID =0;
 	int64_t frameTime = 0;
+	pheroPosition.x = initialPheroPosition.x = 0.77;
+	pheroPosition.y = initialPheroPosition.y = 0.25;
 	while (stop == false)
 	{
 
@@ -397,9 +400,9 @@ int main(int argc,char* argv[])
 			cue.x = 710;
 			cue.y = 230;
 			detectorArray[0]->detectBigCue(image,&cue);
-			pheroPosition = trans->transform(cue,false);
-			printf("SEGMENT: %f %f\n",cue.x,cue.y);
-			printf("SEGMENT: %f %f\n",pheroPosition.x,pheroPosition.y);
+			initialPheroPosition = pheroPosition = trans->transform(cue,false);
+			printf("Phero: %f %f\n",cue.x,cue.y);
+			printf("Phero: %f %f\n",pheroPosition.x,pheroPosition.y);
 		}
 		printf("Pattern detection time: %i us. Found: %i Movement: %f. Clients %i.\n",globalTimer.getTime(),numFound,botsMovement,server->numConnections);
 		evalTime = timer.getTime();
@@ -503,16 +506,16 @@ int main(int argc,char* argv[])
 							if (objectArray[i].pheromone > pheroThreshold) dSpread += sqrt(dx*dx+dy*dy);
 						}
 					}
-				       	fprintf(robotPositionLog,"Frame %i Time %ld Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
-				       	fprintf(stdout,"Frame %i Time %ld Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
+				       	fprintf(robotPositionLog,"Frame %04i Time %ld %06i %03i %02i Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,(frameID-firstFrame)*50,(frameID-firstFrame)/20,(frameID-firstFrame)%20,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
+				       	fprintf(stdout,"Frame %04i Time %ld %06i %03i %02i Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,(frameID-firstFrame)*50,(frameID-firstFrame)/20,(frameID-firstFrame)%20,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
 				}
 				moveOne = moveVal; 
 				if (moveVal > 0) frameID++;
 			}else{
-				if (moveOne-- < -100) moveOne = moveVal;
+				if (moveOne-- < -10) moveOne = moveVal;
 			}
 		}
-
+		pheroPosition.x = initialPheroPosition.x - advectionSpeed*(frameID-firstFrame)/20.0/60.0/3.0;
 		if (useGui) gui->update();
 		if (useGui) processKeys();
 	}
