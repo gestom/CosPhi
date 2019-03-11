@@ -40,10 +40,8 @@ int  screenHeight = 1080;
 
 //pheromone - related
 int pheroThreshold = 80;				//threshold when a robot considered to be on the pheromone by pheromone light 
-float initialPheroPositionX =  0.712;
-float initialPheroPositionY =   0.245;
-float pheroPositionX = initialPheroPositionX;
-float pheroPositionY = initialPheroPositionY;
+STrackedObject initialPheroPosition;
+STrackedObject pheroPosition;
 float pheroRadius = 0.125+0.01;
 
 
@@ -395,6 +393,13 @@ int main(int argc,char* argv[])
 		if (moving == 10){
 			firstFrame = frameID;
 		       	globalTimer.reset();
+			SSegment cue = currentSegmentArray[0];
+			cue.x = 710;
+			cue.y = 230;
+			detectorArray[0]->detectBigCue(image,&cue);
+			pheroPosition = trans->transform(cue,false);
+			printf("SEGMENT: %f %f\n",cue.x,cue.y);
+			printf("SEGMENT: %f %f\n",pheroPosition.x,pheroPosition.y);
 		}
 		printf("Pattern detection time: %i us. Found: %i Movement: %f. Clients %i.\n",globalTimer.getTime(),numFound,botsMovement,server->numConnections);
 		evalTime = timer.getTime();
@@ -428,10 +433,7 @@ int main(int argc,char* argv[])
 			gui->drawTimeStats(evalTime,numBots);
 			gui->displayHelp(displayHelp);
 			gui->guideCalibration(calibNum,fieldLength,fieldWidth);
-			STrackedObject cuo;
-			cuo.x = pheroPositionX; 
-			cuo.y = pheroPositionY; 
-			gui->drawEllipse(cuo,trans,pheroRadius);
+			gui->drawEllipse(pheroPosition,trans,pheroRadius);
 			//gui->drawEllipse(objectArray[4],trans,0.02);
 		}
 		for (int i = 0;i<numBots && useGui && drawCoords;i++){
@@ -480,8 +482,8 @@ int main(int argc,char* argv[])
 							botsOnPheroBright++;
 						}
 						//on phero by position
-						dx = objectArray[i].x-pheroPositionX;
-						dy = objectArray[i].y-pheroPositionY;
+						dx = objectArray[i].x-pheroPosition.x;
+						dy = objectArray[i].y-pheroPosition.y;
 						if (objectArray[i].ID != -1){
 							dDist += sqrt(dx*dx+dy*dy);
 							if (sqrt(dx*dx+dy*dy)<pheroRadius) botsOnPheroDist++;		

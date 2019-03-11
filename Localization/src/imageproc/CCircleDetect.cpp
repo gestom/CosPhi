@@ -4,6 +4,7 @@
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
 int* CCircleDetect::pheromoneCalib = NULL;
+int* CCircleDetect::cueCalib = NULL;
 int* CCircleDetect::buffer = NULL;
 int* CCircleDetect::queue = NULL;
 int* CCircleDetect::mask = NULL;
@@ -42,6 +43,7 @@ CCircleDetect::CCircleDetect(int wi,int he,int idi)
 	if (buffer == NULL){
 		ownBuffer = true;
 		buffer = (int*)malloc(len*sizeof(int));
+		cueCalib = (int*)malloc(siz*sizeof(int));
 		pheromoneCalib = (int*)malloc(len*sizeof(int));
 		memset(pheromoneCalib,0,len*sizeof(int));
 		queue = (int*)malloc(len*sizeof(int));
@@ -246,7 +248,6 @@ void CCircleDetect::identifySegment(SSegment* segment)
 			index = i;
 		}
 	}
-	printf("SEEEE: %i %f %f\n",index,segment->r0,segment->r1);
 	segment->ID = index;
 	if (segment->m1/segment->m0 > 0.9) segment->ID = -1;
 }
@@ -262,8 +263,18 @@ void CCircleDetect::calibratePheromoneDetection(CRawImage* image)
 			pos = y*image->width+x;
 			getSegmentPheromone(image,&a);
 			pheromoneCalib[pos] = a.pheromone;
+			cueCalib[3*pos+0] = image->data[3*pos+0];
+			cueCalib[3*pos+1] = image->data[3*pos+1];
+			cueCalib[3*pos+2] = image->data[3*pos+2];
 		}
 	}
+}
+
+void CCircleDetect::detectBigCue(CRawImage* image,SSegment* cue)
+{
+	int ii = ((int)cue->y)*image->width+cue->x;
+	buffer[ii] = -1;
+	examineSegment(image,cue,ii,innerAreaRatio);
 }
 
 void CCircleDetect::getSegmentPheromone(CRawImage* image,SSegment* segment)

@@ -49,6 +49,7 @@ class CCircleDetect
 		SSegment calcSegment(SSegment segment,int size,long int x,long int y,long int cm0,long int cm1,long int cm2);
 		void getSegmentPheromone(CRawImage* image,SSegment* segment);
 		void calibratePheromoneDetection(CRawImage* image);
+		void detectBigCue(CRawImage* image,SSegment* cue);
 
 		void clearCalibMask();
 		void applyCalibMask(CRawImage* image);
@@ -92,6 +93,7 @@ class CCircleDetect
 		float diameterRatio;
 		bool ownBuffer;
 		static int *pheromoneCalib;
+		static int *cueCalib;
 		static int *buffer;
 		static int *queue;
 		static int *mask;

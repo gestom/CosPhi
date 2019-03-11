@@ -243,7 +243,7 @@ void CGui::drawEllipse(STrackedObject o,CTransformation *t,float r)
 	STrackedObject a,b,x;
 	a.x = o.x; 
 	a.y = o.y;
-	float ro = 0.85/0.89;
+	float ro = 0.85/0.85;
 	for (float p = 0;p<6.28;p+=0.1)
 	{
 		a.x = o.x + r*cos(p);
