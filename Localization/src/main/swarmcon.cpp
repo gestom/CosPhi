@@ -40,8 +40,8 @@ int  screenHeight = 1080;
 
 //pheromone - related
 int pheroThreshold = 80;				//threshold when a robot considered to be on the pheromone by pheromone light 
-float initialPheroPositionX =  0.77*fieldLength;
-float initialPheroPositionY =   0.455*fieldWidth;
+float initialPheroPositionX =  0.712;
+float initialPheroPositionY =   0.245;
 float pheroPositionX = initialPheroPositionX;
 float pheroPositionY = initialPheroPositionY;
 float pheroRadius = 0.125+0.01;
@@ -390,7 +390,7 @@ int main(int argc,char* argv[])
 			}
 		}
 		//did the robots move in the last 10 frames, if yes, consider the experiment started
-		//if (frameID == 5) detectorArray[0]->calibratePheromoneDetection(image);
+		if (frameID == 5) detectorArray[0]->calibratePheromoneDetection(image);
 		if (botsMovement > 5.0) moving++;
 		if (moving == 10){
 			firstFrame = frameID;
@@ -428,7 +428,6 @@ int main(int argc,char* argv[])
 			gui->drawTimeStats(evalTime,numBots);
 			gui->displayHelp(displayHelp);
 			gui->guideCalibration(calibNum,fieldLength,fieldWidth);
-			SSegment cue;
 			STrackedObject cuo;
 			cuo.x = pheroPositionX; 
 			cuo.y = pheroPositionY; 
