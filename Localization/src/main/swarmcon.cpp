@@ -506,8 +506,8 @@ int main(int argc,char* argv[])
 							if (objectArray[i].pheromone > pheroThreshold) dSpread += sqrt(dx*dx+dy*dy);
 						}
 					}
-				       	fprintf(robotPositionLog,"Frame %04i Time %ld %06i %03i %02i Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,(frameID-firstFrame)*50,(frameID-firstFrame)/20,(frameID-firstFrame)%20,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
-				       	fprintf(stdout,"Frame %04i Time %ld %06i %03i %02i Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,(frameID-firstFrame)*50,(frameID-firstFrame)/20,(frameID-firstFrame)%20,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
+				       	fprintf(robotPositionLog,"Frame %04i Time %ld %06i %03i X%02iX Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,(frameID-firstFrame)*50,(frameID-firstFrame)/20,(frameID-firstFrame)%20,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
+				       	fprintf(stdout,"Frame %04i Time %ld %06i %03i X%02iX Pheromone_distance: %03i Coherence_distance: %.3f Pheromone_bright: %03i Coherence_bright: %.3f Spread: %.3f \n",frameID-firstFrame,frameTime,(frameID-firstFrame)*50,(frameID-firstFrame)/20,(frameID-firstFrame)%20,botsOnPheroDist,dDist/numBots,botsOnPheroBright,dBright/numBots,dSpread/botsOnPheroBright);
 				}
 				moveOne = moveVal; 
 				if (moveVal > 0) frameID++;
