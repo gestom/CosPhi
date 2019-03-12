@@ -530,7 +530,10 @@ int main(int argc,char* argv[])
 		if (useGui) gui->update();
 		if (useGui) processKeys();
 		if (moving == 11) gui->saveScreen(0);
-		if ((frameID-firstFrame)/20==299) gui->saveScreen(1); 
+		if ((frameID-firstFrame)/20==100) gui->saveScreen(1); 
+		if ((frameID-firstFrame)/20==200) gui->saveScreen(2); 
+		if ((frameID-firstFrame)/20==250) gui->saveScreen(3); 
+		if ((frameID-firstFrame)/20==299) gui->saveScreen(4); 
 	}
 	if (robotPositionLog != NULL) fclose(robotPositionLog);
 	delete server;
