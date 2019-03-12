@@ -529,6 +529,8 @@ int main(int argc,char* argv[])
 		pheroPosition.x = initialPheroPosition.x - advectionSpeed*(frameID-firstFrame)/20.0/60.0/5.0;
 		if (useGui) gui->update();
 		if (useGui) processKeys();
+		if (moving == 11) gui->saveScreen(0);
+		if ((frameID-firstFrame)/20==299) gui->saveScreen(1); 
 	}
 	if (robotPositionLog != NULL) fclose(robotPositionLog);
 	delete server;
