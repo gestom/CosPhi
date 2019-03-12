@@ -347,8 +347,8 @@ int main(int argc,char* argv[])
 
 	int frameID =0;
 	int64_t frameTime = 0;
-	pheroPosition.x = initialPheroPosition.x = 0.77;
-	pheroPosition.y = initialPheroPosition.y = 0.25;
+	pheroPosition.x = initialPheroPosition.x = 0.7161130; 
+	pheroPosition.y = initialPheroPosition.y = 0.244977;
 	while (stop == false)
 	{
 
@@ -400,9 +400,11 @@ int main(int argc,char* argv[])
 			cue.x = 710;
 			cue.y = 230;
 			detectorArray[0]->detectBigCue(image,&cue);
-			initialPheroPosition = pheroPosition = trans->transform(cue,false);
-			initialPheroPosition.x = (initialPheroPosition.x-fieldLength/2)*0.88/0.85+fieldLength/2;
-			printf("Phero: %f %f\n",cue.x,cue.y);
+			if (cue.size > 10000){
+				initialPheroPosition = pheroPosition = trans->transform(cue,false);
+				initialPheroPosition.x = (initialPheroPosition.x-fieldLength/2)*0.88/0.85+fieldLength/2;
+			}
+			printf("Phero: %f %f %i\n",cue.x,cue.y,cue.size);
 			printf("Phero: %f %f\n",pheroPosition.x,pheroPosition.y);
 		}
 		printf("Pattern detection time: %i us. Found: %i Movement: %f. Clients %i.\n",globalTimer.getTime(),numFound,botsMovement,server->numConnections);
