@@ -42,7 +42,7 @@ int  screenHeight = 1080;
 int pheroThreshold = 80;				//threshold when a robot considered to be on the pheromone by pheromone light 
 STrackedObject initialPheroPosition;
 STrackedObject pheroPosition;
-float pheroRadius = 0.125+0.01;
+float pheroRadius = 0.125+0.02;
 float advectionSpeed = 0;
 
 /*robot detection variables*/
@@ -401,6 +401,7 @@ int main(int argc,char* argv[])
 			cue.y = 230;
 			detectorArray[0]->detectBigCue(image,&cue);
 			initialPheroPosition = pheroPosition = trans->transform(cue,false);
+			initialPheroPosition.x = (initialPheroPosition.x-fieldLength/2)*0.88/0.85+fieldLength/2;
 			printf("Phero: %f %f\n",cue.x,cue.y);
 			printf("Phero: %f %f\n",pheroPosition.x,pheroPosition.y);
 		}
