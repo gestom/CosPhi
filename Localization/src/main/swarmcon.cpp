@@ -333,7 +333,6 @@ int main(int argc,char* argv[])
 	globalTimer.reset();
 	globalTimer.start();
 
-	int frameID =0;
 	int64_t frameTime = 0;
 	while (stop == false)
 	{
@@ -370,7 +369,7 @@ int main(int argc,char* argv[])
 				if (currentSegmentArray[i].x == lastSegmentArray[i].x) numStatic++;
 			}
 		}
-		printf("Pattern detection time: %i us. Found: %i Static: %i. Clients %i.\n",globalTimer.getTime(),numFound,numStatic,server->numConnections);
+		printf("Pattern detection time: %ld us. Found: %i Static: %i. Clients %i.\n",camera->getFrameTime(),numFound,numStatic,server->numConnections);
 		evalTime = timer.getTime();
 
 		//pack up the data for sending to other systems (e.g. artificial pheromone one)
@@ -421,20 +420,19 @@ int main(int argc,char* argv[])
 			moveOne = moveVal;
 			for (int i = 0;i<numBots;i++){
 			       	//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
-			       	if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+			       	if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",camera->getFrameID(),camera->getFrameTime(),i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
 			}
-			if (moveVal > 0) frameID++;
 		}else{
 			//for postprocessing, try to find all robots before loading next frame
 			if (numFound ==  numBots)
 			{
 				//gui->saveScreen(runs++);
+				//if (camera->cameraType == CT_){
 				for (int i = 0;i<numBots;i++){
 				       		//printf("Frame %i Object %03i %03i %.5f %.5f %.5f \n",frameID,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
-						if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",frameID,frameTime,i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
+						if (robotPositionLog != NULL) fprintf(robotPositionLog,"Frame %i Time %ld Object %03i %03i %.5f %.5f %.5f \n",camera->getFrameID(),camera->getFrameTime(),i,currentSegmentArray[i].ID,objectArray[i].x,objectArray[i].y,objectArray[i].yaw);
 				}
 				moveOne = moveVal; 
-				if (moveVal > 0) frameID++;
 			}else{
 				if (moveOne-- < -100) moveOne = moveVal;
 			}

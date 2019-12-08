@@ -25,7 +25,9 @@ CCamera::CCamera()
 	width = height = 0;
 	exposition = 0;
 	fileNum = 1;
+	frameRate = -1;
 	videoIn = (struct vdIn*) calloc(1,sizeof(struct vdIn));
+	frameID = 0;
 	globalTimer.reset();
 	globalTimer.start();
 	return;
@@ -60,6 +62,16 @@ int CCamera::initFileLoader(const char *deviceName,int *wi,int *he)
 		delete image;
 	}
 	return 0;
+}
+
+int CCamera::getFrameID()
+{
+	return frameID;
+}
+
+long int CCamera::getFrameTime()
+{
+	return frameTime; 
 }
 
 int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
@@ -124,7 +136,9 @@ int CCamera::init(const char *deviceName,int *wi,int *he,bool saveI)
 		aviFile = AVI_open_input_file(deviceName,1);
 		*wi = width = AVI_video_width(aviFile);
 		*he = height = AVI_video_height(aviFile);
-		printf("AVI file opened, video dimensions are %i %i\n",width,height);
+		height = AVI_video_height(aviFile);
+		frameRate =  AVI_frame_rate(aviFile);
+		printf("AVI file opened, video dimensions are %i %i, framerate is %.2f\n",width,height,frameRate);
 		aviBuffer1 = (char*) malloc(4*width*height);
 		aviBuffer2 = (unsigned char*) malloc(4*width*height);
 		readNextFrame = true;
@@ -168,6 +182,7 @@ int CCamera::saveConfig(const char* filename)
 	}
 	return 0;	
 }
+
 int CCamera::renewImage(CRawImage* image,bool move)
 {
 	if (cameraType == CT_WEBCAM){
@@ -176,6 +191,9 @@ int CCamera::renewImage(CRawImage* image,bool move)
 			if (ret < 0) {
 				fprintf(stderr,"Cannot grab a frame from a camera!\n"); 
 				return ret;
+			}else{
+				frameTime = globalTimer.getTime();
+				frameID++;
 			}
 		}
 		Pyuv422torgb24(videoIn->framebuffer,image->data,videoIn->width,videoIn->height);
@@ -192,7 +210,11 @@ int CCamera::renewImage(CRawImage* image,bool move)
 	}
 	if (cameraType == CT_FILELOADER){
 		char fileName[1000];
-		if (move) fileNum++;
+		if (move){
+		       	fileNum++;
+			frameTime = globalTimer.getTime();
+			frameID++;
+		}
 		sprintf(fileName,"%s/%08i.bmp",directory,fileNum);
 		if (image->loadBmp(fileName)==false){
 			fileNum=1;
@@ -208,6 +230,8 @@ int CCamera::renewImage(CRawImage* image,bool move)
 			int key;
 			int data = AVI_read_frame(aviFile,aviBuffer1,&key);
 			if (data < 0) return -1;
+			frameTime = (long int)frameID*1000000/frameRate; 
+			frameID++;
 			if (move) readNextFrame = true; else readNextFrame=false; 
 			if (jpeg_decode(&aviBuffer2, (unsigned char*) aviBuffer1, &width, &height) < 0) {
 				printf("jpeg decode errors\n");

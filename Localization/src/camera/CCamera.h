@@ -58,6 +58,8 @@ class CCamera
 	void changeContrast(int value);
 	void setExposition(int value);
 	int getExposition();
+	long int getFrameTime();
+	int getFrameID();
 	
 	void setBrightness(int value);
 	int getBrightness();
@@ -65,7 +67,8 @@ class CCamera
 	int setDeviceWhiteBalanceAuto(const int val);
 	int setDeviceWhiteTemperature(const int value);
 	int getDeviceWhiteTemperature();
-	int fileNum;		
+	int fileNum;
+	double frameRate;
 	ECameraType cameraType;
 
 	int saveConfig(const char* filename);
@@ -89,6 +92,8 @@ class CCamera
 	int gain;
 	int format;
 	int contrast;
+	int frameID;
+	long int frameTime;
 
 	bool autoexposure;
 	struct vdIn *videoIn;
